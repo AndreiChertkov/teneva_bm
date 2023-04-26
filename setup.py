@@ -14,7 +14,7 @@ def find_packages(package, basepath):
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-desc = 'Benchmarks library for tensor based multidimensional approximation and optimization methods'
+desc = 'Benchmarks library, based on a software product teneva, for tensor based multidimensional approximation and optimization methods'
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     desc_long = f.read()
 
@@ -25,10 +25,9 @@ with open(os.path.join(here, 'teneva_bm/__init__.py'), encoding='utf-8') as f:
     version = version.group(1)
 
 
-# with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-#     requirements = f.read().split('\n')
-#     requirements = [r for r in requirements if len(r) >= 3]
-requirements = []
+with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    requirements = f.read().split('\n')
+    requirements = [r for r in requirements if len(r) >= 3]
 
 
 setup_args = dict(
@@ -55,7 +54,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3.9',
         'Framework :: Jupyter',
     ],
-    keywords='low-rank representation tensor train format TT-decomposition cross approximation als anova benchmarks',
+    keywords='benchmarks approximation optimization multidimensional array multivariate function low-rank representation tensor train format TT-decomposition',
     packages=find_packages('teneva_bm', './teneva_bm/'),
     python_requires='>=3.8',
     project_urls={

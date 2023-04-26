@@ -1,0 +1,2 @@
+matplotlib>=3.7.0
+teneva>=0.14.0
