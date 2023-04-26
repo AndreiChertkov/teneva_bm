@@ -120,6 +120,7 @@ class Bm:
         return self.I_tst, self.y_tst
 
     def check(self):
+        """Check that benchmark's configuration is valid."""
         if not self._is_prep:
             self.set_err('Run "prep" method for BM before call it')
 
@@ -129,6 +130,10 @@ class Bm:
             return False
 
         return True
+
+    def get(self, I):
+        """Alias for "__getitem__" method."""
+        return self[I]
 
     def info(self):
         """Returns a detailed description of the benchmark as text."""
