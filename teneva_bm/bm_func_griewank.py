@@ -94,3 +94,9 @@ if __name__ == '__main__':
     e = teneva.accuracy_on_data(Y, bm.I_trn, bm.y_trn)
     text += f'{e:-10.1e}'
     print(text)
+
+    text = 'Value at minimum (real vs calc)   :  '
+    y_real = bm.y_min_real
+    y_calc = bm(bm.x_min_real)
+    text += f'{y_real:-10.3e}/ {y_calc:-10.3e}'
+    print(text)

@@ -58,3 +58,9 @@ if __name__ == '__main__':
     y = bm[I]
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
+
+    text = 'Value at minimum (real vs calc)   :  '
+    y_real = bm.y_min_real
+    y_calc = bm[bm.i_min_real]
+    text += f'{y_real:-10.3e}/ {y_calc:-10.3e}'
+    print(text)
