@@ -26,6 +26,8 @@ class BmFuncRastrigin(Bm):
             x=[0.]*self.d,
             y=0.)
 
+        self.with_cores = True
+
     @property
     def is_func(self):
         return True

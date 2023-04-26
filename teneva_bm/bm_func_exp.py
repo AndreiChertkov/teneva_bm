@@ -27,6 +27,8 @@ class BmFuncExp(Bm):
             x=[0.]*self.d,
             y=-1.)
 
+        self.with_cores = True
+
     @property
     def is_func(self):
         return True

@@ -25,6 +25,8 @@ class BmFuncSchwefel(Bm):
 
         self.set_min(x=[420.9687]*self.d, y=0.)
 
+        self.with_cores = True
+
     @property
     def is_func(self):
         return True

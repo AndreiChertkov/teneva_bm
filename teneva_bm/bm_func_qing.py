@@ -25,6 +25,8 @@ class BmFuncQing(Bm):
 
         self.set_min(y=0., x=np.sqrt(np.arange(1, self.d+1)))
 
+        self.with_cores = True
+
     @property
     def is_func(self):
         return True

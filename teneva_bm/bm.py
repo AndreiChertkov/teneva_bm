@@ -24,6 +24,7 @@ class Bm:
         # TODO: add support for cache of the requested values
         # TODO: add support of min/max log of the requested values
 
+        self.with_cores = False
         self._is_prep = False
 
     def __call__(self, X):
