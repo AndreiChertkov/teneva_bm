@@ -1,0 +1,80 @@
+import numpy as np
+import teneva
+
+
+from teneva_bm import Bm
+
+
+DESC = """
+    Analytical Dixon function (continuous).
+    The dimension and mode size may be any (default are d=50, n=15).
+    See https://www.sfu.ca/~ssurjano/dixonpr.html for details.
+    See also the work Momin Jamil, Xin-She Yang. "A literature survey of
+    benchmark functions for global optimization problems". Journal of
+    Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
+    ("48. Dixon & Price Function"; Continuous, Differentiable,
+    Non-Separable, Scalable, Unimodal). Note that this function achieves a
+    global minimum at more than one point.
+"""
+
+
+class BmFuncDixon(Bm):
+    def __init__(self, d=50, n=15, name='FuncDixon', desc=DESC):
+        super().__init__(d, n, name, desc)
+
+        self.set_grid(-10., +10.)
+
+        x_min = [1.]
+        for _ in range(d-1): # TODO: check this formula one more time:
+            x_min.append(np.sqrt(x_min[-1]/2.))
+        self.set_min(x=np.array(x_min), y=0.)
+
+    @property
+    def is_func(self):
+        return True
+
+    def _f_batch(self, X):
+        y1 = (X[:, 0] - 1)**2
+
+        y2 = np.arange(2, self.d+1) * (2. * X[:, 1:]**2 - X[:, :-1])**2
+        y2 = np.sum(y2, axis=1)
+
+        return y1 + y2
+
+    def _f_pt(self, x):
+        """Draft."""
+        d = torch.tensor(self.d)
+
+        y1 = (x[0] - 1)**2
+        y2 = torch.arange(2, d+1) * (2. * x[1:]**2 - x[:-1])**2
+        y2 = torch.sum(y2)
+        return y1 + y2
+
+
+if __name__ == '__main__':
+    np.random.seed(42)
+
+    bm = BmFuncDixon().prep()
+    print(bm.info())
+
+    text = 'Range of y for 10K random samples : '
+    bm.build_trn(1.E+4)
+    text += f'[{np.min(bm.y_trn):-10.3e},'
+    text += f' {np.max(bm.y_trn):-10.3e}] '
+    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
+    print(text)
+
+    text = 'Value at a random multi-index     :  '
+    i = [np.random.choice(k) for k in bm.n]
+    y = bm[i]
+    text += f'{y:-10.3e}'
+    print(text)
+
+    text = 'Value at 3 random multi-indices   :  '
+    i1 = [np.random.choice(k) for k in bm.n]
+    i2 = [np.random.choice(k) for k in bm.n]
+    i3 = [np.random.choice(k) for k in bm.n]
+    I = [i1, i2, i3]
+    y = bm[I]
+    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
+    print(text)
