@@ -32,7 +32,7 @@ from teneva_bm import *
 np.random.seed(42)
 
 # Prepare benchmark and print info:
-bm = BmQuboMaxCut().prep()
+bm = BmQuboMaxcut().prep()
 print(bm.info())
 
 # Get value at multi-index i:
