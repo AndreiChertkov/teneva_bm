@@ -14,7 +14,7 @@ from .bm_func_rastrigin import BmFuncRastrigin
 from .bm_func_rosenbrock import BmFuncRosenbrock
 from .bm_func_schaffer import BmFuncSchaffer
 from .bm_func_schwefel import BmFuncSchwefel
-from .bm_matmul2 import BmMatmul2
+from .bm_matmul import BmMatmul
 from .bm_oc_simple import BmOcSimple
 from .bm_oc_simple_constr import BmOcSimpleConstr
 from .bm_qubo_knap_amba import BmQuboKnapAmba
