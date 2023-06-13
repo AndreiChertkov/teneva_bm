@@ -9,6 +9,4 @@
 __pycache__/
 _tmp/
 build/
-demo/tmp/*
 dist/
-doc/_build/*
