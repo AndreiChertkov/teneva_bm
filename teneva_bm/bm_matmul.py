@@ -63,7 +63,7 @@ class BmMatmul(Bm):
 
         if self.only2:
             U, V = _factor_from_poi(x, self.rank, True)
-            W = _factor_recover(U, V, T)
+            W = _factor_recover(U, V, self.T)
         else:
             U, V, W = _factor_from_poi(x, self.rank, False)
 
