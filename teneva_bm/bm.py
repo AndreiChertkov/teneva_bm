@@ -29,27 +29,11 @@ class Bm:
 
     def __call__(self, X):
         """Return a value or batch of values for continuous function."""
-        self.check()
-
-        X = np.asanyarray(X, dtype=float)
-
-        if self.is_tens:
-            msg = f'BM "{self.name}" is a tensor. Can`t compute it in the point'
-            raise ValueError(msg)
-        else:
-            return self._f_batch(X) if len(X.shape) == 2 else self._f(X)
+        return self.get_poi(X)
 
     def __getitem__(self, I):
-        """Return a value or batch of values for discrete function."""
-        self.check()
-
-        I = np.asanyarray(I, dtype=int)
-
-        if self.is_func:
-            X = teneva.ind_to_poi(I, self.a, self.b, self.n, self.grid_kind)
-            return self(X)
-        else:
-            return self._f_batch(I) if len(I.shape) == 2 else self._f(I)
+        """Alias for "get" method."""
+        return self.get(I)
 
     @property
     def is_func(self):
@@ -133,8 +117,28 @@ class Bm:
         return True
 
     def get(self, I):
-        """Alias for "__getitem__" method."""
-        return self[I]
+        """Return a value or batch of values for provided multi-index."""
+        self.check()
+
+        I = np.asanyarray(I, dtype=int)
+
+        if self.is_func:
+            X = teneva.ind_to_poi(I, self.a, self.b, self.n, self.grid_kind)
+            return self(X)
+        else:
+            return self._f_batch(I) if len(I.shape) == 2 else self._f(I)
+
+    def get_poi(self, X):
+        """Return a value or batch of values for provided x-point."""
+        self.check()
+
+        X = np.asanyarray(X, dtype=float)
+
+        if self.is_tens:
+            msg = f'BM "{self.name}" is a tensor. Can`t compute it in the point'
+            raise ValueError(msg)
+        else:
+            return self._f_batch(X) if len(X.shape) == 2 else self._f(X)
 
     def info(self):
         """Returns a detailed description of the benchmark as text."""
