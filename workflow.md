@@ -19,7 +19,7 @@
 
 4. Install special dependencies (for developers):
     ```bash
-    pip install sphinx twine jupyterlab
+    pip install twine
     ```
 
 5. Install teneva_bm:
@@ -37,6 +37,18 @@
 8. Delete virtual environment at the end of the work (optional):
     ```bash
     conda activate && conda remove --name teneva_bm --all -y
+    ```
+
+
+## How to add the new benchmark
+
+1. Create python script in the appropriate subfolder of `teneva_bm` with the name like `bm_<subfolder>_<name>.py`
+
+2. Prepare a benchmark class `Bm<Subfolder><Name>` in the created file and a demo example of its use in section `if __name__ == '__main__':`, by analogy with other benchmarks
+
+3. Run the demo example for the new benchmark (note that we should reinstall our library locally to try the new benchmark):
+    ```bash
+    pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py bm_<subfolder>_<name>
     ```
 
 

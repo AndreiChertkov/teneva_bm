@@ -37,11 +37,11 @@ print(bm.info())
 
 # Get value at multi-index i:
 i = np.ones(bm.d)
-print(bm[i])
+print(bm[i]) # you can use the alias "bm.get"
 
 # Get values for batch of multi-indices I:
 I = np.array([i, i, i])
-print(bm[I])
+print(bm[I]) # you can use the alias "bm.get"
 
 # Generate random train dataset:
 I_trn, y_trn = bm.build_trn(1000)
