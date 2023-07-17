@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 
 
@@ -15,6 +16,8 @@ def teneva_bm_demo(bm_use=None, with_info=True):
     """
     bms = {}
     found = False
+
+    bm_use = _parse_bm_name(bm_use)
 
     for cl in _find_cl_all():
         bms[cl] = _find_bm_all(cl)
@@ -79,7 +82,16 @@ def _info(bms):
     print(text)
 
 
+def _parse_bm_name(name):
+    """Converts a name of the benchmark to underscore notation."""
+    if name:
+        if not name.lower().startswith('bm'):
+            name = 'bm_' + name[0].lower() + name[1:]
+        return re.sub('(?<!^)(?=[A-Z])', '_', name).lower()
+
+
 def _run_all(bms, bm_use=None):
+    """Run demo for all benchmarks of only for "bm_use" if provided."""
     here = os.path.abspath(os.path.dirname(__file__))
 
     for cl, bm_list in bms.items():
