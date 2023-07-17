@@ -36,6 +36,8 @@ class BmQuboKnapAmba(Bm):
         return True
 
     def prep(self):
+        self.check_err()
+        
         self.bm_w = [
             80, 82, 85, 70, 72, 70, 66, 50, 55, 25, 50, 55, 40, 48, 59, 32, 22,
             60, 30, 32, 40, 38, 35, 32, 25, 28, 30, 22, 50, 30, 45, 30, 60, 50,

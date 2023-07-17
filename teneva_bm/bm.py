@@ -110,20 +110,17 @@ class Bm:
             msg = 'Penalty for constraint ("bm.penalty_constr") is not set'
             self.set_err(msg)
 
-        if self.err:
-            msg = f'BM "{self.name}" is not ready\n   Error > {self.err}'
+        return self.check_err()
+
+    def check_err(self):
+        """Check that benchmark has not errors."""
+        if len(self.err):
+            msg = f'BM "{self.name}" is not ready'
+            for e in self.err:
+                msg += f'\n    Error > {e}'
             raise ValueError(msg)
 
         return True
-
-    def _compute(self, X):
-        if not self.with_constr:
-            return self._f_batch(X)
-
-        y = np.ones(X.shape[0]) * self.penalty_constr
-        ind = self._constr_batch(X)
-        y[ind] = self._f_batch(X[ind])
-        return y
 
     def get(self, I, skip_process=False):
         """Return a value or batch of values for provided multi-index."""
@@ -231,7 +228,10 @@ class Bm:
     def prep(self):
         """A function with a specific benchmark preparation code."""
         # Note that when inherited, the function in the child class
-        # must end with the following two lines:
+        # must starts with the following line:
+        self.check_err()
+
+        # and should ends with the following two lines:
         self.is_prep = True
         return self
 
@@ -245,7 +245,7 @@ class Bm:
 
     def set_err(self, err=''):
         """Set the error text (can not import external module, etc.)."""
-        self.err = (self.err + '; ' if self.err else '') + err
+        self.err.append(err)
 
     def set_grid(self, a=None, b=None):
         """Set grid lower (a) and upper (b) limits for the function-like BM."""
@@ -311,6 +311,15 @@ class Bm:
         self.d = None if d is None else int(d)
         self.n = teneva.grid_prep_opt(n, self.d, int)
 
+    def _compute(self, X):
+        if not self.with_constr:
+            return self._f_batch(X)
+
+        y = np.ones(X.shape[0]) * self.penalty_constr
+        ind = self._constr_batch(X)
+        y[ind] = self._f_batch(X[ind])
+        return y
+
     def _constr(self, x):
         """Function that check constraint for a given point/index."""
         return self._constr_batch(np.array(x).reshape(1, -1))[0]
@@ -352,7 +361,7 @@ class Bm:
         return np.array([self._f(x) for x in X])
 
     def _init(self):
-        self.err = ''
+        self.err = []
 
         self.i_max = None
         self.x_max = None
