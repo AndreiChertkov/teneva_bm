@@ -14,7 +14,9 @@ def find_packages(package, basepath):
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-desc = 'Benchmarks library, based on a software product teneva, for tensor based multidimensional approximation and optimization methods'
+
+
+desc = 'Benchmarks library, based on the software product teneva, for testing multivariate approximation and optimization methods'
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     desc_long = f.read()
 
@@ -40,7 +42,7 @@ setup_args = dict(
     author_email='andre.chertkov@gmail.com',
     url='https://github.com/AndreiChertkov/teneva_bm',
     classifiers=[
-        'Development Status :: 3 - Alpha', # 4 - Beta, 5 - Production/Stable
+        'Development Status :: 4 - Beta', # 3 - Alpha, 5 - Production/Stable
         'License :: OSI Approved :: MIT License',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Mathematics',
@@ -52,7 +54,6 @@ setup_args = dict(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Framework :: Jupyter',
     ],
     keywords='benchmarks approximation optimization multidimensional array multivariate function low-rank representation tensor train format TT-decomposition',
     packages=find_packages('teneva_bm', './teneva_bm/'),
@@ -61,7 +62,7 @@ setup_args = dict(
         'Source': 'https://github.com/AndreiChertkov/teneva_bm',
     },
     license='MIT',
-    license_files = ('LICENSE.txt',),
+    license_files =('LICENSE.txt',),
 )
 
 

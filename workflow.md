@@ -7,54 +7,50 @@
 
 1. Install [python](https://www.python.org) (version 3.8; you may use [anaconda](https://www.anaconda.com) package manager)
 
-2. Create a virtual environment:
+2. Create and activate a virtual environment:
     ```bash
-    conda create --name teneva_bm python=3.8 -y
+    conda create --name teneva_bm python=3.8 -y && conda activate teneva_bm
     ```
 
-3. Activate the environment:
+3. Install special dependencies (for developers only):
     ```bash
-    conda activate teneva_bm
+    pip install jupyterlab twine
     ```
 
-4. Install special dependencies (for developers):
-    ```bash
-    pip install twine
-    ```
-
-5. Install teneva_bm:
+4. Install teneva_bm from the source:
     ```bash
     python setup.py install
     ```
 
-6. Install dependencies for all benchmarks (see README.md)
+5. Install dependencies for all benchmarks (see instructions in README.md)
 
-7. Reinstall teneva_bm (after updates of the code):
+6. Reinstall teneva_bm from the source after updates of the code:
     ```bash
     clear && pip uninstall teneva_bm -y && python setup.py install
     ```
 
-8. Delete virtual environment at the end of the work (optional):
+7. Optionally delete virtual environment at the end of the work:
     ```bash
     conda activate && conda remove --name teneva_bm --all -y
     ```
 
 
-## How to add the new benchmark
+## How to add a new benchmark
 
-1. Create python script in the appropriate subfolder of `teneva_bm` with the name like `bm_<subfolder>_<name>.py`
+1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `oc`, `qubo`, etc.) and `<name>` is a lowercase name of the benchmark.
 
-2. Prepare a benchmark class `Bm<Subfolder><Name>` in the created file and a demo example of its use in section `if __name__ == '__main__':`, by analogy with other benchmarks
+2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names are in camel case notation) in the created python file and then write a demo example of its usage in the bottom section `if __name__ == '__main__':`, by analogy with other benchmarks.
 
-3. Run the demo example for the new benchmark (note that we should reinstall our library locally to try the new benchmark):
+3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py bm_<subfolder>_<name>
     ```
+    > This script will run the demo (from section `if __name__ == '__main__':`) for the benchmark specified as an argument. If the argument is not provided, then the examples for all benchmarks will be run sequentially.
 
 
 ## How to update the package version
 
-1. Reinstall the package and run the demo script:
+1. Reinstall the package and run the demo script for all benchmarks:
     ```bash
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py
     ```
@@ -63,12 +59,12 @@
 
 3. Do commit `Update version (0.1.X)` and push
 
-4. Upload new version to `pypi` (login: AndreiChertkov)
+4. Upload new version to `pypi` (login: AndreiChertkov):
     ```bash
     rm -r ./dist && python setup.py sdist bdist_wheel && twine upload dist/*
     ```
 
-5. Reinstall and check that installed version is new
+5. Reinstall and check that installed version is new:
     ```bash
     pip install --no-cache-dir --upgrade teneva_bm
     ```
