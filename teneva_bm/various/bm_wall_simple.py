@@ -7,7 +7,11 @@ from teneva_bm import Bm
 
 DESC = """
     Simple example of the special discrete function ("wall"), which is
-    difficult to optimize by tensor methods.
+    difficult to optimize by tensor methods. The exact global minimum
+    is known: i = [0, ..., 0], y = 0. The target function returns "0" if
+    the requested multi-index is optimal; returns a large number ("10 * d")
+    if the requested multi-index matches the optimal one in at least one
+    element; and returns the first element of the multi-index otherwise.
     The dimension and mode size may be any (default are d=10, n=50).
 """
 
@@ -16,7 +20,9 @@ class BmWallSimple(Bm):
     def __init__(self, d=10, n=50, name='WallSimple', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        self.set_min(i=np.zeros(self.d, dtype=int), y=0.)
+        self.set_min(
+            i=np.zeros(self.d, dtype=int),
+            y=0.)
 
     @property
     def is_tens(self):
@@ -37,20 +43,16 @@ if __name__ == '__main__':
     bm = BmWallSimple().prep()
     print(bm.info())
 
-    text = 'Range of y for 10K random samples : '
-    bm.build_trn(1.E+4)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+4)
+    print(bm.info_history())
 
-    text = 'Value at a random multi-index     :  '
+    text = 'Value at a random multi-index            :  '
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Value at 3 random multi-indices   :  '
+    text = 'Value at 3 random multi-indices          :  '
     i1 = [np.random.choice(k) for k in bm.n]
     i2 = [np.random.choice(k) for k in bm.n]
     i3 = [np.random.choice(k) for k in bm.n]
@@ -59,8 +61,8 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    text = 'Value at minimum (real vs calc)   :  '
+    text = 'Value at the minimum (real vs calc)      :  '
     y_real = bm.y_min_real
     y_calc = bm[bm.i_min_real]
-    text += f'{y_real:-10.3e}/ {y_calc:-10.3e}'
+    text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
     print(text)
