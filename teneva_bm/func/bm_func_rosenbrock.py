@@ -8,6 +8,8 @@ from teneva_bm import Bm
 DESC = """
     Analytical Rosenbrock function (continuous).
     The dimension and mode size may be any (default are d=50, n=15).
+    Default grid limits are [-2.048, +2.048]; the exact global minimum
+    is known: x = [1, 1, ..., 1], y = 0.
     See https://www.sfu.ca/~ssurjano/rosen.html for details.
     See also the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
@@ -73,20 +75,16 @@ if __name__ == '__main__':
     bm = BmFuncRosenbrock().prep()
     print(bm.info())
 
-    text = 'Range of y for 10K random samples : '
-    bm.build_trn(1.E+4)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+4)
+    print(bm.info_history())
 
-    text = 'Value at a random multi-index     :  '
+    text = 'Value at a random multi-index            :  '
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Value at 3 random multi-indices   :  '
+    text = 'Value at 3 random multi-indices          :  '
     i1 = [np.random.choice(k) for k in bm.n]
     i2 = [np.random.choice(k) for k in bm.n]
     i3 = [np.random.choice(k) for k in bm.n]
@@ -95,14 +93,14 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    text = 'TT-cores accuracy on train data   :  '
+    text = 'TT-cores accuracy on train data          :  '
     Y = bm.build_cores()
-    e = teneva.accuracy_on_data(Y, bm.I_trn, bm.y_trn)
+    e = teneva.accuracy_on_data(Y, I_trn, y_trn)
     text += f'{e:-10.1e}'
     print(text)
 
-    text = 'Value at minimum (real vs calc)   :  '
+    text = 'Value at the minimum (real vs calc)      :  '
     y_real = bm.y_min_real
     y_calc = bm(bm.x_min_real)
-    text += f'{y_real:-10.3e}/ {y_calc:-10.3e}'
+    text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
     print(text)
