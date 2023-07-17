@@ -34,19 +34,26 @@ class BmQuboMvc(Bm):
         if not self.is_n_equal or self.n[0] != 2:
             self.set_err('Mode size (n) should be "2"')
         if not with_networkx:
-            self.set_err('Need "networkx" module')
+            msg = 'Need "networkx" module. For installation please run '
+            msg += '"pip install networkx==3.0"'
+            self.set_err(msg)
         if not with_qubogen:
-            self.set_err('Need "qubogen" module')
+            msg = 'Need "qubogen" module. For installation please run '
+            msg += '"pip install qubogen==0.1.1"'
+            self.set_err(msg)
 
     @property
     def is_tens(self):
         return True
 
     def prep(self):
+        self.check_err()
+
         graph = nx.fast_gnp_random_graph(n=self.d, p=self.opt_prob_con,
             seed=self.opt_seed)
         edges = np.array(list([list(e) for e in graph.edges]))
         n_nodes = len(np.unique(np.array(edges).flatten()))
+
         g = qubogen.Graph(edges=edges, n_nodes=n_nodes)
         self.bm_Q = qubogen.qubo_mvc(g)
 
@@ -54,7 +61,7 @@ class BmQuboMvc(Bm):
         return self
 
     def set_opts(self, prob_con=0.5, seed=42):
-        """Setting options specific to this benchmark.
+        """Setting options specific to the benchmark.
 
         Args:
             prob_con (float): probability of the connection in the graph.
