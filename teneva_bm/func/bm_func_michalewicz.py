@@ -16,6 +16,8 @@ DESC = """
     Jean-Marc Alliot. "Certified global minima for a benchmark of difficult
     optimization problems". arXiv preprint arXiv:2003.09867 2020
     (the function has d! local minima, and it is multimodal).
+    Note that the method "build_cores" for construction of the function
+    in the TT-format on the discrete grid is available.
 """
 
 

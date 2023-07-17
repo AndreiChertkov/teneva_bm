@@ -8,12 +8,14 @@ from teneva_bm import Bm
 DESC = """
     Analytical Rastrigin function (continuous).
     The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-5.12, +5.12]; the exact global minimum
-    is known: x = 0, y = 0.
+    Default grid limits are [-5.12, 5.12]; the exact global minimum
+    is known: x = [0, ..., 0], y = 0.
     See https://www.sfu.ca/~ssurjano/rastr.html for details.
     See also the work Johannes M Dieterich, Bernd Hartke. "Empirical review
     of standard benchmark functions using evolutionary global optimization".
     Applied Mathematics 2012; 3:1552-1564.
+    Note that the method "build_cores" for construction of the function
+    in the TT-format on the discrete grid is available.
 """
 
 

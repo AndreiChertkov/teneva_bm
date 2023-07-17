@@ -7,7 +7,7 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Piston function (continuous).
-    The dimension is "7" and the mode size may be any (default is n=15),
+    The dimension is 7 and the mode size may be any (default is n=15),
     each mode has its own (substantially different) limits.
     See Vitaly Zankin, Gleb Ryzhakov, Ivan Oseledets. "Gradient descent
     based D-optimal design for the least-squares polynomial approximation".

@@ -8,7 +8,7 @@ from teneva_bm import Bm
 DESC = """
     Analytical Dixon function (continuous).
     The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-10, +10]; the exact global minimum
+    Default grid limits are [-10, 10]; the exact global minimum
     is known: x_i = 2^{(2^i-2) / 2^i} (i = 1, ..., d), y = 0.  Note that
     this function achieves a global minimum at more than one point.
     See https://www.sfu.ca/~ssurjano/dixonpr.html for details.

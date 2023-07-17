@@ -8,7 +8,7 @@ from teneva_bm import Bm
 DESC = """
     Analytical Qing function (continuous).
     The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [0, +500] (note that we limit this function
+    Default grid limits are [0, 500] (note that we limit this function
     to this domain instead of often used [-500, 500] to make sure it has
     a single global minimum); the exact global minimum
     is known: x_i = \sqrt{i} (i = 1, ..., d), y = 0.
@@ -17,6 +17,8 @@ DESC = """
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("98. Qing Function"; Continuous, Differentiable, Separable
     Scalable, Multimodal).
+    Note that the method "build_cores" for construction of the function
+    in the TT-format on the discrete grid is available.
 """
 
 

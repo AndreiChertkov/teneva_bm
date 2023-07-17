@@ -8,14 +8,16 @@ from teneva_bm import Bm
 DESC = """
     Analytical Griewank function (continuous).
     The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-100, +100]; the exact global minimum
-    is known: x = 0, y = 0.
+    Default grid limits are [-100, 100]; the exact global minimum
+    is known: x = [0, ..., 0], y = 0.
     See https://www.sfu.ca/~ssurjano/griewank.html for details.
     See also the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("59. Griewank Function"; Continuous, Differentiable, Non-Separable,
     Scalable, Multimodal).
+    Note that the method "build_cores" for construction of the function
+    in the TT-format on the discrete grid is available.
 """
 
 
