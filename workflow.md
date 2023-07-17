@@ -74,5 +74,5 @@
 
 5. Reinstall the package from `pypi` and check that installed version is new:
     ```bash
-    pip install --no-cache-dir --upgrade teneva_bm
+    pip uninstall teneva_bm -y && pip install --no-cache-dir --upgrade teneva_bm
     ```
