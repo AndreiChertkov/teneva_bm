@@ -13,8 +13,14 @@ from teneva_bm import Bm
 
 
 DESC = """
-    Discrete optimal control (OC) problem with simple 1D ODE "x**3 - i", where
-    "i" is a binary control variable.
+    Discrete optimal control (OC) problem with simple 1D ODE "x**3 - i",
+    where "x = x(t)" is a state variable, "x(0) = x_ini" and "i" is a
+    binary control variable. The loss function for the optimal control
+    problem is "0.5 * (x-x_ref)^2", where "x_ref" is a target value, and
+    the maximum time value is "t_max". Note that for some control values
+    the solver (gekko) fails, in this case we return the value "y_err".
+    By default (see parameters of the "set_opts" function), "x_ini = 0.8",
+    "x_ref = 0.7", "t_max = 1" and "y_err = 1.E+50".
     The dimension may be any (default is 50), and the mode size should be 2.
     The benchmark needs "gekko==1.0.6" library (it is used for ODE solution).
 """
@@ -27,15 +33,13 @@ class BmOcSimple(Bm):
         if not self.is_n_equal or self.n[0] != 2:
             self.set_err('Mode size (n) should be "2"')
         if not with_gekko:
-            self.set_err('Need "gekko" module')
+            msg = 'Need "gekko" module. For installation please run '
+            msg += '"pip install gekko==1.0.6"'
+            self.set_err(msg)
 
     @property
     def is_tens(self):
         return True
-
-    def bm_constr(self, i):
-        """Constraint (optional)."""
-        return None
 
     def bm_ode(self, x, i):
         """Target ordinary differential equation (ODE)."""
@@ -46,7 +50,7 @@ class BmOcSimple(Bm):
         return 0.5 * (x - self.opt_x_ref)**2
 
     def set_opts(self, x_ini=0.8, x_ref=0.7, t_max=1., y_err=1.E+50):
-        """Setting options specific to this benchmark.
+        """Setting options specific to the benchmark.
 
         Args:
             x_ini (float): initial condition for the ODE.
@@ -61,10 +65,6 @@ class BmOcSimple(Bm):
         self.opt_y_err = y_err
 
     def _f(self, i):
-        y_constr = self.bm_constr(i)
-        if y_constr is not None:
-            return y_constr
-
         solver = GEKKO(remote=False)
         solver.options.IMODE = 4
         solver.time = self.opt_times
@@ -91,12 +91,8 @@ if __name__ == '__main__':
     bm = BmOcSimple().prep()
     print(bm.info())
 
-    text = 'Range of y for 100 random samples : '
-    bm.build_trn(1.E+2)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+2)
+    print(bm.info_history())
 
     text = 'Value at a random multi-index     :  '
     i = [np.random.choice(k) for k in bm.n]
