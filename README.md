@@ -39,8 +39,8 @@ teneva_bm_demo('bm_qubo_knap_amba', with_info=True)
 
 ## Available benchmarks
 
-- `func` - a collection of analytic functions of a real multidimensional argument; for almost all functions, the exact global minimum ("continuous x point", not multi-index) is known (see `bm.x_min_real` and `bm.y_min_real`). The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncDixon`, ...
-    > For a number of functions (`BmFuncAlpine`, ...), a `bm.build_cores()` method is available that returns an exact representation of the function on the discrete grid used in the benchmark in the tensor train (TT) format as a list of 3D TT-cores.
+- `func` - a collection of analytic functions of a real multidimensional argument; for almost all functions, the exact global minimum ("continuous x point", not multi-index) is known (see `bm.x_min_real` and `bm.y_min_real`). The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncDixon`, `BmFuncExp` ...
+    > For a number of functions (`BmFuncAlpine`, `BmFuncExp`, ...), a `bm.build_cores()` method is available that returns an exact representation of the function on the discrete grid used in the benchmark in the tensor train (TT) format as a list of 3D TT-cores.
 
 - `oc`
 
