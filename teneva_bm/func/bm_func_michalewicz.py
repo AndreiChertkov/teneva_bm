@@ -8,14 +8,14 @@ from teneva_bm import Bm
 DESC = """
     Analytical Michalewicz function (continuous).
     The dimension and mode size may be any (default are d=50, n=15).
+    Default grid limits are [0, pi]; the exact global minimum is known
+    only for the case of dimensions 2, 5, and 10; in this cases, only the
+    corresponding value of the function is known, but not the argument.
     See https://www.sfu.ca/~ssurjano/michal.html for details.
     See also Charlie Vanaret, Jean-Baptiste Gotteland, Nicolas Durand,
     Jean-Marc Alliot. "Certified global minima for a benchmark of difficult
     optimization problems". arXiv preprint arXiv:2003.09867 2020
     (the function has d! local minima, and it is multimodal).
-    Note that the value of the global minimum is known only for the case of
-    dimensions 2, 5, and 10. In this cases, only the corresponding value of
-    the function is known, but not the argument.
 """
 
 
@@ -75,20 +75,16 @@ if __name__ == '__main__':
     bm = BmFuncMichalewicz().prep()
     print(bm.info())
 
-    text = 'Range of y for 10K random samples : '
-    bm.build_trn(1.E+4)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+4)
+    print(bm.info_history())
 
-    text = 'Value at a random multi-index     :  '
+    text = 'Value at a random multi-index            :  '
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Value at 3 random multi-indices   :  '
+    text = 'Value at 3 random multi-indices          :  '
     i1 = [np.random.choice(k) for k in bm.n]
     i2 = [np.random.choice(k) for k in bm.n]
     i3 = [np.random.choice(k) for k in bm.n]
@@ -97,8 +93,8 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    text = 'TT-cores accuracy on train data   :  '
+    text = 'TT-cores accuracy on train data          :  '
     Y = bm.build_cores()
-    e = teneva.accuracy_on_data(Y, bm.I_trn, bm.y_trn)
+    e = teneva.accuracy_on_data(Y, I_trn, y_trn)
     text += f'{e:-10.1e}'
     print(text)
