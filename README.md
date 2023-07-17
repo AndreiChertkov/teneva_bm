@@ -44,7 +44,7 @@ teneva_bm_demo('bm_qubo_knap_amba', with_info=True)
 
 - `oc`
 
-- `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems; all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapAmba`, ...
+- `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems; all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapAmba`, `BmQuboKnapQuad`, ...
     > The exact global minimum is known only for `BmQuboKnapAmba` benchmark.
 
 - `various`

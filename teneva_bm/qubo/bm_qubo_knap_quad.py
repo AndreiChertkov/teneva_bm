@@ -27,13 +27,17 @@ class BmQuboKnapQuad(Bm):
         if not self.is_n_equal or self.n[0] != 2:
             self.set_err('Mode size (n) should be "2"')
         if not with_qubogen:
-            self.set_err('Need "qubogen" module')
+            msg = 'Need "qubogen" module. For installation please run '
+            msg += '"pip install qubogen==0.1.1"'
+            self.set_err(msg)
 
     @property
     def is_tens(self):
         return True
 
     def prep(self):
+        self.check_err()
+
         v = np.diag(np.random.random(self.d)) / 3.
         a = np.random.random(self.d)
         b = np.mean(a)
@@ -52,20 +56,16 @@ if __name__ == '__main__':
     bm = BmQuboKnapQuad().prep()
     print(bm.info())
 
-    text = 'Range of y for 10K random samples : '
-    bm.build_trn(1.E+4)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+4)
+    print(bm.info_history())
 
-    text = 'Value at a random multi-index     :  '
+    text = 'Value at a random multi-index            :  '
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Value at 3 random multi-indices   :  '
+    text = 'Value at 3 random multi-indices          :  '
     i1 = [np.random.choice(k) for k in bm.n]
     i2 = [np.random.choice(k) for k in bm.n]
     i3 = [np.random.choice(k) for k in bm.n]
