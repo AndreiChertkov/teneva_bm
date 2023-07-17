@@ -7,8 +7,9 @@ from teneva_bm import Bm
 
 DESC = """
     The function 001 from the Hock & Schittkowski collection.
-    The dimension should be 2, and the mode size may be any (default is 21).
-    The exact global minimum is known: x = [1, ..., 1], y = 0.
+    The dimension should be 2, and the mode size may be any (default is 21),
+    the default limits for function inputs are [-10, 10].
+    The exact global minimum is known: x = [1, 1], y = 0.
 """
 
 
@@ -27,9 +28,7 @@ class BmHsFunc001(Bm):
         return True
 
     def _f_batch(self, X):
-        y1 = 100 * (X[:, 1] - X[:, 0]**2)**2
-        y2 = (1 - X[:, 0])**2
-        return y1 + y2
+        return 100. * (X[:, 1] - X[:, 0]**2)**2 + (1. - X[:, 0])**2
 
 
 if __name__ == '__main__':
