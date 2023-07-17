@@ -9,14 +9,19 @@ from teneva_bm import Bm
 
 
 DESC = """
-    Discrete Topology optimization task. This is draft!!!
-    The dimension and mode size are defined from nx and ny parameters.
+    Discrete Topology optimization task. This is a draft!!!
+    The dimension and mode size are defined from "nx" and "ny" parameters.
 """
 
 
 class BmTopopt(Bm):
-    def __init__(self, nx=128, ny=32, name='BmTopopt', desc=DESC):
-        super().__init__(nx*ny, 2, name, desc)
+    def __init__(self, d=None, n=2, name='BmTopopt', desc=DESC, nx=128, ny=32):
+        super().__init__(nx*ny, n, name, desc)
+
+        if d is not None:
+            self.set_err('Dimension number (d) should not be set manually')
+        if not self.is_n_equal or self.n[0] != 2:
+            self.set_err('Mode size (n) should be "2"')
 
         self.nx = nx
         self.ny = ny
@@ -25,7 +30,7 @@ class BmTopopt(Bm):
     def is_tens(self):
         return True
 
-    def optimize_bm(self):
+    def optimize_baseline(self):
         solver = TopOptLite(self.nx, self.ny, self.opt_penal, self.opt_rmin)
         solver.init(Emin=1.E-9, Emax=1.0)
         solver.prep()
@@ -51,6 +56,8 @@ class BmTopopt(Bm):
             plt.show()
 
     def prep(self):
+        self.check_err()
+
         self.bm_f = topopt_lite(self.nx, self.ny,
             self.opt_k_frac, self.opt_penal, self.opt_rmin)
 
@@ -333,20 +340,16 @@ if __name__ == '__main__':
     bm = BmTopopt().prep()
     print(bm.info())
 
-    text = 'Range of y for 100 random samples : '
-    bm.build_trn(1.E+2)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+2)
+    print(bm.info_history())
 
-    text = 'Value at a random multi-index     :  '
+    text = 'Value at a random multi-index            :  '
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Value at 3 random multi-indices   :  '
+    text = 'Value at 3 random multi-indices          :  '
     i1 = [np.random.choice(k) for k in bm.n]
     i2 = [np.random.choice(k) for k in bm.n]
     i3 = [np.random.choice(k) for k in bm.n]
