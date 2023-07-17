@@ -207,13 +207,6 @@ class Bm:
         text += 'Time of requests (sec)                   : '
         text += f'{self.time:-10.3e}\n'
 
-        if self.y_max is not None and self.y_max_real is not None:
-            text += 'Maximum (found / real)                   : '
-            text += f'{self.y_max:-10.3e}   / {self.y_max_real:-10.3e}\n'
-        elif self.y_max is not None:
-            text += 'Maximum (found)                          : '
-            text += f'{self.y_max:-10.3e}\n'
-
         if self.y_min is not None and self.y_min_real is not None:
             text += 'Minimum (found / real)                   : '
             text += f'{self.y_min:-10.3e}   / {self.y_min_real:-10.3e}\n'
@@ -225,6 +218,13 @@ class Bm:
             text += 'Average (found)                          : '
             text += f'{np.mean(self.y_list):-10.3e}\n'
 
+        if self.y_max is not None and self.y_max_real is not None:
+            text += 'Maximum (found / real)                   : '
+            text += f'{self.y_max:-10.3e}   / {self.y_max_real:-10.3e}\n'
+        elif self.y_max is not None:
+            text += 'Maximum (found)                          : '
+            text += f'{self.y_max:-10.3e}\n'
+            
         text += '=' * 78 + '\n'
         return text
 
