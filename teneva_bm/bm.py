@@ -224,7 +224,7 @@ class Bm:
         elif self.y_max is not None:
             text += 'Maximum (found)                          : '
             text += f'{self.y_max:-10.3e}\n'
-            
+
         text += '=' * 78 + '\n'
         return text
 
@@ -376,6 +376,9 @@ class Bm:
 
     def _parse_input(self, I=None, X=None):
         if I is not None and X is not None:
+            raise ValueError('Invalid case')
+
+        if I is None and X is None:
             raise ValueError('Invalid case')
 
         if X is not None and self.is_tens:

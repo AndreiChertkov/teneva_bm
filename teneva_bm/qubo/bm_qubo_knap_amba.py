@@ -8,10 +8,11 @@ from teneva_bm import Bm
 DESC = """
     Binary knapsack problem with fixed weights wi in [5, 20], profits pi in
     [50, 100] (i = 1, 2, . . . , d) and the maximum capacity C = 1000. It is
-    from work (Dong et al., 2021) (problem k3; d = 50), where anglemodulated
-    bat algorithm (AMBA) algorithm was proposed for high-dimensional binary
+    from the work (Dong et al., 2021) (problem k3; d = 50), where angle
+    modulated bat algorithm (AMBA) was proposed for high-dimensional binary
     optimization problems with application to antenna topology optimization.
-    The dimension should be 50, and the mode size should be 2.
+    The dimension should be 50, and the mode size should be 2; the exact
+    global minimum is known: i = [1, 1, 0, ...] (see code), y = -3103.
 """
 
 
@@ -63,20 +64,16 @@ if __name__ == '__main__':
     bm = BmQuboKnapAmba().prep()
     print(bm.info())
 
-    text = 'Range of y for 10K random samples : '
-    bm.build_trn(1.E+4)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+4)
+    print(bm.info_history())
 
-    text = 'Value at a random multi-index     :  '
+    text = 'Value at a random multi-index            :  '
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Value at 3 random multi-indices   :  '
+    text = 'Value at 3 random multi-indices          :  '
     i1 = [np.random.choice(k) for k in bm.n]
     i2 = [np.random.choice(k) for k in bm.n]
     i3 = [np.random.choice(k) for k in bm.n]
@@ -85,8 +82,8 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    text = 'Value at minimum (real vs calc)   :  '
+    text = 'Value at the minimum (real vs calc)      :  '
     y_real = bm.y_min_real
     y_calc = bm[bm.i_min_real]
-    text += f'{y_real:-10.3e}/ {y_calc:-10.3e}'
+    text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
     print(text)
