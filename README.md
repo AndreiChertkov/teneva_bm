@@ -47,7 +47,7 @@ teneva_bm_demo('bm_qubo_knap_amba', with_info=True)
 - `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems; all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapAmba`, `BmQuboKnapQuad`, `BmQuboMaxcut`, `BmQuboMvc`.
     > The exact global minimum is known only for `BmQuboKnapAmba` benchmark.
 
-- `various` - a collection of heterogeneous benchmarks that are not suitable for any other collection (note that in this case, we do not use the name of the collection in the name of the benchmarks, unlike all other sets). The collection includes the following benchmarks: `BmTopopt` (draft!), `BmWallSimple`.
+- `various` - a collection of heterogeneous benchmarks that are not suitable for any other collection (note that in this case, we do not use the name of the collection in the name of the benchmarks, unlike all other sets). The collection includes the following benchmarks: `BmMatmul`, `BmTopopt` (draft!), `BmWallSimple`.
 
 
 ## Usage
