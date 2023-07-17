@@ -81,12 +81,8 @@ if __name__ == '__main__':
     bm = BmQuboMvc().prep()
     print(bm.info())
 
-    text = 'Range of y for 10K random samples : '
-    bm.build_trn(1.E+4)
-    text += f'[{np.min(bm.y_trn):-10.3e},'
-    text += f' {np.max(bm.y_trn):-10.3e}] '
-    text += f'(avg: {np.mean(bm.y_trn):-10.3e})'
-    print(text)
+    I_trn, y_trn = bm.build_trn(1.E+4)
+    print(bm.info_history())
 
     text = 'Value at a random multi-index     :  '
     i = [np.random.choice(k) for k in bm.n]
