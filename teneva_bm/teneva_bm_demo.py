@@ -14,11 +14,20 @@ def teneva_bm_demo(bm_use=None, with_info=True):
 
     """
     bms = {}
+    found = False
+
     for cl in _find_cl_all():
         bms[cl] = _find_bm_all(cl)
+        if bm_use in bms[cl]:
+            found = True
 
     if with_info:
         _info(bms)
+
+    if bm_use and not found:
+        msg = f'Benchmark "{bm_use}" does not exist. '
+        msg += 'Can not run demo'
+        raise ValueError(msg)
 
     _run_all(bms, bm_use)
 
