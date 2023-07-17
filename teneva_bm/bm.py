@@ -195,14 +195,19 @@ class Bm:
         text += '> History of requests.'
         text += '\n'
 
+        if self.m == 0:
+            text += '        ... history is empty ...\n'
+            text += '=' * 78 + '\n'
+            return text
+
         text += 'Number of requests                       : '
         text += f'{self.m:-10.3e}\n'
 
         text += 'Number of cache uses                     : '
         text += f'{self.m_cache:-10.3e}\n'
 
-        text += 'Time of requests (sec)                   : '
-        text += f'{self.time:-10.3e}\n'
+        text += 'Average time of one request (sec)        : '
+        text += f'{self.time/self.m:-10.3e}\n'
 
         if self.y_min is not None and self.y_min_real is not None:
             text += 'Minimum (found / real)                   : '
