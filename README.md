@@ -154,8 +154,15 @@ The following function may be used to print the corresponding values: `print(bm.
 - [Gleb Ryzhakov](https://github.com/G-Ryzhakov)
 - [Ivan Oseledets](https://github.com/oseledets)
 
-If you have interesting benchmarks, then we are happy to invite you to become a contributor. Please see detailed instructions for developers in `workflow.md`.
+
+## Contributors
+
+- [Anastasia Batsheva](https://github.com/anabatsh)
+
+We are happy to invite you to become a contributor, especially if you have interesting benchmarks ;) Please see detailed instructions for developers in `workflow.md`.
+
 
 ---
+
 
 > ✭__🚂  The stars that you give to **teneva_bm**, motivate us to develop faster and add new interesting features to the code 😃
