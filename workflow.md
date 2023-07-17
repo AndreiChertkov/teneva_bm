@@ -1,6 +1,6 @@
 # workflow
 
-> Workflow instructions for `teneva_bm` developers.
+> Workflow instructions for `teneva_bm` developers
 
 
 ## How to install the current local version
@@ -17,14 +17,14 @@
     pip install jupyterlab twine
     ```
 
-4. Install teneva_bm from the source:
+4. Install `teneva_bm` from the source:
     ```bash
     python setup.py install
     ```
 
-5. Install dependencies for all benchmarks (see instructions in README.md)
+5. Install dependencies for all benchmarks (see instructions in the section `Installation` in `README.md` file)
 
-6. Reinstall teneva_bm from the source after updates of the code:
+6. Reinstall `teneva_bm` from the source (after updates of the code):
     ```bash
     clear && pip uninstall teneva_bm -y && python setup.py install
     ```
@@ -37,15 +37,23 @@
 
 ## How to add a new benchmark
 
-1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `oc`, `qubo`, etc.) and `<name>` is a lowercase name of the benchmark.
+1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_amba`)
 
-2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names are in camel case notation) in the created python file and then write a demo example of its usage in the bottom section `if __name__ == '__main__':`, by analogy with other benchmarks.
+2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file and then write a demo example of its usage (initialization, get method, training dataset generation, etc.; please, do it by analogy with other benchmarks) in the bottom section after `if __name__ == '__main__':`. Please, note:
+    - We should necessarily rewrite the method `_f` and / or `_f_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
+    - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function)
+    - If the objective function has constraint, we should specify the function `_constr` and / or `_constr_batch`, also we should specify the value `True` for variable `with_constr` and set correct value for `bm.penalty_constr` variable, which relates to the returned value for the case if the constraint is not met
+    - Method `_cores` can be specified to generate an exact TT-representation of the benchmark, in which case variable `with_cores` should be set to `True`
 
 3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py bm_<subfolder>_<name>
     ```
-    > This script will run the demo (from section `if __name__ == '__main__':`) for the benchmark specified as an argument. If the argument is not provided, then the examples for all benchmarks will be run sequentially.
+    > This script will run the demo (from the section `if __name__ == '__main__':`) for the benchmark specified as an argument. If the argument is not provided, then the examples for all benchmarks from all collections will be run sequentially
+
+4. Add a description of the new benchmark to section `Available benchmarks`  of file `README.md`
+
+5. Update the package version
 
 
 ## How to update the package version
@@ -55,16 +63,16 @@
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py
     ```
 
-2. Update version (like `0.1.X`) in `teneva_bm/__init__.py` and `README.md`
+2. Update version (like `0.2.X`) in `teneva_bm/__init__.py` and `README.md` files, whre `X` is a new subversion number
 
-3. Do commit `Update version (0.1.X)` and push
+3. Do commit like `Update version (0.2.X)` and push
 
-4. Upload new version to `pypi` (login: AndreiChertkov):
+4. Upload the new version to `pypi` (login: AndreiChertkov):
     ```bash
     rm -r ./dist && python setup.py sdist bdist_wheel && twine upload dist/*
     ```
 
-5. Reinstall and check that installed version is new:
+5. Reinstall the package from `pypi` and check that installed version is new:
     ```bash
     pip install --no-cache-dir --upgrade teneva_bm
     ```
