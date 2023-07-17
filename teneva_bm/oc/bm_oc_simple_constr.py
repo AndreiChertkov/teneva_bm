@@ -2,7 +2,7 @@ import numpy as np
 import teneva
 
 
-from teneva_bm import BmOcSimple
+from teneva_bm.oc import BmOcSimple
 
 
 DESC = """

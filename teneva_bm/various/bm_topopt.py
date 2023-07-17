@@ -54,7 +54,7 @@ class BmTopopt(Bm):
         self.bm_f = topopt_lite(self.nx, self.ny,
             self.opt_k_frac, self.opt_penal, self.opt_rmin)
 
-        self._is_prep = True
+        self.is_prep = True
         return self
 
     def set_opts(self, k_frac=0.4, penal=3., rmin=5.4):

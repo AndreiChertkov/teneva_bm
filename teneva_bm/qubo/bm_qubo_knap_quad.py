@@ -39,7 +39,7 @@ class BmQuboKnapQuad(Bm):
         b = np.mean(a)
         self.bm_Q = qubogen.qubo_qkp(v, a, b)
 
-        self._is_prep = True
+        self.is_prep = True
         return self
 
     def _f_batch(self, I):

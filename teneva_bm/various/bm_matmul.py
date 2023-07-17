@@ -55,7 +55,7 @@ class BmMatmul(Bm):
     def prep(self):
         self.loss = _loss_build(self.T, self.E, self.rank, self.only2)
 
-        self._is_prep = True
+        self.is_prep = True
         return self
 
     def recover(self, i):

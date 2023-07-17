@@ -50,7 +50,7 @@ class BmQuboMvc(Bm):
         g = qubogen.Graph(edges=edges, n_nodes=n_nodes)
         self.bm_Q = qubogen.qubo_mvc(g)
 
-        self._is_prep = True
+        self.is_prep = True
         return self
 
     def set_opts(self, prob_con=0.5, seed=42):

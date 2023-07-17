@@ -48,7 +48,7 @@ class BmQuboKnapAmba(Bm):
 
         self.bm_C = 1000
 
-        self._is_prep = True
+        self.is_prep = True
         return self
 
     def _f(self, i):
