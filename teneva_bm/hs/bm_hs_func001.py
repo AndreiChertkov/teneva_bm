@@ -17,6 +17,9 @@ class BmHsFunc001(Bm):
     def __init__(self, d=2, n=21, name='HsFunc001', desc=DESC):
         super().__init__(d, n, name, desc)
 
+        if self.d != 2:
+            self.set_err('Dimension should be 2')
+
         self.set_grid(-10., +10.)
 
         self.set_min(

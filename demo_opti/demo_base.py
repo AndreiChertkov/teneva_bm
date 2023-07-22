@@ -27,6 +27,7 @@ def demo(d=100, m=50000):
     t = tpc()
     print(f'Optimization process:\n')
     i_opt, y_opt = protes(bm.get, bm.d, bm.n0, m)
+    bm.log('<<< DONE', out=True)
 
     print(f'\nOptimization result:\n')
     print(f'Dimension    = {d:-11.0f}')

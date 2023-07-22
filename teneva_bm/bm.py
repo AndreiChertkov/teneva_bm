@@ -239,7 +239,7 @@ class Bm:
         text += '=' * 78 + '\n'
         return text
 
-    def log(self):
+    def log(self, postfix='', out=False):
         self.log_m_last = self.m
         t = tpc() - self.log_t
 
@@ -260,6 +260,12 @@ class Bm:
 
         if self.log_with_max:
             text += f'max {self.y_max:-10.3e} | '
+
+        if postfix:
+            text = text + postfix
+
+        if out:
+            print(text)
 
         return text
 
