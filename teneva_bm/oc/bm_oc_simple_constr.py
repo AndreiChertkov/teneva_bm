@@ -8,10 +8,11 @@ from teneva_bm.oc import BmOcSimple
 DESC = """
     Discrete optimal control (OC) problem with constraint of the special
     form. This benchmark is the same as "BmOcSimple", except the constraint.
-    Please see the description of BmOcSimple for more details. Note that in
-    the case if constraint fails, we return the penalty value "1.E+42".
+    Please see the description of BmOcSimple for more details.
     The dimension may be any (default is 50), and the mode size should be 2.
     The benchmark needs "gekko==1.0.6" library (it is used for ODE solution).
+    Note that the default penalty for the constraint is "1.E+42"
+    and the amplitude of the constraint does not used.
 """
 
 
@@ -19,10 +20,13 @@ class BmOcSimpleConstr(BmOcSimple):
     def __init__(self, d=50, n=2, name='OcSimpleConstr', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        self.penalty_constr = 1.E+42
-        self.with_constr = True
+        self.set_constr(penalty=1.E+42, with_amplitude=True)
 
-    def _constr(self, i):
+    @property
+    def with_constr(self):
+        return True
+
+    def _c(self, i):
         s = ''.join([str(k) for k in i])
 
         condition_false = False
@@ -33,7 +37,7 @@ class BmOcSimpleConstr(BmOcSimple):
         condition_false = condition_false or s.startswith('010')
         condition_false = condition_false or s.startswith('0110')
 
-        return not condition_false
+        return 1. if condition_false else -1.
 
 
 if __name__ == '__main__':

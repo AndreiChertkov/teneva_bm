@@ -13,6 +13,8 @@ class Bm:
         self.set_name(name)
         self.set_desc(desc)
 
+        self.set_constr()
+
         self.set_min()
         self.set_max()
 
@@ -72,6 +74,11 @@ class Bm:
             raise ValueError('Mode size is not constant, can not get n0')
         return self.n[0]
 
+    @property
+    def with_constr(self):
+        """Return True if benchmark has a constant."""
+        return False
+
     def build_cores(self):
         """Return exact TT-cores for the TT-representation of the tensor."""
         if self.is_tens:
@@ -113,10 +120,6 @@ class Bm:
         """Check that benchmark's configuration is valid."""
         if not self.is_prep:
             msg = 'Run "prep" method for BM before call it'
-            self.set_err(msg)
-
-        if self.with_constr and self.penalty_constr is None:
-            msg = 'Penalty for constraint ("bm.penalty_constr") is not set'
             self.set_err(msg)
 
         return self.check_err()
@@ -284,6 +287,12 @@ class Bm:
         self.cache = {} if cache is None else cache
         self.cache_m_max = int(m_max) if m_max else None
 
+    def set_constr(self, penalty=1.E+42, eps=1.E-16, with_amplitude=True):
+        """Set constraint options."""
+        self.constr_penalty = penalty
+        self.constr_eps = eps
+        self.constr_with_amplitude = with_amplitude
+
     def set_desc(self, desc=''):
         """Set text description of the problem."""
         self.desc = desc
@@ -385,22 +394,27 @@ class Bm:
         self.d = None if d is None else int(d)
         self.n = teneva.grid_prep_opt(n, self.d, int)
 
+    def _c(self, x):
+        """Function that check constraint for a given point/index."""
+        return self._c_batch(np.array(x).reshape(1, -1))[0]
+
+    def _c_batch(self, X):
+        """Function that check constraint for a given batch of poi./indices."""
+        return np.array([self._c(x) for x in X])
+
     def _compute(self, X):
         if not self.with_constr:
             return self._f_batch(X)
 
-        y = np.ones(X.shape[0]) * self.penalty_constr
-        ind = self._constr_batch(X)
+        y = np.ones(X.shape[0]) * self.constr_penalty
+        c = self._c_batch(X)
+        ind = c < self.constr_eps
+
         y[ind] = self._f_batch(X[ind])
+        if self.constr_with_amplitude:
+            y[~ind] *= c[~ind]
+
         return y
-
-    def _constr(self, x):
-        """Function that check constraint for a given point/index."""
-        return self._constr_batch(np.array(x).reshape(1, -1))[0]
-
-    def _constr_batch(self, X):
-        """Function that check constraint for a given batch of poi./indices."""
-        return np.array([self._constr(x) for x in X])
 
     def _cores(self, X):
         """Return the exact TT-cores for the provided points."""
@@ -453,12 +467,9 @@ class Bm:
         self.m_cache = 0
         self.time = 0.
 
-        self.penalty_constr = None
-
         self.log_m_last = 0
 
         self.is_prep = False
-        self.with_constr = False
         self.with_cores = False
 
     def _log_check(self):

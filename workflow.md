@@ -42,7 +42,7 @@
 2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file and then write a demo example of its usage (initialization, get method, training dataset generation, etc.; please, do it by analogy with other benchmarks) in the bottom section after `if __name__ == '__main__':`. Please, note:
     - We should necessarily rewrite the method `_f` and / or `_f_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
     - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function)
-    - If the objective function has constraint, we should specify the function `_constr` and / or `_constr_batch`, also we should specify the value `True` for variable `with_constr` and set correct value for `bm.penalty_constr` variable, which relates to the returned value for the case if the constraint is not met
+    - If the objective function has constraint, we should specify the function `_c` and / or `_c_batch`, also we should specify the value `True` for property `with_constr`
     - Method `_cores` can be specified to generate an exact TT-representation of the benchmark, in which case variable `with_cores` should be set to `True`
 
 3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):

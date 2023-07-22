@@ -11,6 +11,8 @@ DESC = """
     The dimension should be 2, and the mode size may be any (default is 21),
     the default limits for function inputs are [-10, 10].
     The exact global minimum is known: x = [1, 1], y = 0.
+    Note that the default penalty for the constraint is "1.E+3"
+    and the amplitude of the constraint is used.
 """
 
 
@@ -20,21 +22,20 @@ class BmHsFunc006(Bm):
 
         self.set_grid(-10., +10.)
 
-        self.set_min(
-            x=[1.]*self.d,
-            y=0.)
+        self.set_min(x=[1.]*self.d, y=0.)
 
-        self.opt_eps = 1.E-16
-        self.penalty_constr = 1.E+42
-        self.with_constr = True
+        self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 
     @property
     def is_func(self):
         return True
 
-    def _constr_batch(self, X):
-        constr = 10. * (X[:, 1] - X[:, 0]**2)
-        return np.abs(constr) < self.opt_eps
+    @property
+    def with_constr(self):
+        return True
+
+    def _c_batch(self, X):
+        return np.abs(10. * (X[:, 1] - X[:, 0]**2))
 
     def _f_batch(self, X):
         return (1. - X[:, 0])**2
