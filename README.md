@@ -30,10 +30,10 @@ bm = BmQuboMaxcut().prep()
 print(bm.info())
 ```
 
-You can run demos for all benchmarks at once with the command `python demo.py` from the root folder of the project (you can also specify the name of the benchmark as a script argument to run the demo for only one benchmark, e.g., `python demo.py bm_qubo_knap_amba`). You can also use a function from the `teneva_bm` package to run all or only one demo:
+You can run demos for all benchmarks at once with the command `python demo.py` from the root folder of the project (you can also specify the name of the benchmark as a script argument to run the demo for only one benchmark, e.g., `python demo.py bm_qubo_knap_det`). You can also use a function from the `teneva_bm` package to run all or only one demo:
 ```python
 from teneva_bm import teneva_bm_demo
-teneva_bm_demo('bm_qubo_knap_amba', with_info=True)
+teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 ```
 
 
@@ -46,8 +46,8 @@ teneva_bm_demo('bm_qubo_knap_amba', with_info=True)
 
 - `oc` - a collection of optimal control problems described by ordinary differential equations with discrete binary control variable, some of the problems have explicit restrictions on the elements of the control vector. The collection includes the following benchmarks: `BmOcSimple`, `BmOcSimpleConstr`.
 
-- `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems; all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapAmba`, `BmQuboKnapQuad`, `BmQuboMaxcut`, `BmQuboMvc`.
-    > The exact global minimum is known only for `BmQuboKnapAmba` benchmark.
+- `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems; all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapDet`, `BmQuboKnapQuad`, `BmQuboMaxcut`, `BmQuboMvc`.
+    > The exact global minimum is known only for `BmQuboKnapDet` benchmark (note that this benchmark supports only dimensions `10`, `20`, `50`, `80` and `100`).
 
 - `various` - a collection of heterogeneous benchmarks that are not suitable for any other collection (note that in this case, we do not use the name of the collection in the name of the benchmarks, unlike all other sets). The collection includes the following benchmarks: `BmMatmul`, `BmTopopt` (draft!), `BmWallSimple`.
 
@@ -85,7 +85,9 @@ Before calling the `bm.prep()` method, you can set a number of additional benchm
 
 - `bm.set_min(i, x, y)` - the same as in the previous point, but for the global minimum.
 
-- `bm.set_cache(True)` - when calling this function with the `True` argument, the cache will be used (it is not used by default), that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values.
+- `bm.set_log(True, cond, step, prefix)` - when calling this function with the `True` argument, the log will be printed while requests to benchmark. You may set the log codition `cond` (`min`, `max`, `min-max` or `step`; e.g., in the case `min` the log will be presented each time the `min` value is updated), the log step and a string `prefix` for the log.
+
+- `bm.set_cache(True)` - when calling this function with the `True` argument, the cache will be used (it is not used by default), that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values. Optionally, you can specify `m_max` argument that specifies the maximum cache size. If the size is exceeded, the cache will be cleared and a corresponding warning will be displayed.
 
 - `bm.set_quantization(True)` - an auxiliary option, when set, it is assumed that the requested multi-indices and the points are presented in a quantized representation, that is, each mode of the original grid of the size `2^q`, is converted into `q` virtual modes, having a size `2`.
 

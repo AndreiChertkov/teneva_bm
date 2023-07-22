@@ -6,18 +6,19 @@ from teneva_bm import Bm
 
 
 DESC = """
-    Binary knapsack problem with fixed weights wi in [5, 20], profits pi in
-    [50, 100] (i = 1, 2, . . . , d) and the maximum capacity C = 1000. It is
-    from the work (Dong et al., 2021) (problem k3; d = 50), where phase angle
-    modulated bat algorithm (P-AMBA) was proposed for high-dimensional binary
-    optimization problems with application to antenna topology optimization.
-    The dimension should be 50, and the mode size should be 2; the exact
-    global minimum is known: i = [1, 1, 0, ...] (see code), y = -3103.
+    Binary knapsack problem -1 * sum p_i x_i -> min s.t. sum w_i x_i < C with
+    fixed weights w, profits p and the capacity C. The exact minimum is known
+    (d=10: -295, d=20: -1024, d=50: -3103, d=80: -5183, d=100: -15170).
+    We use the values of parameters from the work Dong et al. 2021 (problems
+    k1-k5), where phase angle modulated bat algorithm (P-AMBA) was proposed
+    for high dimensional binary optimization problems with application to
+    antenna topology optimization. The dimension should be in 10, 20, 50, 80,
+    100, and the mode size should be 2.
 """
 
 
-class BmQuboKnapAmba(Bm):
-    def __init__(self, d=50, n=2, name='QuboKnapAmba', desc=DESC):
+class BmQuboKnapDet(Bm):
+    def __init__(self, d=50, n=2, name='QuboKnapDet', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n0 != 2:
@@ -153,7 +154,7 @@ class BmQuboKnapAmba(Bm):
 if __name__ == '__main__':
     np.random.seed(42)
 
-    bm = BmQuboKnapAmba().prep()
+    bm = BmQuboKnapDet().prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+4)
@@ -176,7 +177,7 @@ if __name__ == '__main__':
 
     for d in [10, 20, 50, 80, 100]:
         text = f'Value at the minimum for d={d:-3d}           :  '
-        bm = BmQuboKnapAmba(d).prep()
+        bm = BmQuboKnapDet(d).prep()
         y_real = bm.y_min_real
         y_calc = bm[bm.i_min_real]
         text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'

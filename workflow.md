@@ -37,7 +37,7 @@
 
 ## How to add a new benchmark
 
-1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_amba`)
+1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_det`)
 
 2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file and then write a demo example of its usage (initialization, get method, training dataset generation, etc.; please, do it by analogy with other benchmarks) in the bottom section after `if __name__ == '__main__':`. Please, note:
     - We should necessarily rewrite the method `_f` and / or `_f_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
