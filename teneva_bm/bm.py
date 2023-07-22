@@ -23,6 +23,8 @@ class Bm:
 
         self.set_cache()
 
+        self.set_log()
+
     def __call__(self, X):
         """Return a value or batch of values for provided x-point."""
         return self.get_poi(X)
@@ -62,6 +64,13 @@ class Bm:
     def is_tens(self):
         """Check if BM relates to tensor (i.e., discrete function)."""
         return not self.is_func
+
+    @property
+    def n0(self):
+        """Return the mode size value if it is constant."""
+        if not self.is_n_equal:
+            raise ValueError('Mode size is not constant, can not get n0')
+        return self.n[0]
 
     def build_cores(self):
         """Return exact TT-cores for the TT-representation of the tensor."""
@@ -230,6 +239,30 @@ class Bm:
         text += '=' * 78 + '\n'
         return text
 
+    def log(self):
+        self.log_m_last = self.m
+        t = tpc() - self.log_t
+
+        text = ''
+
+        if self.log_prefix:
+            text += self.log_prefix + ' > '
+
+        text += f'm {self.m:-7.1e}'
+        if self.with_cache:
+            text += f' [+ {self.m_cache:-7.1e}]'
+        text += ' | '
+
+        text += f't {t:-7.1e} | '
+
+        if self.log_with_min:
+            text += f'min {self.y_min:-10.3e} | '
+
+        if self.log_with_max:
+            text += f'max {self.y_max:-10.3e} | '
+
+        return text
+
     def prep(self):
         """A function with a specific benchmark preparation code."""
         # Note that when inherited, the function in the child class
@@ -240,9 +273,10 @@ class Bm:
         self.is_prep = True
         return self
 
-    def set_cache(self, with_cache=False, cache=None):
+    def set_cache(self, with_cache=False, cache=None, m_max=1.E+8):
         self.with_cache = with_cache
         self.cache = {} if cache is None else cache
+        self.cache_m_max = int(m_max) if m_max else None
 
     def set_desc(self, desc=''):
         """Set text description of the problem."""
@@ -273,17 +307,46 @@ class Bm:
             msg = f'Invalid kind of the grid (should be "uni" or "cheb")'
             raise ValueError(msg)
 
+    def set_log(self, with_log=False, cond='min-max', step=1000, prefix='bm',
+                with_min=True, with_max=True):
+        """Set the log options."""
+        self.with_log = with_log
+        self.log_cond = cond
+        self.log_step = int(step) if step else None
+        self.log_prefix = prefix
+        self.log_with_min = with_min
+        self.log_with_max = with_max
+
+        self.log_t = tpc()
+
+        if not self.log_cond in ['min', 'max', 'min-max', 'step']:
+            raise ValueError('Invalid "log_cond" argument')
+
     def set_max(self, i=None, x=None, y=None):
         """Set exact (real) global maximum (index, point and related value)."""
         self.i_max_real = i
         self.x_max_real = x
         self.y_max_real = y
 
+        if self.i_max_real is not None:
+            self.i_max_real = np.asanyarray(self.i_max_real, dtype=int)
+        if self.x_max_real is not None:
+            self.x_max_real = np.asanyarray(self.x_max_real, dtype=float)
+        if self.y_max_real is not None:
+            self.y_max_real = float(self.y_max_real)
+
     def set_min(self, i=None, x=None, y=None):
         """Set exact (real) global minimum (index, point and related value)."""
         self.i_min_real = i
         self.x_min_real = x
         self.y_min_real = y
+
+        if self.i_min_real is not None:
+            self.i_min_real = np.asanyarray(self.i_min_real, dtype=int)
+        if self.x_min_real is not None:
+            self.x_min_real = np.asanyarray(self.x_min_real, dtype=float)
+        if self.y_min_real is not None:
+            self.y_min_real = float(self.y_min_real)
 
     def set_name(self, name=''):
         """Set display name for the problem."""
@@ -368,10 +431,12 @@ class Bm:
     def _init(self):
         self.err = []
 
+        self.is_y_max_new = False
         self.i_max = None
         self.x_max = None
         self.y_max = None
 
+        self.is_y_min_new = False
         self.i_min = None
         self.x_min = None
         self.y_min = None
@@ -384,9 +449,27 @@ class Bm:
 
         self.penalty_constr = None
 
+        self.log_m_last = 0
+
         self.is_prep = False
         self.with_constr = False
         self.with_cores = False
+
+    def _log_check(self):
+        if not self.with_log:
+            return False
+
+        if self.log_cond == 'min':
+            return self.is_y_min_new
+
+        if self.log_cond == 'max':
+            return self.is_y_max_new
+
+        if self.log_cond == 'min-max':
+            return self.is_y_min_new or self.is_y_max_new
+
+        if self.log_cond == 'step':
+            return self.log_step and self.m - self.log_m_last > self.log_step
 
     def _parse_input(self, I=None, X=None):
         if I is not None and X is not None:
@@ -441,15 +524,29 @@ class Bm:
 
         ind = np.argmax(y)
         if self.y_max is None or self.y_max < y[ind]:
+            self.is_y_max_new = True
             self.i_max = I[ind, :] if I is not None else None
             self.x_max = X[ind, :] if X is not None else None
             self.y_max = y[ind]
+        else:
+            self.is_y_max_new = False
+
 
         ind = np.argmin(y)
         if self.y_min is None or self.y_min > y[ind]:
+            self.is_y_min_new = True
             self.i_min = I[ind, :] if I is not None else None
             self.x_min = X[ind, :] if X is not None else None
             self.y_min = y[ind]
+        else:
+            self.is_y_min_new = False
+
+        if self._log_check():
+            print(self.log())
+
+        if self.cache_m_max and len(self.cache.keys()) > self.cache_m_max:
+            self._wrn('The maximum cache size has been exceeded. Cache cleared')
+            self.cache = {}
 
         return y if is_batch else y[0]
 
@@ -471,3 +568,7 @@ class Bm:
             I[:, k] = np.ravel_multi_index(I_qtt_curr, n, order='F')
 
         return I if is_many else I[0, :]
+
+    def _wrn(self, text):
+        text = '!!! BM-WARNING | ' + text
+        print(text)
