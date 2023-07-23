@@ -10,7 +10,7 @@ clusters of our group. If you run this script on zhores, then you should set
 the flag "--zhores" (note that rendering does not work in this case).
 
 The script can be downloaded with the following command:
-$ wget https://github.com/AndreiChertkov/teneva_bm/blob/main/install_mujoco.py
+$ wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_mujoco.py
 
 An existing environment can be specified as an argument to the script, or a new
 one can be pre-created:
@@ -104,6 +104,11 @@ def install_mujoco(env=None, with_info=True, with_log=False, is_zhores=False):
     if platform != 'colab':
         msg += '. Please activate your environment as '
         msg += f'"conda activate {env}" and use it with mujoco...'
+
+    msg += '\nYou can check the result as "'
+    if env:
+        msg += f'"conda activate {env} && '
+    msg += 'python install_mujoco.py --test"'
     _log(msg)
 
 
