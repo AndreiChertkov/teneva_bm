@@ -7,9 +7,9 @@ installation will be done in the related environment.
 
 * The correctness of the script was verified, including on noisy and zhores
 clusters of our group. If you run this script on zhores, then you should set
-the flag "--zhores" (note that rendering does not work in this case).
+the flag "--zhores" (note that rendering does not work in this case now).
 
-The script can be downloaded with the following command:
+For convenience, the script can be downloaded with the following command:
 $ wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_mujoco.py
 
 An existing environment can be specified as an argument to the script, or a new
@@ -22,18 +22,18 @@ $ conda activate && conda remove --name install_mujoco --all -y
 * In the case of zhores, you should run before environment creation the command:
 $ module load python/anaconda3
 
-To run the script, use the following command (in the case of a colab platform,
-you should not set the environment; also note that you does not need to acrivate
-the environment manually before run the script):
+>>>>> To run the script, use the following command (in the case of a colab
+platform, you should not set the environment; also note that you does not need
+to activate the environment manually before run the script):
 $ clear && python install_mujoco.py --env install_mujoco
 
-If there are any problems with the script, you can run it with "--log" flag
+* If there are any problems with the script, you can run it with "--log" flag
 (full output from all commands will be presented) and check the outputs. If you
 want to remove all messages (except errors) presented by the script, then you
 can specify the flag "--silent".
 
-To check the success of the script, you can activate the environment and run a
-test computation (the video will be generated after computation):
+>>>>> To check the success of the script, you can activate the environment and
+run a test computation (the video will be generated after computation):
 $ conda activate install_mujoco && clear && python install_mujoco.py --test
 
 * In the case of zhores cluster you should set the flag "--zhores", the video
@@ -105,10 +105,13 @@ def install_mujoco(env=None, with_info=True, with_log=False, is_zhores=False):
         msg += '. Please activate your environment as '
         msg += f'"conda activate {env}" and use it with mujoco...'
 
-    msg += '\nYou can check the result as "'
+    msg += '\n... you can check the result as "'
     if env:
         msg += f'"conda activate {env} && '
-    msg += 'python install_mujoco.py --test"'
+    msg += 'python install_mujoco.py --test'
+    if platform == 'zhores':
+        msg += ' --zhores'
+    msg += '""'
     _log(msg)
 
 
@@ -265,7 +268,7 @@ def test(with_video=True):
         out.release()
         print(f'DONE      | Video is seved into "{fpath}"')
     else:
-        print(f'DONE      | Video is seved into "{fpath}"')
+        print(f'DONE      |')
 
 
 def _args_build():
