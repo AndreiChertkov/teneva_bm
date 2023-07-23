@@ -38,6 +38,8 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 > We prepare some demo scripts with benchmark optimization examples in the `demo_opti` folder. To run these examples (e.g., `python demo_opti/demo_base.py`), you need to install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.2`).
 
+> We also present some examples [DRAFT!] in this [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing).
+
 
 ## Available benchmarks
 
