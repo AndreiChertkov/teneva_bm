@@ -16,4 +16,8 @@ from teneva_bm import teneva_bm_demo
 
 if __name__ == '__main__':
     bm_use = sys.argv[1] if len(sys.argv) > 1 else None
-    teneva_bm_demo(bm_use, with_info=(bm_use is None))
+
+    bm_use = None if bm_use == 'info' else bm_use
+    only_info = (bm_use == 'info')
+
+    teneva_bm_demo(bm_use, with_info=(bm_use is None), all=(not only_info))

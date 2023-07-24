@@ -3,7 +3,7 @@ import re
 import subprocess
 
 
-def teneva_bm_demo(bm_use=None, with_info=True):
+def teneva_bm_demo(bm_use=None, with_info=True, all=False):
     """Demo script for teneva_bm.
 
     Run demo for all existing benchmarks (if "bm_use" is None) or for a
@@ -17,6 +17,9 @@ def teneva_bm_demo(bm_use=None, with_info=True):
     bms = {}
     found = False
 
+    if bm_use:
+        all = False
+
     bm_use = _parse_bm_name(bm_use)
 
     for cl in _find_cl_all():
@@ -26,6 +29,9 @@ def teneva_bm_demo(bm_use=None, with_info=True):
 
     if with_info:
         _info(bms)
+
+    if not bm_use or not all:
+        return
 
     if bm_use and not found:
         msg = f'Benchmark "{bm_use}" does not exist. '
@@ -63,10 +69,11 @@ def _info(bms):
     """Present the stats for existing collections and benchmarks."""
     text = '\n\n\n' + '-' * 70 + '\n'
     text += '-' * 19 + ' Benchmarks library (teneva_bm) ' + '-' * 19 + '\n'
-    text += '-' * 70 + '\n\n'
+    text += '-' * 70 + '\n'
 
     for cl, bm_list in bms.items():
         count = len(bm_list)
+        text += '\n'
         text += f'--> {cl}' + ' ' * max(0, 10-len(cl))
         text += f': {count:-4d} benchmarks'
         for i in range(count):
