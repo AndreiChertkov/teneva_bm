@@ -3,29 +3,29 @@ import teneva
 from time import perf_counter as tpc
 
 
+from teneva_bm import __version__
+
+
 class Bm:
     def __init__(self, d=None, n=None, name='', desc=''):
         self._init()
 
         self.set_size(d, n)
         self.set_quantization()
-
-        self.set_name(name)
-        self.set_desc(desc)
-
         self.set_constr()
-
-        self.set_min()
-        self.set_max()
 
         self.set_grid()
         self.set_grid_kind()
 
+        self.set_name(name)
+        self.set_desc(desc)
+
         self.set_opts()
-
         self.set_cache()
-
         self.set_budget()
+
+        self.set_min()
+        self.set_max()
 
         self.set_log()
 
@@ -36,6 +36,40 @@ class Bm:
     def __getitem__(self, I):
         """Return a value or batch of values for provided multi-index."""
         return self.get(I)
+
+    @property
+    def a0(self):
+        """Return the lower grid size value if it is constant."""
+        if not self.is_a_equal:
+            raise ValueError('Lower grid size is not constant, can`t get a0')
+        return self.a[0]
+
+    @property
+    def b0(self):
+        """Return the upper grid size value if it is constant."""
+        if not self.is_b_equal:
+            raise ValueError('Upper grid size is not constant, can`t get b0')
+        return self.b[0]
+
+    @property
+    def is_a_equal(self):
+        """Check if all the lower grid sizes are the same."""
+        if self.a is None:
+            return True
+        for v in self.a[1:]:
+            if np.abs(v - self.a[0]) > 1.E-16:
+                return False
+        return True
+
+    @property
+    def is_b_equal(self):
+        """Check if all the upper grid sizes are the same."""
+        if self.b is None:
+            return True
+        for v in self.b[1:]:
+            if np.abs(v - self.b[0]) > 1.E-16:
+                return False
+        return True
 
     @property
     def is_func(self):
@@ -51,7 +85,7 @@ class Bm:
 
     @property
     def is_n_even(self):
-        """Check if all the mode sizes are even."""
+        """Check if all the mode sizes are even (2, 4, ...)."""
         if self.n is None:
             return True
         for k in self.n:
@@ -61,7 +95,7 @@ class Bm:
 
     @property
     def is_n_odd(self):
-        """Check if all the mode sizes are odd."""
+        """Check if all the mode sizes are odd (1, 3, ...)."""
         return not self.is_n_even
 
     @property
@@ -73,17 +107,23 @@ class Bm:
     def n0(self):
         """Return the mode size value if it is constant."""
         if not self.is_n_equal:
-            raise ValueError('Mode size is not constant, can not get n0')
+            raise ValueError('Mode size is not constant, can`t get n0')
         return self.n[0]
 
     @property
     def with_constr(self):
-        """Return True if benchmark has a constant."""
+        """Return True if benchmark has a constraint."""
+        return False
+
+    @property
+    def with_cores(self):
+        """Return True if exact TT-cores can be constructed for benchmark."""
         return False
 
     def build_cores(self):
         """Return exact TT-cores for the TT-representation of the tensor."""
         if self.is_tens:
+            # TODO: check why
             msg = 'Construction of the TT-cores does not work for tensors'
             raise ValueError(msg)
 
@@ -100,6 +140,7 @@ class Bm:
         if m < 1:
             return None, None
 
+        # TODO: add fixed random seed support
         I_trn = teneva.sample_lhs(n, m)
         y_trn = self.get(I_trn, skip_process)
 
@@ -116,6 +157,7 @@ class Bm:
         if m < 1:
             return None, None
 
+        # TODO: add fixed random seed support
         I_tst = np.vstack([np.random.choice(k, m) for k in n]).T
         y_tst = self.get(I_tst, skip_process)
 
@@ -275,10 +317,10 @@ class Bm:
 
         text += f't {t:-7.1e} | '
 
-        if self.log_with_min:
+        if self.log_with_min and self.y_min is not None:
             text += f'min {self.y_min:-10.3e} | '
 
-        if self.log_with_max:
+        if self.log_with_max and self.y_max is not None:
             text += f'max {self.y_max:-10.3e} | '
 
         if postfix:
@@ -295,7 +337,7 @@ class Bm:
         # must starts with the following line:
         self.check_err()
 
-        # and should ends with the following two lines:
+        # and it should ends with the following two lines:
         self.is_prep = True
         return self
 
@@ -305,6 +347,7 @@ class Bm:
         self.budget_is_strict = is_strict
 
     def set_cache(self, with_cache=False, cache=None, m_max=1.E+8):
+        """Set cache options."""
         self.with_cache = with_cache
         self.cache = {} if cache is None else cache
         self.cache_m_max = int(m_max) if m_max else None
@@ -334,8 +377,8 @@ class Bm:
         Note:
             In some benchmarks, when setting the exact global optimum, it is
             used that the central multi-index for a grid with an odd number of
-            nodes lies at the origin. When new types of grids appear, this
-            point should be taken into account.
+            nodes lies at the origin. When new types of grids appear, it should
+            be taken into account.
 
         """
         self.grid_kind = kind
@@ -357,7 +400,7 @@ class Bm:
         self.log_t = tpc()
 
         if not self.log_cond in ['min', 'max', 'min-max', 'step']:
-            raise ValueError('Invalid "log_cond" argument')
+            raise ValueError(f'Invalid "log_cond" argument "{self.log_cond}"')
 
     def set_max(self, i=None, x=None, y=None):
         """Set exact (real) global maximum (index, point and related value)."""
@@ -390,10 +433,11 @@ class Bm:
         self.name = name
 
     def set_opts(self):
-        """Setting options specific to the benchmark."""
+        """Set options specific to the benchmark."""
         return
 
     def set_quantization(self, with_quantization=False):
+        """Set quantization usage."""
         self.with_quantization = with_quantization
 
         if not self.with_quantization:
@@ -404,7 +448,7 @@ class Bm:
             msg = 'Quantization now works only if all mode sizes are equal'
             raise NotImplementedError(msg)
 
-        n = self.n[0]
+        n = self.n0
         self.quantization = int(np.log2(n))
         if 2**self.quantization != n:
             msg = 'Invalid mode size for quantization '
@@ -418,7 +462,7 @@ class Bm:
 
     def _c(self, x):
         """Function that check constraint for a given point/index."""
-        return self._c_batch(np.array(x).reshape(1, -1))[0]
+        return self._c_batch(x.reshape(1, -1))[0]
 
     def _c_batch(self, X):
         """Function that check constraint for a given batch of poi./indices."""
@@ -437,12 +481,13 @@ class Bm:
             return self._f_batch(X)
 
         y = np.ones(X.shape[0]) * self.constr_penalty
-        c = self._c_batch(X)
-        ind = c < self.constr_eps
 
-        y[ind] = self._f_batch(X[ind])
+        c = self._c_batch(X)
+        ind_good = c < self.constr_eps
+
+        y[ind_good] = self._f_batch(X[ind_good])
         if self.constr_with_amplitude:
-            y[~ind] *= c[~ind]
+            y[~ind_good] *= c[~ind_good]
 
         return y
 
@@ -472,7 +517,7 @@ class Bm:
 
     def _f(self, x):
         """Function that computes value for a given point/index."""
-        return self._f_batch(np.array(x).reshape(1, -1))[0]
+        return self._f_batch(x.reshape(1, -1))[0]
 
     def _f_batch(self, X):
         """Function that computes values for a given batch of points/indices."""
@@ -500,7 +545,6 @@ class Bm:
         self.log_m_last = 0
 
         self.is_prep = False
-        self.with_cores = False
 
     def _log_check(self):
         if not self.with_log:
@@ -516,14 +560,14 @@ class Bm:
             return self.is_y_min_new or self.is_y_max_new
 
         if self.log_cond == 'step':
-            return self.log_step and self.m - self.log_m_last > self.log_step
+            return self.log_step and self.m - self.log_m_last >= self.log_step
 
     def _parse_input(self, I=None, X=None):
         if I is not None and X is not None:
-            raise ValueError('Invalid case')
+            raise ValueError('Can`t parse input. Invalid case')
 
         if I is None and X is None:
-            raise ValueError('Invalid case')
+            raise ValueError('Can`t parse input. Invalid case')
 
         if X is not None and self.is_tens:
             msg = f'BM "{self.name}" is a tensor. '
