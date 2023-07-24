@@ -107,11 +107,11 @@ def install_mujoco(env=None, with_info=True, with_log=False, is_zhores=False):
 
     msg += '\n... you can check the result as "'
     if env:
-        msg += f'"conda activate {env} && '
+        msg += f'conda activate {env} && '
     msg += 'python install_mujoco.py --test'
     if platform == 'zhores':
         msg += ' --zhores'
-    msg += '""'
+    msg += '"'
     _log(msg)
 
 

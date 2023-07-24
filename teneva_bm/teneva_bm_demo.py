@@ -42,7 +42,7 @@ def _find_bm_all(cl):
     with open(f'{here}/{cl}/__init__.py', encoding='utf-8') as f:
         lines = f.readlines()
     for l in lines:
-        if 'from .' in l and ' import ' in l and l[0] != '#':
+        if 'from .bm_' in l and ' import ' in l and l[0] != '#':
             bms.append(l.split('from .')[1].split(' import')[0])
     return bms
 
