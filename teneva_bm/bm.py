@@ -54,22 +54,14 @@ class Bm:
     @property
     def is_a_equal(self):
         """Check if all the lower grid sizes are the same."""
-        if self.a is None:
-            return True
-        for v in self.a[1:]:
-            if np.abs(v - self.a[0]) > 1.E-16:
-                return False
-        return True
+        v = self.list_convert(self.a, 'float')
+        return v is None or isinstance(v, (float,))
 
     @property
     def is_b_equal(self):
         """Check if all the upper grid sizes are the same."""
-        if self.b is None:
-            return True
-        for v in self.b[1:]:
-            if np.abs(v - self.b[0]) > 1.E-16:
-                return False
-        return True
+        v = self.list_convert(self.b, 'float')
+        return v is None or isinstance(v, (float,))
 
     @property
     def is_func(self):
@@ -79,9 +71,8 @@ class Bm:
     @property
     def is_n_equal(self):
         """Check if all the mode sizes are the same."""
-        if self.n is None:
-            return True
-        return len(set(self.n)) == 1
+        v = self.list_convert(self.n, 'int')
+        return v is None or isinstance(v, (int,))
 
     @property
     def is_n_even(self):
@@ -220,6 +211,52 @@ class Bm:
 
         return self._process(I, X, y, m_cache, t, is_batch, skip_process)
 
+    def get_config(self):
+        """Return a dict with configuration of the benchmark."""
+        conf = {
+            'd': self.d,
+            'n': self.list_convert(self.n, 'int'),
+            'name': self.name,
+            'benchmark': self.__class__.__name__,
+            'version': __version__,
+            'is_tens': self.is_tens,
+            'is_func': self.is_func,
+            'with_quantization': self.with_quantization,
+            'with_cache': self.with_cache,
+            'with_constr': self.with_constr,
+            'with_cores': self.with_cores,
+        }
+
+        if self.is_func:
+            conf['a'] = self.list_convert(self.a, 'float')
+            conf['b'] = self.list_convert(self.b, 'float')
+            conf['grid_kind'] = self.grid_kind
+
+        if self.with_constr:
+            conf['constr_penalty'] = self.constr_penalty
+            conf['constr_eps'] = self.constr_eps
+            conf['constr_with_amplitude'] = self.constr_with_amplitude
+
+        if self.budget_m_max:
+            conf['budget_m_max'] = self.budget_m_max
+            conf['budget_is_strict'] = self.budget_is_strict
+
+        if self.i_max_real is not None:
+            conf['i_max_real'] = self.list_convert(self.i_max_real, 'int')
+        if self.x_max_real is not None:
+            conf['x_max_real'] = self.list_convert(self.x_max_real, 'float')
+        if self.y_max_real is not None:
+            conf['y_max_real'] = self.y_max_real
+
+        if self.i_min_real is not None:
+            conf['i_min_real'] = self.list_convert(self.i_min_real, 'int')
+        if self.x_min_real is not None:
+            conf['x_min_real'] = self.list_convert(self.x_min_real, 'float')
+        if self.y_min_real is not None:
+            conf['y_min_real'] = self.y_min_real
+
+        return conf
+
     def get_poi(self, X, skip_process=False):
         """Return a value or batch of values for provided x-point."""
         t = tpc()
@@ -233,6 +270,25 @@ class Bm:
             return None
 
         return self._process(I, X, y, 0, t, is_batch, skip_process)
+
+    def get_result(self):
+        """Return a dict with results of requests to the benchmark."""
+        res = {
+            'm': self.m,
+            'm_cache': self.m_cache,
+            'i_max': self.i_max,
+            'x_max': self.x_max,
+            'y_max': self.y_max,
+            'i_min': self.i_min,
+            'x_min': self.x_min,
+            'y_min': self.y_min,
+            'y_list': self.y_list,
+            'time': self.time,
+            'time_full': tpc() - self.log_t,
+            'err': '; '.join(self.err) if len(self.err) else '',
+        }
+
+        return res
 
     def info(self):
         """Returns a detailed description of the benchmark as text."""
@@ -300,6 +356,24 @@ class Bm:
 
         text += '=' * 78 + '\n'
         return text
+
+    def list_convert(self, x, kind='float', eps=1.E-16):
+        """Convert list of equal values to one number and back."""
+        if x is None:
+            return None
+        if kind == 'int':
+            if isinstance(x, (int, float)):
+                return np.array([x]*self.d, dtype=int)
+            return int(x[0]) if len(set(x))==1 else np.asanyarray(x, dtype=int)
+        elif kind == 'float':
+            if isinstance(x, (int, float)):
+                return np.array([x]*self.d, dtype=float)
+            for v in x:
+                if np.abs(v - x[0]) > eps:
+                    return np.asanyarray(x, dtype=float)
+            return float(x[0])
+        else:
+            raise ValueError('Unsupported kind for list conversion')
 
     def log(self, postfix='', out=False):
         self.log_m_last = self.m
