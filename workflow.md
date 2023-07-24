@@ -43,7 +43,7 @@
     - We should necessarily rewrite the method `_f` and / or `_f_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
     - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function)
     - If the objective function has constraint, we should specify the function `_c` and / or `_c_batch`, also we should specify the value `True` for property `with_constr`
-    - Method `_cores` can be specified to generate an exact TT-representation of the benchmark, in which case variable `with_cores` should be set to `True`
+    - Method `_cores` can be specified to generate an exact TT-representation of the benchmark, in which case the property `with_cores` should be set to `True`
 
 3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
@@ -54,6 +54,13 @@
 4. Add a description of the new benchmark to section `Available benchmarks`  of file `README.md`
 
 5. Update the package version
+
+> Please use prefixes for all class instance variables entered in the benchmark so that there is no name conflict with the base class Bm, e.g., `opt_` (in `set_opts` methods) and `bm_` (for other custom variables)
+
+
+## How to update the base class Bm
+
+Modifying this class may break the functionality of all benchmarks, so please do so with care!
 
 
 ## How to update the package version

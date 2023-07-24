@@ -34,10 +34,12 @@ class BmFuncMichalewicz(Bm):
         if self.d == 10:
             self.set_min(y=-9.66015)
 
-        self.with_cores = True
-
     @property
     def is_func(self):
+        return True
+
+    @property
+    def with_cores(self):
         return True
 
     def set_opts(self, m=10.):

@@ -29,10 +29,12 @@ class BmFuncSchwefel(Bm):
 
         self.set_min(x=[420.9687]*self.d, y=0.)
 
-        self.with_cores = True
-
     @property
     def is_func(self):
+        return True
+
+    @property
+    def with_cores(self):
         return True
 
     def set_opts(self, a=418.9829):

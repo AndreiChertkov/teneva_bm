@@ -32,10 +32,12 @@ class BmFuncGriewank(Bm):
             x=[0.]*self.d,
             y=0.)
 
-        self.with_cores = True
-
     @property
     def is_func(self):
+        return True
+
+    @property
+    def with_cores(self):
         return True
 
     def _cores(self, X):
