@@ -290,7 +290,7 @@ class Bm:
 
         return self._process(I, X, y, 0, t, is_batch, skip_process)
 
-    def info(self):
+    def info(self, footer=''):
         """Returns a detailed description of the benchmark as text."""
         text = '-' * 78 + '\n' + 'BM: '
         text += self.name + ' ' * max(0, 36-len(self.name)) +  ' | '
@@ -330,12 +330,19 @@ class Bm:
 
         if self.is_func:
             text += 'Lower grid limit                         : '
-            v = self.list_convert(self.a, 'float')
-            text += f'{v}\n'
+            va = self.list_convert(self.a, 'float')
+            if not isinstance(va, (int, float)) and self.d > 3:
+                va = f'[{va[0]}, {va[1]}, <...>, {va[-1]}]'
+            text += f'{va}\n'
 
             text += 'Upper grid limit                         : '
-            v = self.list_convert(self.b, 'float')
-            text += f'{v}\n'
+            vb = self.list_convert(self.b, 'float')
+            if not isinstance(vb, (int, float)) and self.d > 3:
+                vb = f'[{vb[0]}, {vb[1]}, <...>, {vb[-1]}]'
+            if isinstance(va, (int, float)) and isinstance(vb, (int, float)):
+                if va < 0 and vb > 0:
+                    vb = f'+{vb}'
+            text += f'{vb}\n'
 
             text += 'Grid kind                                : '
             v = self.grid_kind
@@ -386,11 +393,15 @@ class Bm:
         if self.i_max_real is not None:
             text += 'Exact max (multi-index)                  : '
             v = self.list_convert(self.i_max_real, 'int')
+            if not isinstance(v, (int, float)) and self.d > 3:
+                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
             text += f'{v}\n'
 
         if self.x_max_real is not None:
             text += 'Exact max (point)                        : '
             v = self.list_convert(self.x_max_real, 'float')
+            if not isinstance(v, (int, float)) and self.d > 3:
+                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
             text += f'{v}\n'
 
         if self.y_max_real is not None:
@@ -401,17 +412,27 @@ class Bm:
         if self.i_min_real is not None:
             text += 'Exact min (multi-index)                  : '
             v = self.list_convert(self.i_min_real, 'int')
+            if not isinstance(v, (int, float)) and self.d > 3:
+                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
             text += f'{v}\n'
 
         if self.x_min_real is not None:
             text += 'Exact min (point)                        : '
             v = self.list_convert(self.x_min_real, 'float')
+            if not isinstance(v, (int, float)) and self.d > 3:
+                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
             text += f'{v}\n'
 
         if self.y_min_real is not None:
             text += 'Exact min (value)                        : '
             v = self.y_min_real
             text += f'{v}\n'
+
+        if footer:
+            text += '-' * 41 + '|             '
+            text += '>               Options'
+            text += '\n'
+            text += footer
 
         text += '=' * 78 + '\n'
         return text
