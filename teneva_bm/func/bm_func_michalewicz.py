@@ -42,6 +42,20 @@ class BmFuncMichalewicz(Bm):
     def with_cores(self):
         return True
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_m'] = self.opt_m
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param m for Michalewicz function         : '
+        v = self.opt_m
+        text += f'{v:.6f}\n'
+
+        return super().info(text+footer)
+
     def set_opts(self, m=10.):
         """Setting options specific to this benchmark.
 

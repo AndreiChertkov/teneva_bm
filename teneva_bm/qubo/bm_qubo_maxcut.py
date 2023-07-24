@@ -31,7 +31,7 @@ class BmQuboMaxcut(Bm):
     def __init__(self, d=50, n=2, name='QuboMaxcut', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        if not self.is_n_equal or self.n[0] != 2:
+        if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
         if not with_networkx:
             msg = 'Need "networkx" module. For installation please run '
@@ -45,6 +45,25 @@ class BmQuboMaxcut(Bm):
     @property
     def is_tens(self):
         return True
+
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_prob_con'] = self.opt_prob_con
+        conf['opt_seed'] = self.opt_seed
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param prob_con (connection probability)  : '
+        v = self.opt_prob_con
+        text += f'{v:.6f}\n'
+
+        text += 'Param seed (seed for the random graph)   : '
+        v = self.opt_seed
+        text += f'{v:.0f}\n'
+
+        return super().info(text+footer)
 
     def prep(self):
         self.check_err()

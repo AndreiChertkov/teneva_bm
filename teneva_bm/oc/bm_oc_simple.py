@@ -49,6 +49,35 @@ class BmOcSimple(Bm):
         """Objective function for ODE solution."""
         return 0.5 * (x - self.opt_x_ref)**2
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_x_ini'] = self.opt_x_ini
+        conf['opt_x_ref'] = self.opt_x_ref
+        conf['opt_t_max'] = self.opt_t_max
+        conf['opt_y_err'] = self.opt_y_err
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param x_ini (initial condition)          : '
+        v = self.opt_x_ini
+        text += f'{v:.6f}\n'
+
+        text += 'Param x_ref (target value)               : '
+        v = self.opt_x_ref
+        text += f'{v:.6f}\n'
+
+        text += 'Param t_max (upper limit for time)       : '
+        v = self.opt_t_max
+        text += f'{v:.6f}\n'
+
+        text += 'Param y_err (returned value if error)    : '
+        v = self.opt_y_err
+        text += f'{v:-7.1e}\n'
+
+        return super().info(text+footer)
+
     def set_opts(self, x_ini=0.8, x_ref=0.7, t_max=1., y_err=1.E+50):
         """Setting options specific to the benchmark.
 
@@ -61,13 +90,15 @@ class BmOcSimple(Bm):
         """
         self.opt_x_ini = x_ini
         self.opt_x_ref = x_ref
-        self.opt_times = np.linspace(0, t_max, self.d)
+        self.opt_t_max = t_max
         self.opt_y_err = y_err
+
+        self._opt_times = np.linspace(0, t_max, self.d)
 
     def _f(self, i):
         solver = GEKKO(remote=False)
         solver.options.IMODE = 4
-        solver.time = self.opt_times
+        solver.time = self._opt_times
 
         x = solver.Var(value=self.opt_x_ini, name='x')
         c = solver.Param(list(i), name='i')

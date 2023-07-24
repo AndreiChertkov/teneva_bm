@@ -37,6 +37,20 @@ class BmFuncSchwefel(Bm):
     def with_cores(self):
         return True
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_a'] = self.opt_a
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param a for Schwefel function            : '
+        v = self.opt_a
+        text += f'{v:.6f}\n'
+
+        return super().info(text+footer)
+
     def set_opts(self, a=418.9829):
         """Setting options specific to this benchmark.
 

@@ -34,6 +34,30 @@ class BmFuncAckley(Bm):
     def is_func(self):
         return True
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_a'] = self.opt_a
+        conf['opt_b'] = self.opt_b
+        conf['opt_c'] = self.opt_c
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param a for Ackley function              : '
+        v = self.opt_a
+        text += f'{v:.6f}\n'
+
+        text += 'Param b for Ackley function              : '
+        v = self.opt_b
+        text += f'{v:.6f}\n'
+
+        text += 'Param c for Ackley function              : '
+        v = self.opt_c
+        text += f'{v:.6f}\n'
+
+        return super().info(text+footer)
+
     def set_opts(self, a=20., b=0.2, c=2.*np.pi):
         """Setting options specific to this benchmark.
 

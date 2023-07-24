@@ -20,27 +20,63 @@ class BmTopopt(Bm):
 
         if d is not None:
             self.set_err('Dimension number (d) should not be set manually')
-        if not self.is_n_equal or self.n[0] != 2:
+        if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
 
-        self.nx = nx
-        self.ny = ny
+        self.opt_nx = nx
+        self.opt_ny = ny
 
     @property
     def is_tens(self):
         return True
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_nx'] = self.opt_nx
+        conf['opt_ny'] = self.opt_ny
+        conf['opt_k_frac'] = self.opt_k_frac
+        conf['opt_penal'] = self.opt_penal
+        conf['opt_rmin'] = self.opt_rmin
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param nx (grid x-size)                   : '
+        v = self.opt_nx
+        text += f'{v:.0f}\n'
+
+        text += 'Param ny (grid y-size)                   : '
+        v = self.opt_ny
+        text += f'{v:.0f}\n'
+
+        text += 'Param k_frac for Topopt                  : '
+        v = self.opt_k_frac
+        text += f'{v:.6f}\n'
+
+        text += 'Param penal for Topopt                   : '
+        v = self.opt_penal
+        text += f'{v:.6f}\n'
+
+        text += 'Param rmin for Topopt                    : '
+        v = self.opt_rmin
+        text += f'{v:.6f}\n'
+
+        return super().info(text+footer)
+
     def optimize_baseline(self):
-        solver = TopOptLite(self.nx, self.ny, self.opt_penal, self.opt_rmin)
+        solver = TopOptLite(self.opt_nx, self.opt_ny, self.opt_penal,
+            self.opt_rmin)
         solver.init(Emin=1.E-9, Emax=1.0)
         solver.prep()
-        x_ini = self.opt_k_frac * np.ones(self.nx * self.ny, dtype=float)
+        x_ini = self.opt_k_frac * np.ones(self.opt_nx * self.opt_ny,
+            dtype=float)
         x_opt = solver.solve(x_ini)
         return x_opt
 
     def plot(self, x, name='solver', fpath=None):
         fig, ax = plt.subplots(1, 1, figsize=(21, 7))
-        x = x.reshape(self.nx, self.ny).T
+        x = x.reshape(self.opt_nx, self.opt_ny).T
         ax.imshow(x, cmap='gray', interpolation='none')
 
         k_frac_real = np.sum(x) / np.size(x)
@@ -58,7 +94,7 @@ class BmTopopt(Bm):
     def prep(self):
         self.check_err()
 
-        self.bm_f = topopt_lite(self.nx, self.ny,
+        self.bm_f = topopt_lite(self.opt_nx, self.opt_ny,
             self.opt_k_frac, self.opt_penal, self.opt_rmin)
 
         self.is_prep = True

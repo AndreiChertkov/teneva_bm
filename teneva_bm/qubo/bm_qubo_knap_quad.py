@@ -24,7 +24,7 @@ class BmQuboKnapQuad(Bm):
     def __init__(self, d=50, n=2, name='QuboKnapQuad', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        if not self.is_n_equal or self.n[0] != 2:
+        if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
         if not with_qubogen:
             msg = 'Need "qubogen" module. For installation please run '

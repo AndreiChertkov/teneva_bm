@@ -38,6 +38,20 @@ class BmFuncRastrigin(Bm):
     def with_cores(self):
         return True
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_A'] = self.opt_A
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param A for Rastrigin function           : '
+        v = self.opt_A
+        text += f'{v:.6f}\n'
+
+        return super().info(text+footer)
+
     def set_opts(self, A=10.):
         """Setting options specific to this benchmark.
 

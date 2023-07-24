@@ -20,9 +20,7 @@ class BmWallSimple(Bm):
     def __init__(self, d=10, n=50, name='WallSimple', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        self.set_min(
-            i=np.zeros(self.d, dtype=int),
-            y=0.)
+        self.set_min(i=[0]*self.d, y=0.)
 
     @property
     def is_tens(self):

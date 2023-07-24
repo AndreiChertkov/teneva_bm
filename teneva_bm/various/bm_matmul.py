@@ -21,6 +21,8 @@ DESC = """
     If the "only2" flag is set during initialization, then only two factor
     matrices will be constructed, and the third matrix will be restored as a
     solution to the corresponding system of linear equations.
+    The benchmark has also the method "recover", which returns the factor
+    matrices for the given multi-indices.
     For more details, see the work Fawzi, A., et al. "Discovering faster
     matrix multiplication algorithms with reinforcement learning." Nature
     610.7930 (2022): 47-53.
@@ -49,7 +51,7 @@ class BmMatmul(Bm):
 
         if size == 2 and n == 3:
             # Strassen algorithm:
-            self.set_min(i=np.array([
+            i=[
                 2, 1, 2, 1, 2, 0, 1,
                 1, 1, 1, 1, 2, 1, 2,
                 1, 2, 1, 1, 1, 2, 1,
@@ -63,35 +65,61 @@ class BmMatmul(Bm):
                 2, 1, 1, 2, 0, 1, 2,
                 1, 1, 2, 1, 2, 1, 1,
                 1, 2, 1, 2, 1, 1, 1,
-                2, 0, 2, 1, 1, 2, 1], dtype=int),
-                y=0.)
+                2, 0, 2, 1, 1, 2, 1]
+            self.set_min(i=i, y=0.)
 
-        self.T = T_real
-        self.E = E
-        self.size = size
-        self.rank = rank
-        self.only2 = only2
+        self.bm_T = T_real
+        self.bm_E = E
+
+        self.opt_size = size
+        self.opt_rank = rank
+        self.opt_only2 = only2
 
     @property
     def is_tens(self):
         return True
 
+    def get_config(self):
+        conf = super().get_config()
+        conf['opt_size'] = self.opt_size
+        conf['opt_rank'] = self.opt_rank
+        conf['opt_only2'] = self.opt_only2
+        return conf
+
+    def info(self, footer=''):
+        text = ''
+
+        text += 'Param size (sizes of the matrices)       : '
+        v = self.opt_size
+        text += f'{v:.0f}\n'
+
+        text += 'Param rank (search rank for CP-decomp.)  : '
+        v = self.opt_rank
+        text += f'{v:.0f}\n'
+
+        text += 'Param only2 (if True, use 2 CP-factors)  : '
+        v = 'YES' if self.opt_only2 else 'no'
+        text += f'{v}\n'
+
+        return super().info(text+footer)
+
     def prep(self):
         self.check_err()
 
-        self.loss = _loss_build(self.T, self.E, self.rank, self.only2)
+        self.loss = _loss_build(self.bm_T, self.bm_E, self.opt_rank,
+            self.opt_only2)
 
         self.is_prep = True
         return self
 
     def recover(self, i):
-        x = _ind_to_poi(i, self.E)
+        x = _ind_to_poi(i, self.bm_E)
 
-        if self.only2:
-            U, V = _factor_from_poi(x, self.rank, True)
-            W = _factor_recover(U, V, self.T)
+        if self.opt_only2:
+            U, V = _factor_from_poi(x, self.opt_rank, True)
+            W = _factor_recover(U, V, self.bm_T)
         else:
-            U, V, W = _factor_from_poi(x, self.rank, False)
+            U, V, W = _factor_from_poi(x, self.opt_rank, False)
 
         return U, V, W
 
@@ -205,7 +233,7 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    if bm.size == 2 and bm.n[0] == 3:
+    if bm.opt_size == 2 and bm.n0 == 3:
         text = 'Value at the minimum (real vs calc)      :  '
         y_real = bm.y_min_real
         y_calc = bm[bm.i_min_real]
@@ -223,6 +251,6 @@ if __name__ == '__main__':
     bm = BmMatmul(size=2, rank=7).prep()
     U, V, W = bm.recover(bm.i_min_real)
     T_appr = np.einsum('nr,mr,sr->nms', U, V, W)
-    e = np.linalg.norm(T_appr.reshape(-1) - bm.T.reshape(-1))
+    e = np.linalg.norm(T_appr.reshape(-1) - bm.bm_T.reshape(-1))
     text += f'{e:-10.3e}'
     print(text)
