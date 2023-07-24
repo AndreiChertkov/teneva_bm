@@ -7,6 +7,7 @@ from .teneva_bm_demo import teneva_bm_demo
 
 from .func import *
 from .hs import *
+from .mujoco import *
 from .oc import *
 from .qubo import *
 from .various import *
