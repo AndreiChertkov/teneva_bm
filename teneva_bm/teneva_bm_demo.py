@@ -30,7 +30,7 @@ def teneva_bm_demo(bm_use=None, with_info=True, all=False):
     if with_info:
         _info(bms)
 
-    if not bm_use or not all:
+    if not bm_use and not all:
         return
 
     if bm_use and not found:
