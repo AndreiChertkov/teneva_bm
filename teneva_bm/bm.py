@@ -294,21 +294,126 @@ class Bm:
         """Returns a detailed description of the benchmark as text."""
         text = '-' * 78 + '\n' + 'BM: '
         text += self.name + ' ' * max(0, 36-len(self.name)) +  ' | '
-        text += f'DIMS = {self.d:-5d} | <MODE SIZE> = {np.mean(self.n):-6.1f}\n'
+        text += f'DIMS = {self.d:-4d} | '
+        n = np.mean(self.n)
+        text += '<MODE SIZE> = ' + (f'{n:-7.1f}' if n<9999 else f'{n:-7.1e}')
+        text += '\n'
+        text += '-' * 41 + '|             '
+        text += '>           Description'
+        text += '\n'
 
-        if self.y_min_real is not None or self.y_max_real is not None:
-            text += ' ' * 35
-            if self.y_min_real is not None:
-                text += f'y_min = {self.y_min_real:-12.5e} | '
-            if self.y_max_real is not None:
-                text += f'y_max = {self.y_max_real:-12.5e}'
-            text += '\n'
+        text += '.' * 78 + '\n'
+        desc = f'    {self.desc.strip()}'
+        text += desc.replace('            ', '    ')
+        text += '\n'
+        text += '.' * 78 + '\n'
 
-        if self.desc:
-            desc = f'  [ {self.desc.strip()} ]'
-            text += '\n' + desc.replace('            ', '    ') # TODO
+        text += '-' * 41 + '|            '
+        text += '>          Configuration'
+        text += '\n'
 
-        text += '\n' + '=' * 78 + '\n'
+        text += 'Package version                          : '
+        v = __version__
+        text += f'{v}\n'
+
+        text += 'Benchmark                                : '
+        v = self.__class__.__name__
+        text += f'{v}\n'
+
+        text += 'Dimension                                : '
+        v = self.d
+        text += f'{v}\n'
+
+        text += 'Mode size                                : '
+        v = self.list_convert(self.n, 'int')
+        text += f'{v}\n'
+
+        if self.is_func:
+            text += 'Lower grid limit                         : '
+            v = self.list_convert(self.a, 'float')
+            text += f'{v}\n'
+
+            text += 'Upper grid limit                         : '
+            v = self.list_convert(self.b, 'float')
+            text += f'{v}\n'
+
+            text += 'Grid kind                                : '
+            v = self.grid_kind
+            text += f'{v}\n'
+
+        text += 'Function kind                            : '
+        v = 'discrete' if self.is_tens else 'continuous'
+        text += f'{v}\n'
+
+        text += 'With quantization                        : '
+        v = 'YES' if self.with_quantization else 'no'
+        text += f'{v}\n'
+
+        text += 'With cache                               : '
+        v = 'YES' if self.with_cache else 'no'
+        text += f'{v}\n'
+
+        text += 'With constraint                          : '
+        v = 'YES' if self.with_constr else 'no'
+        text += f'{v}\n'
+
+        text += 'With TT-cores                            : '
+        v = 'YES' if self.with_cores else 'no'
+        text += f'{v}\n'
+
+        if self.with_constr:
+            text += 'Constraint penalty                       : '
+            v = self.constr_penalty
+            text += f'{v}\n'
+
+            text += 'Constraint epsilon                       : '
+            v = self.constr_eps
+            text += f'{v}\n'
+
+            text += 'Constraint with amplitude                : '
+            v = 'YES' if self.constr_with_amplitude else 'no'
+            text += f'{v}\n'
+
+        if self.budget_m_max:
+            text += 'Computation budget                       : '
+            v = self.budget_m_max
+            text += f'{v}\n'
+
+            text += 'Computation budget is strict             : '
+            v = 'YES' if self.budget_is_strict else 'no'
+            text += f'{v}\n'
+
+        if self.i_max_real is not None:
+            text += 'Exact max (multi-index)                  : '
+            v = self.list_convert(self.i_max_real, 'int')
+            text += f'{v}\n'
+
+        if self.x_max_real is not None:
+            text += 'Exact max (point)                        : '
+            v = self.list_convert(self.x_max_real, 'float')
+            text += f'{v}\n'
+
+        if self.y_max_real is not None:
+            text += 'Exact max (value)                        : '
+            v = self.y_max_real
+            text += f'{v}\n'
+
+        if self.i_min_real is not None:
+            text += 'Exact min (multi-index)                  : '
+            v = self.list_convert(self.i_min_real, 'int')
+            text += f'{v}\n'
+
+        if self.x_min_real is not None:
+            text += 'Exact min (point)                        : '
+            v = self.list_convert(self.x_min_real, 'float')
+            text += f'{v}\n'
+
+        if self.y_min_real is not None:
+            text += 'Exact min (value)                        : '
+            v = self.y_min_real
+            text += f'{v}\n'
+
+        text += '=' * 78 + '\n'
         return text
 
     def info_history(self):
@@ -317,9 +422,12 @@ class Bm:
 
         text = '-' * 78 + '\n' + 'BM: '
         text += self.name + ' ' * max(0, 36-len(self.name)) +  ' | '
-        text += f'DIMS = {self.d:-5d} | <MODE SIZE> = {np.mean(self.n):-6.1f}\n'
-        text += '-' * 41 + '|              '
-        text += '> History of requests.'
+        text += f'DIMS = {self.d:-4d} | '
+        n = np.mean(self.n)
+        text += '<MODE SIZE> = ' + (f'{n:-7.1f}' if n<9999 else f'{n:-7.1e}')
+        text += '\n'
+        text += '-' * 41 + '|             '
+        text += '>   History of requests'
         text += '\n'
 
         if self.m == 0:
@@ -335,6 +443,12 @@ class Bm:
 
         text += 'Average time of one request (sec)        : '
         text += f'{self.time/self.m:-10.3e}\n'
+
+        text += 'Total requests time (sec)                : '
+        text += f'{self.time:-10.3e}\n'
+
+        text += 'Total work time (sec)                    : '
+        text += f'{tpc() - self.log_t:-10.3e}\n'
 
         if self.y_min is not None and self.y_min_real is not None:
             text += 'Minimum (found / real)                   : '
