@@ -25,6 +25,8 @@ class Bm:
 
         self.set_cache()
 
+        self.set_budget()
+
         self.set_log()
 
     def __call__(self, X):
@@ -101,6 +103,9 @@ class Bm:
         I_trn = teneva.sample_lhs(n, m)
         y_trn = self.get(I_trn, skip_process)
 
+        if y_trn is None:
+            raise ValueError('The specified budget is exceeded')
+
         return I_trn, y_trn
 
     def build_tst(self, m=0, skip_process=True):
@@ -113,6 +118,9 @@ class Bm:
 
         I_tst = np.vstack([np.random.choice(k, m) for k in n]).T
         y_tst = self.get(I_tst, skip_process)
+
+        if y_tst is None:
+            raise ValueError('The specified budget is exceeded')
 
         return I_tst, y_tst
 
@@ -150,7 +158,11 @@ class Bm:
             m_cache = m - m_new
 
             if m_new > 0:
-                y_new = self._compute(X[ind] if self.is_func else I[ind])
+                Z = X[ind] if self.is_func else I[ind]
+                y_new = self._compute(Z, skip_process)
+                if y_new is None:
+                    return None
+
                 for k in range(m_new):
                     self.cache[tuple(I[ind[k]])] = y_new[k]
 
@@ -159,7 +171,10 @@ class Bm:
         else:
             m_cache = 0
 
-            y = self._compute(X if self.is_func else I)
+            Z = X if self.is_func else I
+            y = self._compute(Z, skip_process)
+            if y is None:
+                return None
 
         return self._process(I, X, y, m_cache, t, is_batch, skip_process)
 
@@ -171,7 +186,9 @@ class Bm:
 
         I, X, is_batch = self._parse_input(X=X)
 
-        y = self._compute(X)
+        y = self._compute(X, skip_process)
+        if y is None:
+            return None
 
         return self._process(I, X, y, 0, t, is_batch, skip_process)
 
@@ -281,6 +298,11 @@ class Bm:
         # and should ends with the following two lines:
         self.is_prep = True
         return self
+
+    def set_budget(self, m_max=None, is_strict=True):
+        """Set computation buget."""
+        self.budget_m_max = int(m_max) if m_max else None
+        self.budget_is_strict = is_strict
 
     def set_cache(self, with_cache=False, cache=None, m_max=1.E+8):
         self.with_cache = with_cache
@@ -402,7 +424,15 @@ class Bm:
         """Function that check constraint for a given batch of poi./indices."""
         return np.array([self._c(x) for x in X])
 
-    def _compute(self, X):
+    def _compute(self, X, skip_process=False):
+        m = self.m
+        m_cur = X.shape[0]
+        m_max = self.budget_m_max
+
+        if not skip_process and m_max:
+            if (m >= m_max) or (m + m_cur > m_max and self.budget_is_strict):
+                return None
+
         if not self.with_constr:
             return self._f_batch(X)
 
