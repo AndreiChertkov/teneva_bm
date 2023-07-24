@@ -257,23 +257,9 @@ class Bm:
 
         return conf
 
-    def get_poi(self, X, skip_process=False):
-        """Return a value or batch of values for provided x-point."""
-        t = tpc()
-
-        self.check()
-
-        I, X, is_batch = self._parse_input(X=X)
-
-        y = self._compute(X, skip_process)
-        if y is None:
-            return None
-
-        return self._process(I, X, y, 0, t, is_batch, skip_process)
-
-    def get_result(self):
+    def get_history(self):
         """Return a dict with results of requests to the benchmark."""
-        res = {
+        hist = {
             'm': self.m,
             'm_cache': self.m_cache,
             'i_max': self.i_max,
@@ -288,7 +274,21 @@ class Bm:
             'err': '; '.join(self.err) if len(self.err) else '',
         }
 
-        return res
+        return hist
+
+    def get_poi(self, X, skip_process=False):
+        """Return a value or batch of values for provided x-point."""
+        t = tpc()
+
+        self.check()
+
+        I, X, is_batch = self._parse_input(X=X)
+
+        y = self._compute(X, skip_process)
+        if y is None:
+            return None
+
+        return self._process(I, X, y, 0, t, is_batch, skip_process)
 
     def info(self):
         """Returns a detailed description of the benchmark as text."""
