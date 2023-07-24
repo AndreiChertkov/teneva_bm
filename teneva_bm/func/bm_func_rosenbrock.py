@@ -26,6 +26,7 @@ class BmFuncRosenbrock(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-2.048, +2.048)
+        self.shift_grid()
 
         self.set_min(x=[1.]*self.d, y=0.)
 

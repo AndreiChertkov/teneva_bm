@@ -26,6 +26,7 @@ class BmFuncSchwefel(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-500., +500.)
+        self.shift_grid()
 
         self.set_min(x=[420.9687]*self.d, y=0.)
 

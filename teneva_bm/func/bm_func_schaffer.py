@@ -23,11 +23,9 @@ class BmFuncSchaffer(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-100., +100.)
+        self.shift_grid()
 
-        self.set_min(
-            i=np.array((self.n-1)/2, dtype=int) if self.is_n_odd else None,
-            x=[0.]*self.d,
-            y=0.)
+        self.set_min(x=[0.]*self.d, y=0.)
 
     @property
     def is_func(self):

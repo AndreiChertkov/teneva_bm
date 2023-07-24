@@ -25,11 +25,9 @@ class BmFuncExp(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-1., +1.)
+        self.shift_grid()
 
-        self.set_min(
-            i=np.array((self.n-1)/2, dtype=int) if self.is_n_odd else None,
-            x=[0.]*self.d,
-            y=-1.)
+        self.set_min(x=[0.]*self.d, y=-1.)
 
     @property
     def is_func(self):

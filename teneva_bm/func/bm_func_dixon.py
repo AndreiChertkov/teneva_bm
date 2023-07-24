@@ -25,7 +25,8 @@ class BmFuncDixon(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-10., +10.)
-
+        self.shift_grid()
+        
         x_min = [1.]
         for _ in range(d-1): # TODO: check this formula one more time:
             x_min.append(np.sqrt(x_min[-1]/2.))

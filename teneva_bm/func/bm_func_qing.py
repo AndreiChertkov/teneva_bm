@@ -27,10 +27,9 @@ class BmFuncQing(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(0., +500.)
+        self.shift_grid()
 
-        self.set_min(
-            x=np.sqrt(np.arange(1, self.d+1)),
-            y=0.)
+        self.set_min(x=np.sqrt(np.arange(1, self.d+1)), y=0.)
 
     @property
     def is_func(self):

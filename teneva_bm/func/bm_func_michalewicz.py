@@ -26,6 +26,7 @@ class BmFuncMichalewicz(Bm):
         super().__init__(d, n, name, desc)
 
         self.set_grid(0., np.pi)
+        self.shift_grid()
 
         if self.d == 2:
             self.set_min(x=[2.20, 1.57], y=-1.8013)

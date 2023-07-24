@@ -10,6 +10,8 @@ class Bm:
     def __init__(self, d=None, n=None, name='', desc=''):
         self._init()
 
+        self.set_seed()
+
         self.set_size(d, n)
         self.set_quantization()
         self.set_constr()
@@ -216,6 +218,7 @@ class Bm:
         conf = {
             'd': self.d,
             'n': self.list_convert(self.n, 'int'),
+            'seed': self.seed,
             'name': self.name,
             'benchmark': self.__class__.__name__,
             'version': __version__,
@@ -316,6 +319,10 @@ class Bm:
         v = __version__
         text += f'{v}\n'
 
+        text += 'Random seed                              : '
+        v = self.seed
+        text += f'{v}\n'
+
         text += 'Benchmark                                : '
         v = self.__class__.__name__
         text += f'{v}\n'
@@ -332,13 +339,13 @@ class Bm:
             text += 'Lower grid limit                         : '
             va = self.list_convert(self.a, 'float')
             if not isinstance(va, (int, float)) and self.d > 3:
-                va = f'[{va[0]}, {va[1]}, <...>, {va[-1]}]'
+                va = f'[{va[0]:.2f}, {va[1]:.2f}, <...>, {va[-1]:.2f}]'
             text += f'{va}\n'
 
             text += 'Upper grid limit                         : '
             vb = self.list_convert(self.b, 'float')
             if not isinstance(vb, (int, float)) and self.d > 3:
-                vb = f'[{vb[0]}, {vb[1]}, <...>, {vb[-1]}]'
+                vb = f'[{vb[0]:.2f}, {vb[1]:.2f}, <...>, {vb[-1]:.2f}]'
             if isinstance(va, (int, float)) and isinstance(vb, (int, float)):
                 if va < 0 and vb > 0:
                     vb = f'+{vb}'
@@ -401,7 +408,7 @@ class Bm:
             text += 'Exact max (point)                        : '
             v = self.list_convert(self.x_max_real, 'float')
             if not isinstance(v, (int, float)) and self.d > 3:
-                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
+                v = f'[{v[0]:.2f}, {v[1]:.2f}, <...>, {v[-1]:.2f}]'
             text += f'{v}\n'
 
         if self.y_max_real is not None:
@@ -420,7 +427,7 @@ class Bm:
             text += 'Exact min (point)                        : '
             v = self.list_convert(self.x_min_real, 'float')
             if not isinstance(v, (int, float)) and self.d > 3:
-                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
+                v = f'[{v[0]:.2f}, {v[1]:.2f}, <...>, {v[-1]:.2f}]'
             text += f'{v}\n'
 
         if self.y_min_real is not None:
@@ -664,10 +671,20 @@ class Bm:
             msg += '(it should be a power of two)'
             raise ValueError(msg)
 
+    def set_seed(self, seed=42):
+        self.seed = seed
+        self.rand = np.random.default_rng(self.seed)
+
     def set_size(self, d=None, n=None):
         """Set dimension (d) and sizes for all d-modes (n: int or list)."""
         self.d = None if d is None else int(d)
         self.n = teneva.grid_prep_opt(n, self.d, int)
+
+    def shift_grid(self, scale=25):
+        """Apply random shift for the grid limits."""
+        shift = self.rand.normal(size=self.d) / scale
+        self.a = self.a - (self.b-self.a) * shift
+        self.b = self.b + (self.b-self.a) * shift
 
     def _c(self, x):
         """Function that check constraint for a given point/index."""

@@ -25,6 +25,7 @@ class BmFuncPiston(Bm):
         self.set_grid(
             [30., 0.005, 0.002, 1000,  90000, 290, 340],
             [60., 0.020, 0.010, 5000, 110000, 296, 360])
+        self.shift_grid()
 
     @property
     def is_func(self):
