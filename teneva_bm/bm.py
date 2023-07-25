@@ -190,7 +190,15 @@ class Bm:
             ind = [k for k in range(m) if tuple(I[k]) not in self.cache]
 
             m_new = len(ind)
-            m_cache = m - m_new
+            dm_cache = m - m_new
+
+            if self.budget_m_cache:
+                if self.budget_is_strict:
+                    if self.m_cache + dm_cache > self.budget_m_cache:
+                        return None
+                else:
+                    if self.m_cache > self.budget_m_cache:
+                        return None
 
             if m_new > 0:
                 Z = X[ind] if self.is_func else I[ind]
@@ -204,14 +212,14 @@ class Bm:
             y = np.array([self.cache[tuple(i)] for i in I])
 
         else:
-            m_cache = 0
+            dm_cache = 0
 
             Z = X if self.is_func else I
             y = self._compute(Z, skip_process)
             if y is None:
                 return None
 
-        return self._process(I, X, y, m_cache, t, is_batch, skip_process)
+        return self._process(I, X, y, dm_cache, t, is_batch, skip_process)
 
     def get_config(self):
         """Return a dict with configuration of the benchmark."""
@@ -240,8 +248,11 @@ class Bm:
             conf['constr_eps'] = self.constr_eps
             conf['constr_with_amplitude'] = self.constr_with_amplitude
 
-        if self.budget_m_max:
-            conf['budget_m_max'] = self.budget_m_max
+        if self.budget_m:
+            conf['budget_m'] = self.budget_m
+        if self.budget_m_cache:
+            conf['budget_m_cache'] = self.budget_m_cache
+        if self.budget_m or self.budget_m_cache:
             conf['budget_is_strict'] = self.budget_is_strict
 
         if self.i_max_real is not None:
@@ -388,11 +399,17 @@ class Bm:
             v = 'YES' if self.constr_with_amplitude else 'no'
             text += f'{v}\n'
 
-        if self.budget_m_max:
+        if self.budget_m:
             text += 'Computation budget                       : '
-            v = self.budget_m_max
+            v = self.budget_m
             text += f'{v}\n'
 
+        if self.budget_m_cache:
+            text += 'Computation budget for cache requests    : '
+            v = self.budget_m_cache
+            text += f'{v}\n'
+
+        if self.budget_m or self.budget_m_cache:
             text += 'Computation budget is strict             : '
             v = 'YES' if self.budget_is_strict else 'no'
             text += f'{v}\n'
@@ -557,9 +574,10 @@ class Bm:
         self.is_prep = True
         return self
 
-    def set_budget(self, m_max=None, is_strict=True):
+    def set_budget(self, m=None, m_cache=None, is_strict=True):
         """Set computation buget."""
-        self.budget_m_max = int(m_max) if m_max else None
+        self.budget_m = int(m) if m else None
+        self.budget_m_cache = int(m_cache) if m_cache else None
         self.budget_is_strict = is_strict
 
     def set_cache(self, with_cache=False, cache=None, m_max=1.E+8):
@@ -697,7 +715,7 @@ class Bm:
     def _compute(self, X, skip_process=False):
         m = self.m
         m_cur = X.shape[0]
-        m_max = self.budget_m_max
+        m_max = self.budget_m
 
         if not skip_process and m_max:
             if (m >= m_max) or (m + m_cur > m_max and self.budget_is_strict):
