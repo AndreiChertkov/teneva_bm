@@ -73,13 +73,3 @@ if __name__ == '__main__':
     y = bm[I]
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
-
-    print()
-    print()
-    print()
-    print(bm[i])
-
-    bm = BmQuboKnapQuad()
-    bm.set_seed(0)
-    bm.prep()
-    print(bm[i])
