@@ -49,7 +49,6 @@ class BmQuboMvc(Bm):
     def get_config(self):
         conf = super().get_config()
         conf['opt_prob_con'] = self.opt_prob_con
-        conf['opt_seed'] = self.opt_seed
         return conf
 
     def info(self, footer=''):
@@ -59,17 +58,14 @@ class BmQuboMvc(Bm):
         v = self.opt_prob_con
         text += f'{v:.6f}\n'
 
-        text += 'Param seed (seed for the random graph)   : '
-        v = self.opt_seed
-        text += f'{v:.0f}\n'
-
         return super().info(text+footer)
 
     def prep(self):
         self.check_err()
 
-        graph = nx.fast_gnp_random_graph(n=self.d, p=self.opt_prob_con,
-            seed=self.opt_seed)
+        d = self.d
+        p = self.opt_prob_con
+        graph = nx.fast_gnp_random_graph(n=d, p=p, seed=self.seed)
         edges = np.array(list([list(e) for e in graph.edges]))
         n_nodes = len(np.unique(np.array(edges).flatten()))
 
@@ -79,16 +75,14 @@ class BmQuboMvc(Bm):
         self.is_prep = True
         return self
 
-    def set_opts(self, prob_con=0.5, seed=42):
+    def set_opts(self, prob_con=0.5):
         """Setting options specific to the benchmark.
 
         Args:
             prob_con (float): probability of the connection in the graph.
-            seed (int): seed for the random graph.
 
         """
         self.opt_prob_con = prob_con
-        self.opt_seed = seed
 
     def _f_batch(self, I):
         return ((I @ self.bm_Q) * I).sum(axis=1)
