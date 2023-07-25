@@ -38,8 +38,8 @@ class BmQuboKnapQuad(Bm):
     def prep(self):
         self.check_err()
 
-        v = np.diag(np.random.random(self.d)) / 3.
-        a = np.random.random(self.d)
+        v = np.diag(self.rand.random(self.d)) / 3.
+        a = self.rand.random(self.d)
         b = np.mean(a)
         self.bm_Q = qubogen.qubo_qkp(v, a, b)
 
@@ -73,3 +73,13 @@ if __name__ == '__main__':
     y = bm[I]
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
+
+    print()
+    print()
+    print()
+    print(bm[i])
+
+    bm = BmQuboKnapQuad()
+    bm.set_seed(0)
+    bm.prep()
+    print(bm[i])
