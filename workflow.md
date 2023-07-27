@@ -40,10 +40,10 @@
 1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_det`)
 
 2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file and then write a demo example of its usage (initialization, get method, training dataset generation, etc.; please, do it by analogy with other benchmarks) in the bottom section after `if __name__ == '__main__':`. Please, note:
-    - We should necessarily rewrite the method `_f` and / or `_f_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
+    - We should necessarily rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
     - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function)
-    - If the objective function has constraint, we should specify the function `_c` and / or `_c_batch`, also we should specify the value `True` for property `with_constr`
-    - Method `_cores` can be specified to generate an exact TT-representation of the benchmark, in which case the property `with_cores` should be set to `True`
+    - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for property `with_constr`
+    - Method `cores` can be specified to generate an exact TT-representation of the benchmark, in which case the property `with_cores` should be set to `True`
 
 3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
@@ -55,7 +55,7 @@
 
 5. Update the package version
 
-> Please use prefixes for all class instance variables entered in the benchmark so that there is no name conflict with the base class Bm, e.g., `opt_` (in `set_opts` methods) and `bm_` (for other custom variables)
+> Please use underscore prefixes for all new class instance variables and functions entered in the benchmark (e.g., `_temperature`) so that there is no name conflict with the base class `Bm`
 
 
 ## How to update the base class Bm

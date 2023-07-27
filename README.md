@@ -23,9 +23,9 @@ Some benchmarks require additional installation of specialized libraries. The co
     pip install networkx==3.0 qubogen==0.1.1 gekko==1.0.6
     ```
 
-- Сollections `agent` and `agent_toe` require a rather complicated installation process of the `mujoco` framework, so we have prepared a special python installation script [install_mujoco.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_mujoco.py). Detailed instructions for using the script are presented in the file header.
+- Сollections `agent` and `agent_toe` require a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so we have prepared a special python installation script [install_mujoco.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_mujoco.py). Detailed instructions for using the script are presented in the file header.
 
-> To run benchmark optimization examples, you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.3`).
+> To run benchmark optimization examples (see `demo_opti` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.3`).
 
 
 ## Documentation and examples
@@ -33,7 +33,8 @@ Some benchmarks require additional installation of specialized libraries. The co
 All benchmarks inherit from the `Bm` base class (`teneva_bm/bm.py`) and are located in the subfolders (collections of benchmarks) of `teneva_bm` folder. The corresponding python files contain a detailed description of the benchmarks, as well as a scripts for a demo run at the end of the files. You can get detailed information on the created benchmark using the `info` class method:
 ```python
 from teneva_bm import *
-bm = BmQuboMaxcut().prep()
+bm = BmQuboMaxcut()
+bm.prep()
 print(bm.info())
 ```
 
@@ -45,7 +46,7 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 > We prepare some demo scripts with benchmark optimization examples in the `demo_opti` folder. To run these examples (e.g., `python demo_opti/demo_base.py`), you need to install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.3`).
 
-> We also present some examples [DRAFT!] in this [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing).
+> We also present some examples in this [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing).
 
 
 ## Available benchmarks
@@ -79,15 +80,21 @@ import numpy as np
 from teneva_bm import *
 np.random.seed(42)
 
-bm = BmFuncAckley().prep()
+bm = BmFuncAckley()
+bm.prep()
 print(bm.info())
 ```
 
 The class constructor of all benchmarks has the following optional arguments:
+
 - `d` - dimension of the benchmark's input (non-negative integer). For some benchmarks, this number is hardcoded (or depends on other specified auxiliary arguments), if another value is explicitly passed, an error message will be generated (e.g., the dimension for benchmark `various.bm_matmul` is determined automatically by the values of auxiliary arguments `size`, `rank` and `only2`). By default, some correct value is used (specified in the benchmark description).
+
 - `n` - number of possible discrete values for benchmark input variables, i.e., the mode size of the related tensor / multidimensional array (non-negative integer if all mode sizes are equal or a list of non-negative integers of the length `d`). For some benchmarks, this number is hardcoded (or depends on other specified auxiliary arguments), if another value is explicitly passed, an error message will be generated (e.g., in `qubo` collection all benchmarks should have `n = 2`). By default, some correct value is used (specified in the benchmark description).
+
 - `name` - the display name of the benchmark (string). By default, the name corresponding to the file/class name is used.
+
 - `desc` - the description of the benchmark (string). By default, a detailed description of the benchmark is used, provided in the corresponding python file.
+
 - `...other arguments...` - some benchmarks have additional optional arguments, which are described in the corresponding python files.
 
 ##### Setting advanced options
