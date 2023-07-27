@@ -28,15 +28,19 @@ class BmFuncSchaffer(Bm):
         self.set_min(x=[0.]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         Z = X[:, :-1]**2 + X[:, 1:]**2
         Y = 0.5 + (np.sin(np.sqrt(Z))**2 - 0.5) / (1. + 0.001 * Z)**2
         return np.sum(Y, axis=1)
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         z = x[:-1]**2 + x[1:]**2
         y = 0.5 + (torch.sin(torch.sqrt(z))**2 - 0.5) / (1. + 0.001 * z)**2

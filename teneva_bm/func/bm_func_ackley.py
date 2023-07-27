@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm import Bm
@@ -29,35 +28,41 @@ class BmFuncAckley(Bm):
         self.set_min(x=[0.]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_a'] = self.opt_a
-        conf['opt_b'] = self.opt_b
-        conf['opt_c'] = self.opt_c
+        conf['_a'] = self._a
+        conf['_b'] = self._b
+        conf['_c'] = self._c
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param a for Ackley function              : '
-        v = self.opt_a
+        v = self._a
         text += f'{v:.6f}\n'
 
         text += 'Param b for Ackley function              : '
-        v = self.opt_b
+        v = self._b
         text += f'{v:.6f}\n'
 
         text += 'Param c for Ackley function              : '
-        v = self.opt_c
+        v = self._c
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def set_opts(self, a=20., b=0.2, c=2.*np.pi):
-        """Setting options specific to this benchmark.
+        """Set options specific to this benchmark.
+
+        There are no plans to manually change the default values.
 
         Args:
             a (float): parameter of the function.
@@ -65,27 +70,27 @@ class BmFuncAckley(Bm):
             c (float): parameter of the function.
 
         """
-        self.opt_a = a
-        self.opt_b = b
-        self.opt_c = c
+        self._a = a
+        self._b = b
+        self._c = c
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         y1 = np.sqrt(np.sum(X**2, axis=1) / self.d)
-        y1 = -self.opt_a * np.exp(-self.opt_b * y1)
+        y1 = -self._a * np.exp(-self._b * y1)
 
-        y2 = np.sum(np.cos(self.opt_c * X), axis=1)
+        y2 = np.sum(np.cos(self._c * X), axis=1)
         y2 = -np.exp(y2 / self.d)
 
-        y3 = self.opt_a + np.exp(1.)
+        y3 = self._a + np.exp(1.)
 
         return y1 + y2 + y3
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
-        par_a = torch.tensor(self.opt_a)
-        par_b = torch.tensor(self.opt_b)
-        par_c = torch.tensor(self.opt_c)
+        par_a = torch.tensor(self._a)
+        par_b = torch.tensor(self._b)
+        par_c = torch.tensor(self._c)
 
         y1 = torch.sqrt(torch.sum(x**2) / d)
         y1 = - par_a * torch.exp(-par_b * y1)

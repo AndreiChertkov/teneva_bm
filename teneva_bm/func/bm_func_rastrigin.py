@@ -29,6 +29,10 @@ class BmFuncRastrigin(Bm):
         self.set_min(x=[0.]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -38,41 +42,43 @@ class BmFuncRastrigin(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_A'] = self.opt_A
+        conf['_A'] = self._A
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param A for Rastrigin function           : '
-        v = self.opt_A
+        v = self._A
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def set_opts(self, A=10.):
-        """Setting options specific to this benchmark.
+        """Set options specific to this benchmark.
+
+        There are no plans to manually change the default values.
 
         Args:
             A (float): parameter of the function.
 
         """
-        self.opt_A = A
+        self._A = A
 
-    def _cores(self, X):
-        return self._cores_add(
-            [x**2 - self.opt_A * np.cos(2 * np.pi * x) for x in X.T],
-            a0=self.opt_A*self.d)
+    def cores(self, X):
+        return self.cores_add(
+            [x**2 - self._A * np.cos(2 * np.pi * x) for x in X.T],
+            a0=self._A*self.d)
 
-    def _f_batch(self, X):
-        y1 = self.opt_A * self.d
-        y2 = np.sum(X**2 - self.opt_A * np.cos(2. * np.pi * X), axis=1)
+    def target_batch(self, X):
+        y1 = self._A * self.d
+        y2 = np.sum(X**2 - self._A * np.cos(2. * np.pi * X), axis=1)
         return y1 + y2
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
-        par_A = torch.tensor(self.opt_A)
+        par_A = torch.tensor(self._A)
         pi = torch.tensor(np.pi)
 
         y1 = par_A * d

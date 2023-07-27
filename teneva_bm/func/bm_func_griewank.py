@@ -31,6 +31,10 @@ class BmFuncGriewank(Bm):
         self.set_min(x=[0.]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -38,12 +42,12 @@ class BmFuncGriewank(Bm):
     def with_cores(self):
         return True
 
-    def _cores(self, X):
-        Y = self._cores_mul([np.cos(x/np.sqrt(i)) for i,x in enumerate(X.T,1)])
+    def cores(self, X):
+        Y = self.cores_mul([np.cos(x/np.sqrt(i)) for i,x in enumerate(X.T,1)])
         Y[-1] *= -1
-        return teneva.add(Y, self._cores_add([x**2 / 4000. for x in X.T], a0=1))
+        return teneva.add(Y, self.cores_add([x**2 / 4000. for x in X.T], a0=1))
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         y1 = np.sum(X**2, axis=1) / 4000
 
         y2 = np.cos(X / np.sqrt(np.arange(self.d) + 1))
@@ -53,7 +57,7 @@ class BmFuncGriewank(Bm):
 
         return y1 + y2 + y3
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
 

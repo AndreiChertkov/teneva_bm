@@ -31,6 +31,10 @@ class BmFuncSchwefel(Bm):
         self.set_min(x=[420.9687]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -40,40 +44,42 @@ class BmFuncSchwefel(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_a'] = self.opt_a
+        conf['_a'] = self._a
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param a for Schwefel function            : '
-        v = self.opt_a
+        v = self._a
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def set_opts(self, a=418.9829):
-        """Setting options specific to this benchmark.
+        """Set options specific to this benchmark.
+
+        There are no plans to manually change the default values.
 
         Args:
             a (float): parameter of the function.
 
         """
-        self.opt_a = a
+        self._a = a
 
-    def _cores(self, X):
-        return self._cores_add(
+    def cores(self, X):
+        return self.cores_add(
             [-x * np.sin(np.sqrt(np.abs(x))) for x in X.T],
-            a0=self.opt_a*self.d)
+            a0=self._a*self.d)
 
-    def _f_batch(self, X):
-        y0 = self.opt_a * self.d
+    def target_batch(self, X):
+        y0 = self._a * self.d
         return y0 - np.sum(X * np.sin(np.sqrt(np.abs(X))), axis=1)
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
-        par_a = torch.tensor(self.opt_a)
+        par_a = torch.tensor(self._a)
         y0 = par_a * d
         return y0 - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
 

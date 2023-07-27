@@ -31,6 +31,10 @@ class BmFuncRosenbrock(Bm):
         self.set_min(x=[1.]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -38,7 +42,7 @@ class BmFuncRosenbrock(Bm):
     def with_cores(self):
         return True
 
-    def _cores(self, X):
+    def cores(self, X):
         Y = []
         for i, x in enumerate(X.T):
             x2 = x*x
@@ -62,12 +66,12 @@ class BmFuncRosenbrock(Bm):
             Y.append(G)
         return Y
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         y1 = 100. * (X[:, 1:] - X[:, :-1]**2)**2
         y2 = (X[:, :-1] - 1.)**2
         return np.sum(y1 + y2, axis=1)
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         y1 = 100. * (x[1:] - x[:-1]**2)**2
         y2 = (x[:-1] - 1.)**2

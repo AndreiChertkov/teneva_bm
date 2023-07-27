@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm import Bm
@@ -26,17 +25,21 @@ class BmFuncDixon(Bm):
 
         self.set_grid(-10., +10.)
         self.shift_grid()
-        
+
         x_min = [1.]
         for _ in range(d-1): # TODO: check this formula one more time:
             x_min.append(np.sqrt(x_min[-1]/2.))
         self.set_min(x=np.array(x_min), y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         y1 = (X[:, 0] - 1)**2
 
         y2 = np.arange(2, self.d+1) * (2. * X[:, 1:]**2 - X[:, :-1])**2
@@ -44,7 +47,7 @@ class BmFuncDixon(Bm):
 
         return y1 + y2
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
 

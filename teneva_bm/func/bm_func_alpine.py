@@ -30,6 +30,10 @@ class BmFuncAlpine(Bm):
         self.set_min(x=[0.]*self.d, y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -37,13 +41,13 @@ class BmFuncAlpine(Bm):
     def with_cores(self):
         return True
 
-    def _cores(self, X):
-        return self._cores_add([np.abs(x * (np.sin(x) + 0.1)) for x in X.T])
+    def cores(self, X):
+        return self.cores_add([np.abs(x * (np.sin(x) + 0.1)) for x in X.T])
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         return np.sum(np.abs(X * np.sin(X) + 0.1 * X), axis=1)
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         return torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
 

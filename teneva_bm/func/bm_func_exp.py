@@ -30,6 +30,10 @@ class BmFuncExp(Bm):
         self.set_min(x=[0.]*self.d, y=-1.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -37,15 +41,15 @@ class BmFuncExp(Bm):
     def with_cores(self):
         return True
 
-    def _cores(self, X):
-        Y = self._cores_mul([np.exp(-0.5 * x**2) for x in X.T])
+    def cores(self, X):
+        Y = self.cores_mul([np.exp(-0.5 * x**2) for x in X.T])
         Y[-1] *= -1.
         return Y
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         return -np.exp(-0.5 * np.sum(X**2, axis=1))
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         return -torch.exp(-0.5 * torch.sum(x**2))
 

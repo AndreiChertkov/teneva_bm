@@ -32,6 +32,10 @@ class BmFuncQing(Bm):
         self.set_min(x=np.sqrt(np.arange(1, self.d+1)), y=0.)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -39,13 +43,13 @@ class BmFuncQing(Bm):
     def with_cores(self):
         return True
 
-    def _cores(self, X):
-        return self._cores_add([(x**2 - i)**2 for i, x in enumerate(X.T, 1)])
+    def cores(self, X):
+        return self.cores_add([(x**2 - i)**2 for i, x in enumerate(X.T, 1)])
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         return np.sum((X**2 - np.arange(1, self.d+1))**2, axis=1)
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
 

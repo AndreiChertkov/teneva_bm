@@ -28,10 +28,14 @@ class BmFuncPiston(Bm):
         self.shift_grid()
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         _M  = X[:, 0]
         _S  = X[:, 1]
         _V0 = X[:, 2]
@@ -47,7 +51,7 @@ class BmFuncPiston(Bm):
 
         return _C
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         pi = torch.tensor(np.pi)
 

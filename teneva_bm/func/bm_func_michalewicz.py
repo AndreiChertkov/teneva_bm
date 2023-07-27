@@ -36,6 +36,10 @@ class BmFuncMichalewicz(Bm):
             self.set_min(y=-9.66015)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_func(self):
         return True
 
@@ -45,43 +49,45 @@ class BmFuncMichalewicz(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_m'] = self.opt_m
+        conf['_m'] = self._m
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param m for Michalewicz function         : '
-        v = self.opt_m
+        v = self._m
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def set_opts(self, m=10.):
-        """Setting options specific to this benchmark.
+        """Set options specific to this benchmark.
+
+        There are no plans to manually change the default values.
 
         Args:
             m (float): parameter of the function.
 
         """
-        self.opt_m = m
+        self._m = m
 
-    def _cores(self, X):
-        Y = self._cores_add(
-            [np.sin(x) * np.sin(i*x**2/np.pi)**(2*self.opt_m)
+    def cores(self, X):
+        Y = self.cores_add(
+            [np.sin(x) * np.sin(i*x**2/np.pi)**(2*self._m)
                 for i, x in enumerate(X.T, 1)])
         Y[-1] *= -1.
         return Y
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         y1 = np.sin(((np.arange(self.d) + 1) * X**2 / np.pi))
-        y = -np.sum(np.sin(X) * y1**(2 * self.opt_m), axis=1)
+        y = -np.sum(np.sin(X) * y1**(2 * self._m), axis=1)
         return y
 
-    def _f_pt(self, x):
+    def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
-        par_m = torch.tensor(self.opt_m)
+        par_m = torch.tensor(self._m)
         pi = torch.tensor(np.pi)
         y1 = torch.sin(((torch.arange(d) + 1) * x**2 / pi))
         y = -torch.sum(torch.sin(x) * y1**(2 * par_m))
