@@ -176,7 +176,8 @@ def install_mujoco_linux(env):
         'tar -xf mujoco210-linux-x86_64.tar.gz',
         'rm mujoco210-linux-x86_64.tar.gz',
         'mkdir ~/.mujoco',
-        'mv mujoco210 ~/.mujoco/')
+        'mv mujoco210 ~/.mujoco/',
+        'rm -r mujoco210')
     _log('Mujoco is downloaded')
 
     for pack in PY_PACKAGES:
@@ -199,7 +200,8 @@ def install_mujoco_osx(env):
         'tar -xf mujoco210-macos-x86_64.tar.gz',
         'rm mujoco210-macos-x86_64.tar.gz',
         'mkdir ~/.mujoco',
-        'mv mujoco210 ~/.mujoco/')
+        'mv mujoco210 ~/.mujoco/',
+        'rm -r mujoco210')
     _log('Mujoco is downloaded')
 
     for pack in PY_PACKAGES:
@@ -228,7 +230,8 @@ def install_mujoco_zhores(env):
         'tar -xf mujoco210-linux-x86_64.tar.gz',
         'rm mujoco210-linux-x86_64.tar.gz',
         'mkdir ~/.mujoco',
-        'mv mujoco210 ~/.mujoco/')
+        'mv mujoco210 ~/.mujoco/',
+        'rm -r mujoco210')
     _log('Mujoco is downloaded')
 
     for pack in PY_PACKAGES:
