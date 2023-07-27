@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm.oc import BmOcSimple
@@ -26,7 +25,7 @@ class BmOcSimpleConstr(BmOcSimple):
     def with_constr(self):
         return True
 
-    def _c(self, i):
+    def constr(self, i):
         s = ''.join([str(k) for k in i])
 
         condition_false = False
