@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 try:
@@ -26,28 +25,28 @@ class BmQuboKnapQuad(Bm):
 
         if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
+
         if not with_qubogen:
             msg = 'Need "qubogen" module. For installation please run '
             msg += '"pip install qubogen==0.1.1"'
             self.set_err(msg)
 
     @property
+    def identity(self):
+        return super().identity + ['seed']
+
+    @property
     def is_tens(self):
         return True
 
-    def prep(self):
-        self.check_err()
-
+    def prep_bm(self):
         v = np.diag(self.rand.random(self.d)) / 3.
         a = self.rand.random(self.d)
         b = np.mean(a)
-        self.bm_Q = qubogen.qubo_qkp(v, a, b)
+        self._Q = qubogen.qubo_qkp(v, a, b)
 
-        self.is_prep = True
-        return self
-
-    def _f_batch(self, I):
-        return ((I @ self.bm_Q) * I).sum(axis=1)
+    def target_batch(self, I):
+        return ((I @ self._Q) * I).sum(axis=1)
 
 
 if __name__ == '__main__':

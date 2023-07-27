@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 try:
@@ -33,14 +32,20 @@ class BmQuboMvc(Bm):
 
         if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
+
         if not with_networkx:
             msg = 'Need "networkx" module. For installation please run '
             msg += '"pip install networkx==3.0"'
             self.set_err(msg)
+
         if not with_qubogen:
             msg = 'Need "qubogen" module. For installation please run '
             msg += '"pip install qubogen==0.1.1"'
             self.set_err(msg)
+
+    @property
+    def identity(self):
+        return super().identity + ['seed']
 
     @property
     def is_tens(self):
@@ -48,44 +53,41 @@ class BmQuboMvc(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_prob_con'] = self.opt_prob_con
+        conf['_prob_con'] = self._prob_con
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param prob_con (connection probability)  : '
-        v = self.opt_prob_con
+        v = self._prob_con
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
-    def prep(self):
-        self.check_err()
-
+    def prep_bm(self):
         d = self.d
-        p = self.opt_prob_con
+        p = self._prob_con
         graph = nx.fast_gnp_random_graph(n=d, p=p, seed=self.seed)
         edges = np.array(list([list(e) for e in graph.edges]))
         n_nodes = len(np.unique(np.array(edges).flatten()))
 
         g = qubogen.Graph(edges=edges, n_nodes=n_nodes)
-        self.bm_Q = qubogen.qubo_mvc(g)
-
-        self.is_prep = True
-        return self
+        self._Q = qubogen.qubo_mvc(g)
 
     def set_opts(self, prob_con=0.5):
         """Setting options specific to the benchmark.
+
+        There are no plans to manually change the default values.
 
         Args:
             prob_con (float): probability of the connection in the graph.
 
         """
-        self.opt_prob_con = prob_con
+        self._prob_con = prob_con
 
-    def _f_batch(self, I):
-        return ((I @ self.bm_Q) * I).sum(axis=1)
+    def target_batch(self, I):
+        return ((I @ self._Q) * I).sum(axis=1)
 
 
 if __name__ == '__main__':
