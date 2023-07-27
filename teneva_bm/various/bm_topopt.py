@@ -68,25 +68,6 @@ class BmTopopt(Bm):
 
         return super().info(text+footer)
 
-    def show(self, fpath=None, i=None, best=True):
-        i, y = self.get_solution(i, best)
-
-        x = i.reshape(self._nx, self._ny).T
-
-        fig, ax = plt.subplots(1, 1, figsize=(21, 7))
-        ax.imshow(x, cmap='gray', interpolation='none')
-
-        k_frac_real = np.sum(x) / np.size(x)
-
-        title = ''
-        title += f'Shape: {x.shape[0]} x {x.shape[1]}. '
-        title += f'Frac: {k_frac_real:.2f} ({self._k_frac:.2f}). '
-        title += f'Value: {y:.2f}.'
-        fig.suptitle(title, fontsize=18)
-
-        fpath = self.path_build(fpath, 'png')
-        plt.savefig(fpath, bbox_inches='tight') if fpath else plt.show()
-
     def prep_bm(self):
         self._solver = _topopt_lite(self._nx, self._ny,
             self._k_frac, self._penal, self._rmin)
@@ -105,6 +86,25 @@ class BmTopopt(Bm):
         self._k_frac = k_frac
         self._penal = penal
         self._rmin = rmin
+
+    def show(self, fpath=None, i=None, best=True):
+        i, y = self.get_solution(i, best)
+
+        x = i.reshape(self._nx, self._ny).T
+
+        fig, ax = plt.subplots(1, 1, figsize=(21, 7))
+        ax.imshow(x, cmap='gray', interpolation='none')
+
+        k_frac_real = np.sum(x) / np.size(x)
+
+        title = ''
+        title += f'Shape: {x.shape[0]} x {x.shape[1]}. '
+        title += f'Frac: {k_frac_real:.2f} ({self._k_frac:.2f}). '
+        title += f'Value: {y:.2f}.'
+        fig.suptitle(title, fontsize=18)
+
+        fpath = self.path_build(fpath, 'png')
+        plt.savefig(fpath, bbox_inches='tight') if fpath else plt.show()
 
     def target(self, i):
         return self._solver(i)
