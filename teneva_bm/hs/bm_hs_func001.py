@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm import Bm
@@ -20,17 +19,15 @@ class BmHsFunc001(Bm):
         if self.d != 2:
             self.set_err('Dimension should be 2')
 
-        self.set_grid(-10., +10.)
+        self.set_grid(-10., +10.) # TODO: do we need random shift?
 
-        self.set_min(
-            x=[1.]*self.d,
-            y=0.)
+        self.set_min(x=[1.]*self.d, y=0.)
 
     @property
     def is_func(self):
         return True
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         return 100. * (X[:, 1] - X[:, 0]**2)**2 + (1. - X[:, 0])**2
 
 

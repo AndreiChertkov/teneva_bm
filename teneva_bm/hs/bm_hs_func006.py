@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm import Bm
@@ -20,7 +19,7 @@ class BmHsFunc006(Bm):
     def __init__(self, d=2, n=21, name='HsFunc006', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        self.set_grid(-10., +10.)
+        self.set_grid(-10., +10.) # TODO: do we need random shift?
 
         self.set_min(x=[1.]*self.d, y=0.)
 
@@ -34,10 +33,10 @@ class BmHsFunc006(Bm):
     def with_constr(self):
         return True
 
-    def _c_batch(self, X):
+    def constr_batch(self, X):
         return np.abs(10. * (X[:, 1] - X[:, 0]**2))
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         return (1. - X[:, 0])**2
 
 
