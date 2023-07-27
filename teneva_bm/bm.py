@@ -871,6 +871,9 @@ class Bm:
 
     def set_grid(self, a=None, b=None):
         """Set grid lower (a) and upper (b) limits for the function-like BM."""
+        if (a is not None or b is not None) and not self.d:
+            raise ValueError('Please, set dimension "d" before')
+
         self.a = teneva.grid_prep_opt(a, self.d)
         self.b = teneva.grid_prep_opt(b, self.d)
 
@@ -944,6 +947,10 @@ class Bm:
     def set_size(self, d=None, n=None):
         """Set dimension (d) and sizes for all d-modes (n: int or list)."""
         self.d = None if d is None else int(d)
+
+        if n is not None and not self.d:
+            raise ValueError('Please, set dimension "d" before')
+
         self.n = teneva.grid_prep_opt(n, self.d, int)
 
     def shift_grid(self, scale=25):
