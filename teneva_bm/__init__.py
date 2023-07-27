@@ -6,7 +6,6 @@ from .teneva_bm_demo import teneva_bm_demo
 
 
 from .agent import *
-from .agent_toe import *
 from .func import *
 from .hs import *
 from .oc import *
