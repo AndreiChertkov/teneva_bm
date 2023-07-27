@@ -8,7 +8,7 @@ from teneva_bm import __version__
 
 class Bm:
     def __init__(self, d=None, n=None, name='', desc=''):
-        self._init()
+        self.init()
 
         self.set_seed()
 
@@ -123,7 +123,7 @@ class Bm:
         I = np.array([teneva.grid_flat(k) for k in self.n], dtype=int).T
         X = teneva.ind_to_poi(I, self.a, self.b, self.n, self.grid_kind)
 
-        return self._cores(X)
+        return self.cores(X)
 
     def build_trn(self, m=0, skip_process=False):
         """Generate random (from LHS) train dataset of (index, value)."""
@@ -177,13 +177,68 @@ class Bm:
 
         return True
 
+    def compute(self, X, skip_process=False):
+        m = self.m
+        m_cur = X.shape[0]
+        m_max = self.budget_m
+
+        if not skip_process and m_max:
+            if (m >= m_max) or (m + m_cur > m_max and self.budget_is_strict):
+                return None
+
+        if not self.with_constr:
+            return self.target_batch(X)
+
+        y = np.ones(X.shape[0]) * self.constr_penalty
+
+        c = self.constr_batch(X)
+        ind_good = c < self.constr_eps
+
+        y[ind_good] = self.target_batch(X[ind_good])
+        if self.constr_with_amplitude:
+            y[~ind_good] *= c[~ind_good]
+
+        return y
+
+    def constr(self, x):
+        """Function that check constraint for a given point/index."""
+        return self.constr_batch(x.reshape(1, -1))[0]
+
+    def constr_batch(self, X):
+        """Function that check constraint for a given batch of poi./indices."""
+        return np.array([self.constr(x) for x in X])
+
+    def cores(self, X):
+        """Return the exact TT-cores for the provided points."""
+        raise NotImplementedError()
+
+    def cores_add(self, X, a0=0):
+        """Helper function for the construction of the TT-cores."""
+        Y = []
+
+        for x in X:
+            G = np.ones([2, len(x), 2])
+            G[1, :, 0] = 0.
+            G[0, :, 1] = x
+            Y.append(G)
+
+        Y[0] = Y[0][0:1, ...].copy()
+        Y[-1] = Y[-1][..., 1:2].copy()
+        Y[-1][0, :, 0] += a0
+
+        return Y
+
+    def cores_mul(self, X):
+        """Helper function for the construction of the TT-cores."""
+        return [x[None, :, None] for x in X]
+
     def get(self, I, skip_process=False):
         """Return a value or batch of values for provided multi-index."""
         t = tpc()
 
         self.check()
 
-        I, X, is_batch = self._parse_input(I=I)
+        I, X, is_batch = self.parse_input(I=I)
 
         if self.with_cache:
             m = I.shape[0]
@@ -202,7 +257,7 @@ class Bm:
 
             if m_new > 0:
                 Z = X[ind] if self.is_func else I[ind]
-                y_new = self._compute(Z, skip_process)
+                y_new = self.compute(Z, skip_process)
                 if y_new is None:
                     return None
 
@@ -215,11 +270,11 @@ class Bm:
             dm_cache = 0
 
             Z = X if self.is_func else I
-            y = self._compute(Z, skip_process)
+            y = self.compute(Z, skip_process)
             if y is None:
                 return None
 
-        return self._process(I, X, y, dm_cache, t, is_batch, skip_process)
+        return self.process(I, X, y, dm_cache, t, is_batch, skip_process)
 
     def get_config(self):
         """Return a dict with configuration of the benchmark."""
@@ -296,13 +351,13 @@ class Bm:
 
         self.check()
 
-        I, X, is_batch = self._parse_input(X=X)
+        I, X, is_batch = self.parse_input(X=X)
 
-        y = self._compute(X, skip_process)
+        y = self.compute(X, skip_process)
         if y is None:
             return None
 
-        return self._process(I, X, y, 0, t, is_batch, skip_process)
+        return self.process(I, X, y, 0, t, is_batch, skip_process)
 
     def info(self, footer=''):
         """Returns a detailed description of the benchmark as text."""
@@ -516,6 +571,29 @@ class Bm:
         text += '=' * 78 + '\n'
         return text
 
+    def init(self):
+        self.err = []
+
+        self.is_y_max_new = False
+        self.i_max = None
+        self.x_max = None
+        self.y_max = None
+
+        self.is_y_min_new = False
+        self.i_min = None
+        self.x_min = None
+        self.y_min = None
+
+        self.y_list = []
+
+        self.m = 0
+        self.m_cache = 0
+        self.time = 0.
+
+        self.log_m_last = 0
+
+        self.is_prep = False
+
     def list_convert(self, x, kind='float', eps=1.E-16):
         """Convert list of equal values to one number and back."""
         if x is None:
@@ -564,6 +642,62 @@ class Bm:
 
         return text
 
+    def log_check(self):
+        if not self.with_log:
+            return False
+
+        if self.log_cond == 'min':
+            return self.is_y_min_new
+
+        if self.log_cond == 'max':
+            return self.is_y_max_new
+
+        if self.log_cond == 'min-max':
+            return self.is_y_min_new or self.is_y_max_new
+
+        if self.log_cond == 'step':
+            return self.log_step and self.m - self.log_m_last >= self.log_step
+
+    def parse_input(self, I=None, X=None):
+        if I is not None and X is not None:
+            raise ValueError('Can`t parse input. Invalid case')
+
+        if I is None and X is None:
+            raise ValueError('Can`t parse input. Invalid case')
+
+        if X is not None and self.is_tens:
+            msg = f'BM "{self.name}" is a tensor. '
+            msg += 'Can`t compute it in the point'
+            raise ValueError(msg)
+
+        if I is not None:
+            I = np.asanyarray(I, dtype=int)
+
+            is_batch = len(I.shape) == 2
+            if not is_batch:
+                I = I.reshape(1, -1)
+
+            if self.with_quantization:
+                I = self.unquantize(I)
+
+            if self.is_func:
+                X = teneva.ind_to_poi(I, self.a, self.b, self.n, self.grid_kind)
+
+        elif X is not None:
+            X = np.asanyarray(X, dtype=float)
+
+            is_batch = len(X.shape) == 2
+            if not is_batch:
+                X = X.reshape(1, -1)
+
+            if self.with_quantization:
+                X = self.unquantize(X)
+
+            if self.is_func:
+                I = teneva.poi_to_ind(X, self.a, self.b, self.n, self.grid_kind)
+
+        return I, X, is_batch
+
     def prep(self):
         """A function with a specific benchmark preparation code."""
         # Note that when inherited, the function in the child class
@@ -573,6 +707,45 @@ class Bm:
         # and it should ends with the following two lines:
         self.is_prep = True
         return self
+
+    def process(self, I, X, y, dm_cache, t, is_batch, skip=False):
+        if skip:
+            return y if is_batch else y[0]
+
+        self.y_list.extend(list(y))
+
+        self.m += y.shape[0] - dm_cache
+        self.m_cache += dm_cache
+
+        self.time += tpc() - t
+
+        ind = np.argmax(y)
+        if self.y_max is None or self.y_max < y[ind]:
+            self.is_y_max_new = True
+            self.i_max = I[ind, :] if I is not None else None
+            self.x_max = X[ind, :] if X is not None else None
+            self.y_max = y[ind]
+        else:
+            self.is_y_max_new = False
+
+
+        ind = np.argmin(y)
+        if self.y_min is None or self.y_min > y[ind]:
+            self.is_y_min_new = True
+            self.i_min = I[ind, :] if I is not None else None
+            self.x_min = X[ind, :] if X is not None else None
+            self.y_min = y[ind]
+        else:
+            self.is_y_min_new = False
+
+        if self.log_check():
+            print(self.log())
+
+        if self.cache_m_max and len(self.cache.keys()) > self.cache_m_max:
+            self.wrn('The maximum cache size has been exceeded. Cache cleared')
+            self.cache = {}
+
+        return y if is_batch else y[0]
 
     def set_budget(self, m=None, m_cache=None, is_strict=True):
         """Set computation buget."""
@@ -704,188 +877,15 @@ class Bm:
         self.a = self.a - (self.b-self.a) * shift
         self.b = self.b + (self.b-self.a) * shift
 
-    def _c(self, x):
-        """Function that check constraint for a given point/index."""
-        return self._c_batch(x.reshape(1, -1))[0]
-
-    def _c_batch(self, X):
-        """Function that check constraint for a given batch of poi./indices."""
-        return np.array([self._c(x) for x in X])
-
-    def _compute(self, X, skip_process=False):
-        m = self.m
-        m_cur = X.shape[0]
-        m_max = self.budget_m
-
-        if not skip_process and m_max:
-            if (m >= m_max) or (m + m_cur > m_max and self.budget_is_strict):
-                return None
-
-        if not self.with_constr:
-            return self._f_batch(X)
-
-        y = np.ones(X.shape[0]) * self.constr_penalty
-
-        c = self._c_batch(X)
-        ind_good = c < self.constr_eps
-
-        y[ind_good] = self._f_batch(X[ind_good])
-        if self.constr_with_amplitude:
-            y[~ind_good] *= c[~ind_good]
-
-        return y
-
-    def _cores(self, X):
-        """Return the exact TT-cores for the provided points."""
-        raise NotImplementedError()
-
-    def _cores_add(self, X, a0=0):
-        """Helper function for the construction of the TT-cores."""
-        Y = []
-
-        for x in X:
-            G = np.ones([2, len(x), 2])
-            G[1, :, 0] = 0.
-            G[0, :, 1] = x
-            Y.append(G)
-
-        Y[0] = Y[0][0:1, ...].copy()
-        Y[-1] = Y[-1][..., 1:2].copy()
-        Y[-1][0, :, 0] += a0
-
-        return Y
-
-    def _cores_mul(self, X):
-        """Helper function for the construction of the TT-cores."""
-        return [x[None, :, None] for x in X]
-
-    def _f(self, x):
+    def target(self, x):
         """Function that computes value for a given point/index."""
-        return self._f_batch(x.reshape(1, -1))[0]
+        return self.target_batch(x.reshape(1, -1))[0]
 
-    def _f_batch(self, X):
+    def target_batch(self, X):
         """Function that computes values for a given batch of points/indices."""
-        return np.array([self._f(x) for x in X])
+        return np.array([self.target(x) for x in X])
 
-    def _init(self):
-        self.err = []
-
-        self.is_y_max_new = False
-        self.i_max = None
-        self.x_max = None
-        self.y_max = None
-
-        self.is_y_min_new = False
-        self.i_min = None
-        self.x_min = None
-        self.y_min = None
-
-        self.y_list = []
-
-        self.m = 0
-        self.m_cache = 0
-        self.time = 0.
-
-        self.log_m_last = 0
-
-        self.is_prep = False
-
-    def _log_check(self):
-        if not self.with_log:
-            return False
-
-        if self.log_cond == 'min':
-            return self.is_y_min_new
-
-        if self.log_cond == 'max':
-            return self.is_y_max_new
-
-        if self.log_cond == 'min-max':
-            return self.is_y_min_new or self.is_y_max_new
-
-        if self.log_cond == 'step':
-            return self.log_step and self.m - self.log_m_last >= self.log_step
-
-    def _parse_input(self, I=None, X=None):
-        if I is not None and X is not None:
-            raise ValueError('Can`t parse input. Invalid case')
-
-        if I is None and X is None:
-            raise ValueError('Can`t parse input. Invalid case')
-
-        if X is not None and self.is_tens:
-            msg = f'BM "{self.name}" is a tensor. '
-            msg += 'Can`t compute it in the point'
-            raise ValueError(msg)
-
-        if I is not None:
-            I = np.asanyarray(I, dtype=int)
-
-            is_batch = len(I.shape) == 2
-            if not is_batch:
-                I = I.reshape(1, -1)
-
-            if self.with_quantization:
-                I = self._unquantize(I)
-
-            if self.is_func:
-                X = teneva.ind_to_poi(I, self.a, self.b, self.n, self.grid_kind)
-
-        elif X is not None:
-            X = np.asanyarray(X, dtype=float)
-
-            is_batch = len(X.shape) == 2
-            if not is_batch:
-                X = X.reshape(1, -1)
-
-            if self.with_quantization:
-                X = self._unquantize(X)
-
-            if self.is_func:
-                I = teneva.poi_to_ind(X, self.a, self.b, self.n, self.grid_kind)
-
-        return I, X, is_batch
-
-    def _process(self, I, X, y, dm_cache, t, is_batch, skip=False):
-        if skip:
-            return y if is_batch else y[0]
-
-        self.y_list.extend(list(y))
-
-        self.m += y.shape[0] - dm_cache
-        self.m_cache += dm_cache
-
-        self.time += tpc() - t
-
-        ind = np.argmax(y)
-        if self.y_max is None or self.y_max < y[ind]:
-            self.is_y_max_new = True
-            self.i_max = I[ind, :] if I is not None else None
-            self.x_max = X[ind, :] if X is not None else None
-            self.y_max = y[ind]
-        else:
-            self.is_y_max_new = False
-
-
-        ind = np.argmin(y)
-        if self.y_min is None or self.y_min > y[ind]:
-            self.is_y_min_new = True
-            self.i_min = I[ind, :] if I is not None else None
-            self.x_min = X[ind, :] if X is not None else None
-            self.y_min = y[ind]
-        else:
-            self.is_y_min_new = False
-
-        if self._log_check():
-            print(self.log())
-
-        if self.cache_m_max and len(self.cache.keys()) > self.cache_m_max:
-            self._wrn('The maximum cache size has been exceeded. Cache cleared')
-            self.cache = {}
-
-        return y if is_batch else y[0]
-
-    def _unquantize(self, I_qtt):
+    def unquantize(self, I_qtt):
         if len(I_qtt.shape) == 1:
             is_many = False
             I_qtt = I_qtt.reshape(1, -1)
@@ -904,6 +904,6 @@ class Bm:
 
         return I if is_many else I[0, :]
 
-    def _wrn(self, text):
+    def wrn(self, text):
         text = '!!! BM-WARNING | ' + text
         print(text)
