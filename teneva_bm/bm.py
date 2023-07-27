@@ -13,7 +13,6 @@ class Bm:
         self.set_seed()
 
         self.set_size(d, n)
-        self.set_quantization()
         self.set_constr()
 
         self.set_grid()
@@ -127,14 +126,11 @@ class Bm:
 
     def build_trn(self, m=0, skip_process=False):
         """Generate random (from LHS) train dataset of (index, value)."""
-        m = int(m)
-        n = [2]*self.quantization*self.d if self.with_quantization else self.n
-
         if m < 1:
             return None, None
 
         # TODO: add fixed random seed support
-        I_trn = teneva.sample_lhs(n, m)
+        I_trn = teneva.sample_lhs(self.n, int(m))
         y_trn = self.get(I_trn, skip_process)
 
         if y_trn is None:
@@ -144,14 +140,11 @@ class Bm:
 
     def build_tst(self, m=0, skip_process=True):
         """Generate random (from "choice") test dataset of (index, value)."""
-        m = int(m)
-        n = [2]*self.quantization*self.d if self.with_quantization else self.n
-
         if m < 1:
             return None, None
 
         # TODO: add fixed random seed support
-        I_tst = np.vstack([np.random.choice(k, m) for k in n]).T
+        I_tst = np.vstack([np.random.choice(k, int(m)) for k in self.n]).T
         y_tst = self.get(I_tst, skip_process)
 
         if y_tst is None:
@@ -287,7 +280,6 @@ class Bm:
             'version': __version__,
             'is_tens': self.is_tens,
             'is_func': self.is_func,
-            'with_quantization': self.with_quantization,
             'with_cache': self.with_cache,
             'with_constr': self.with_constr,
             'with_cores': self.with_cores,
@@ -423,10 +415,6 @@ class Bm:
 
         text += 'Function kind                            : '
         v = 'discrete' if self.is_tens else 'continuous'
-        text += f'{v}\n'
-
-        text += 'With quantization                        : '
-        v = 'YES' if self.with_quantization else 'no'
         text += f'{v}\n'
 
         text += 'With cache                               : '
@@ -677,9 +665,6 @@ class Bm:
             if not is_batch:
                 I = I.reshape(1, -1)
 
-            if self.with_quantization:
-                I = self.unquantize(I)
-
             if self.is_func:
                 X = teneva.ind_to_poi(I, self.a, self.b, self.n, self.grid_kind)
 
@@ -689,9 +674,6 @@ class Bm:
             is_batch = len(X.shape) == 2
             if not is_batch:
                 X = X.reshape(1, -1)
-
-            if self.with_quantization:
-                X = self.unquantize(X)
 
             if self.is_func:
                 I = teneva.poi_to_ind(X, self.a, self.b, self.n, self.grid_kind)
@@ -843,25 +825,6 @@ class Bm:
         """Set options specific to the benchmark."""
         return
 
-    def set_quantization(self, with_quantization=False):
-        """Set quantization usage."""
-        self.with_quantization = with_quantization
-
-        if not self.with_quantization:
-            self.quantization = None
-            return
-
-        if not self.is_n_equal:
-            msg = 'Quantization now works only if all mode sizes are equal'
-            raise NotImplementedError(msg)
-
-        n = self.n0
-        self.quantization = int(np.log2(n))
-        if 2**self.quantization != n:
-            msg = 'Invalid mode size for quantization '
-            msg += '(it should be a power of two)'
-            raise ValueError(msg)
-
     def set_seed(self, seed=42):
         self.seed = seed
         self.rand = np.random.default_rng(self.seed)
@@ -884,25 +847,6 @@ class Bm:
     def target_batch(self, X):
         """Function that computes values for a given batch of points/indices."""
         return np.array([self.target(x) for x in X])
-
-    def unquantize(self, I_qtt):
-        if len(I_qtt.shape) == 1:
-            is_many = False
-            I_qtt = I_qtt.reshape(1, -1)
-        else:
-            is_many = True
-
-        d = self.d
-        q = self.quantization
-        n = [2] * q
-        m = I_qtt.shape[0]
-
-        I = np.zeros((m, d), dtype=I_qtt.dtype)
-        for k in range(d):
-            I_qtt_curr = I_qtt[:, q*k:q*(k+1)].T
-            I[:, k] = np.ravel_multi_index(I_qtt_curr, n, order='F')
-
-        return I if is_many else I[0, :]
 
     def wrn(self, text):
         text = '!!! BM-WARNING | ' + text
