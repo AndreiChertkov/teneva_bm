@@ -40,14 +40,14 @@ class Bm:
 
     @property
     def a0(self):
-        """Return the lower grid size value if it is constant."""
+        """Return the lower grid size float value if it is constant."""
         if not self.is_a_equal:
             raise ValueError('Lower grid size is not constant, can`t get a0')
         return self.a[0]
 
     @property
     def b0(self):
-        """Return the upper grid size value if it is constant."""
+        """Return the upper grid size float value if it is constant."""
         if not self.is_b_equal:
             raise ValueError('Upper grid size is not constant, can`t get b0')
         return self.b[0]
@@ -97,10 +97,15 @@ class Bm:
 
     @property
     def n0(self):
-        """Return the mode size value if it is constant."""
+        """Return the mode size int value if it is constant."""
         if not self.is_n_equal:
             raise ValueError('Mode size is not constant, can`t get n0')
         return self.n[0]
+
+    @property
+    def time_full(self):
+        """Full time of benchmark existence in seconds."""
+        return tpc() - self.time_stamp_start
 
     @property
     def with_constr(self):
@@ -115,8 +120,11 @@ class Bm:
     def build_cores(self):
         """Return exact TT-cores for the TT-representation of the tensor."""
         if self.is_tens:
-            # TODO: check why
             msg = 'Construction of the TT-cores does not work for tensors'
+            raise ValueError(msg)
+
+        if not self.with_cores:
+            msg = 'Construction of the TT-cores does not supported for this BM'
             raise ValueError(msg)
 
         I = np.array([teneva.grid_flat(k) for k in self.n], dtype=int).T
@@ -129,8 +137,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        # TODO: add fixed random seed support
-        I_trn = teneva.sample_lhs(self.n, int(m))
+        I_trn = self.sample_lhs(m)
         y_trn = self.get(I_trn, skip_process)
 
         if y_trn is None:
@@ -143,8 +150,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        # TODO: add fixed random seed support
-        I_tst = np.vstack([np.random.choice(k, int(m)) for k in self.n]).T
+        I_tst = self.sample_random(m)
         y_tst = self.get(I_tst, skip_process)
 
         if y_tst is None:
@@ -182,11 +188,10 @@ class Bm:
         if not self.with_constr:
             return self.target_batch(X)
 
-        y = np.ones(X.shape[0]) * self.constr_penalty
+        y = np.ones(m_cur, dtype=float) * self.constr_penalty
 
         c = self.constr_batch(X)
         ind_good = c < self.constr_eps
-
         y[ind_good] = self.target_batch(X[ind_good])
         if self.constr_with_amplitude:
             y[~ind_good] *= c[~ind_good]
@@ -331,7 +336,7 @@ class Bm:
             'y_min': self.y_min,
             'y_list': self.y_list,
             'time': self.time,
-            'time_full': tpc() - self.log_t,
+            'time_full': self.time_full,
             'err': '; '.join(self.err) if len(self.err) else '',
         }
 
@@ -504,7 +509,7 @@ class Bm:
         text += '=' * 78 + '\n'
         return text
 
-    def info_history(self):
+    def info_history(self, footer=''):
         """Returns an information about the request history (text)."""
         text = ''
 
@@ -536,7 +541,7 @@ class Bm:
         text += f'{self.time:-10.3e}\n'
 
         text += 'Total work time (sec)                    : '
-        text += f'{tpc() - self.log_t:-10.3e}\n'
+        text += f'{self.time_full:-10.3e}\n'
 
         if self.y_min is not None and self.y_min_real is not None:
             text += 'Minimum (found / real)                   : '
@@ -555,6 +560,12 @@ class Bm:
         elif self.y_max is not None:
             text += 'Maximum (found)                          : '
             text += f'{self.y_max:-10.3e}\n'
+
+        if footer:
+            text += '-' * 41 + '|             '
+            text += '>               Options'
+            text += '\n'
+            text += footer
 
         text += '=' * 78 + '\n'
         return text
@@ -582,14 +593,18 @@ class Bm:
 
         self.is_prep = False
 
+        self.time_stamp_start = tpc()
+
     def list_convert(self, x, kind='float', eps=1.E-16):
         """Convert list of equal values to one number and back."""
         if x is None:
             return None
+
         if kind == 'int':
             if isinstance(x, (int, float)):
                 return np.array([x]*self.d, dtype=int)
             return int(x[0]) if len(set(x))==1 else np.asanyarray(x, dtype=int)
+
         elif kind == 'float':
             if isinstance(x, (int, float)):
                 return np.array([x]*self.d, dtype=float)
@@ -597,13 +612,11 @@ class Bm:
                 if np.abs(v - x[0]) > eps:
                     return np.asanyarray(x, dtype=float)
             return float(x[0])
+
         else:
             raise ValueError('Unsupported kind for list conversion')
 
     def log(self, postfix='', out=False):
-        self.log_m_last = self.m
-        t = tpc() - self.log_t
-
         text = ''
 
         if self.log_prefix:
@@ -614,7 +627,7 @@ class Bm:
             text += f' [+ {self.m_cache:-7.1e}]'
         text += ' | '
 
-        text += f't {t:-7.1e} | '
+        text += f't {self.time_full:-7.1e} | '
 
         if self.log_with_min and self.y_min is not None:
             text += f'min {self.y_min:-10.3e} | '
@@ -627,6 +640,8 @@ class Bm:
 
         if out:
             print(text)
+
+        self.log_m_last = self.m
 
         return text
 
@@ -647,10 +662,7 @@ class Bm:
             return self.log_step and self.m - self.log_m_last >= self.log_step
 
     def parse_input(self, I=None, X=None):
-        if I is not None and X is not None:
-            raise ValueError('Can`t parse input. Invalid case')
-
-        if I is None and X is None:
+        if I is None and X is None or I is not None and X is not None:
             raise ValueError('Can`t parse input. Invalid case')
 
         if X is not None and self.is_tens:
@@ -682,13 +694,14 @@ class Bm:
 
     def prep(self):
         """A function with a specific benchmark preparation code."""
-        # Note that when inherited, the function in the child class
-        # must starts with the following line:
         self.check_err()
-
-        # and it should ends with the following two lines:
+        self.prep_bm()
         self.is_prep = True
         return self
+
+    def prep_bm(self):
+        """A function with a specific benchmark preparation code (inner)."""
+        return
 
     def process(self, I, X, y, dm_cache, t, is_batch, skip=False):
         if skip:
@@ -724,10 +737,52 @@ class Bm:
             print(self.log())
 
         if self.cache_m_max and len(self.cache.keys()) > self.cache_m_max:
-            self.wrn('The maximum cache size has been exceeded. Cache cleared')
             self.cache = {}
+            self.wrn('The maximum cache size has been exceeded. Cache cleared')
 
         return y if is_batch else y[0]
+
+    def sample_lhs(self, m):
+        """Generate LHS smaples (multi-indices).
+
+        Args:
+            m (int, float): number of samples.
+
+        Returns:
+            np.ndarray: generated multi-indices for the tensor in the form of
+            array of the shape [m, d], where d is the dimension of the tensor.
+
+        """
+        d = self.d
+        n = self.n
+        m = int(m)
+
+        I = np.empty((m, d), dtype=int)
+        for i, k in enumerate(n):
+            I1 = np.repeat(np.arange(k), m // k)
+            I2 = self.rand.choice(np.arange(k), m-len(I1), replace=False)
+            I[:, i] = np.concatenate([I1, I2])
+            self.rand.shuffle(I[:, i])
+
+        return I
+
+    def sample_random(self, m):
+        """Generate random smaples (multi-indices).
+
+        Args:
+            m (int, float): number of samples.
+
+        Returns:
+            np.ndarray: generated multi-indices for the tensor in the form of
+            array of the shape [m, d], where d is the dimension of the tensor.
+
+        """
+        n = self.n
+        m = int(m)
+
+        I = np.vstack([self.rand.choice(np.arange(k), m) for k in n]).T
+
+        return I
 
     def set_budget(self, m=None, m_cache=None, is_strict=True):
         """Set computation buget."""
@@ -785,8 +840,6 @@ class Bm:
         self.log_prefix = prefix
         self.log_with_min = with_min
         self.log_with_max = with_max
-
-        self.log_t = tpc()
 
         if not self.log_cond in ['min', 'max', 'min-max', 'step']:
             raise ValueError(f'Invalid "log_cond" argument "{self.log_cond}"')
