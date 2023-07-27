@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
-import teneva
 
 
 from teneva_bm import Bm
@@ -20,11 +19,16 @@ class BmTopopt(Bm):
 
         if d is not None:
             self.set_err('Dimension number (d) should not be set manually')
+
         if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
 
-        self.opt_nx = nx
-        self.opt_ny = ny
+        self._nx = nx
+        self._ny = ny
+
+    @property
+    def identity(self):
+        return ['_nx', '_ny']
 
     @property
     def is_tens(self):
@@ -32,76 +36,65 @@ class BmTopopt(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_nx'] = self.opt_nx
-        conf['opt_ny'] = self.opt_ny
-        conf['opt_k_frac'] = self.opt_k_frac
-        conf['opt_penal'] = self.opt_penal
-        conf['opt_rmin'] = self.opt_rmin
+        conf['_nx'] = self._nx
+        conf['_ny'] = self._ny
+        conf['_k_frac'] = self._k_frac
+        conf['_penal'] = self._penal
+        conf['_rmin'] = self._rmin
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param nx (grid x-size)                   : '
-        v = self.opt_nx
+        v = self._nx
         text += f'{v:.0f}\n'
 
         text += 'Param ny (grid y-size)                   : '
-        v = self.opt_ny
+        v = self._ny
         text += f'{v:.0f}\n'
 
         text += 'Param k_frac for Topopt                  : '
-        v = self.opt_k_frac
+        v = self._k_frac
         text += f'{v:.6f}\n'
 
         text += 'Param penal for Topopt                   : '
-        v = self.opt_penal
+        v = self._penal
         text += f'{v:.6f}\n'
 
         text += 'Param rmin for Topopt                    : '
-        v = self.opt_rmin
+        v = self._rmin
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
-    def optimize_baseline(self):
-        solver = TopOptLite(self.opt_nx, self.opt_ny, self.opt_penal,
-            self.opt_rmin)
-        solver.init(Emin=1.E-9, Emax=1.0)
-        solver.prep()
-        x_ini = self.opt_k_frac * np.ones(self.opt_nx * self.opt_ny,
-            dtype=float)
-        x_opt = solver.solve(x_ini)
-        return x_opt
+    def show(self, fpath=None, i=None, best=True):
+        i, y = self.get_solution(i, best)
 
-    def plot(self, x, name='solver', fpath=None):
+        x = i.reshape(self._nx, self._ny).T
+
         fig, ax = plt.subplots(1, 1, figsize=(21, 7))
-        x = x.reshape(self.opt_nx, self.opt_ny).T
         ax.imshow(x, cmap='gray', interpolation='none')
 
         k_frac_real = np.sum(x) / np.size(x)
 
-        title = 'Result for ' + name + '. '
+        title = ''
         title += f'Shape: {x.shape[0]} x {x.shape[1]}. '
-        title += f'Frac: {k_frac_real:.2f} ({self.opt_k_frac:.2f}). '
+        title += f'Frac: {k_frac_real:.2f} ({self._k_frac:.2f}). '
+        title += f'Value: {y:.2f}.'
         fig.suptitle(title, fontsize=18)
 
-        if fpath:
-            plt.savefig(fpath, bbox_inches='tight')
-        else:
-            plt.show()
+        fpath = self.path_build(fpath, 'png')
+        plt.savefig(fpath, bbox_inches='tight') if fpath else plt.show()
 
-    def prep(self):
-        self.check_err()
-
-        self.bm_f = topopt_lite(self.opt_nx, self.opt_ny,
-            self.opt_k_frac, self.opt_penal, self.opt_rmin)
-
-        self.is_prep = True
-        return self
+    def prep_bm(self):
+        self._solver = _topopt_lite(self._nx, self._ny,
+            self._k_frac, self._penal, self._rmin)
 
     def set_opts(self, k_frac=0.4, penal=3., rmin=5.4):
         """Setting options specific to this benchmark.
+
+        There are no plans to manually change the default values.
 
         Args:
             k_frac (float): ?.
@@ -109,114 +102,21 @@ class BmTopopt(Bm):
             rmin (float): ?.
 
         """
-        self.opt_k_frac = k_frac
-        self.opt_penal = penal
-        self.opt_rmin = rmin
+        self._k_frac = k_frac
+        self._penal = penal
+        self._rmin = rmin
 
-    def _f(self, i):
-        return self.bm_f(i)
+    def target(self, i):
+        return self._solver(i)
 
-
-def topopt_lite(nelx, nely, volfrac, penal, rmin, ft=1):
-    Emin = 1.E-9
-    Emax = 1.0
-    ndof = 2 * (nelx+1) * (nely+1)
-
-    # FE: Build the index vectors for the for coo matrix format.
-    KE = lk()
-    edofMat = np.zeros((nelx*nely, 8), dtype=int)
-    for elx in range(nelx):
-        for ely in range(nely):
-            el = ely + elx*nely
-            n1 = (nely+1)*elx + ely
-            n2 = (nely+1)*(elx+1) + ely
-            edofMat[el, :]= np.array(
-                [2*n1+2, 2*n1+3, 2*n2+2, 2*n2+3,2*n2, 2*n2+1, 2*n1, 2*n1+1])
-
-    # Construct the index pointers for the coo format:
-    iK = np.kron(edofMat,np.ones((8,1))).flatten()
-    jK = np.kron(edofMat,np.ones((1,8))).flatten()
-
-    # Filter: Build and assemble the index+data vectors for the coo matrix:
-    nfilter = int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
-    iH = np.zeros(nfilter)
-    jH = np.zeros(nfilter)
-    sH = np.zeros(nfilter)
-    cc = 0
-    for i in range(nelx):
-        for j in range(nely):
-            row = i*nely + j
-            kk1 = int(np.maximum(i - (np.ceil(rmin)-1), 0))
-            kk2 = int(np.minimum(i + np.ceil(rmin), nelx))
-            ll1 = int(np.maximum(j - (np.ceil(rmin)-1), 0))
-            ll2 = int(np.minimum(j + np.ceil(rmin), nely))
-            for k in range(kk1, kk2):
-                for l in range(ll1, ll2):
-                    col = k*nely + l
-                    fac = rmin - np.sqrt(((i-k)*(i-k)+(j-l)*(j-l)))
-                    iH[cc] = row
-                    jH[cc] = col
-                    sH[cc] = np.maximum(0., fac)
-                    cc = cc + 1
-
-    # Finalize assembly and convert to csc format:
-    H = coo_matrix((sH, (iH, jH)), shape=(nelx*nely, nelx*nely)).tocsc()
-    Hs = H.sum(1)
-
-    # BC's and support:
-    dofs = np.arange(2*(nelx+1)*(nely+1))
-    fixed = np.union1d(dofs[0:2*(nely+1):2], np.array([2*(nelx+1)*(nely+1)-1]))
-    free = np.setdiff1d(dofs, fixed)
-
-    # Solution and RHS vectors:
-    f = np.zeros((ndof, 1))
-    u = np.zeros((ndof, 1))
-
-    # Set load:
-    f[1, 0] = -1
-
-    def f_loss(x):
-
-        # Filter design variables:
-        xPhys = np.asarray(H * x[np.newaxis].T / Hs)[:, 0] if ft == 1 else x
-
-        # Setup and solve FE problem:
-        sK = ((KE.flatten()[np.newaxis]).T*(Emin+(xPhys)**penal*(Emax-Emin)))
-        sK = sK.flatten(order='F')
-        K = coo_matrix((sK, (iK, jK)), shape=(ndof, ndof)).tocsc()
-
-        # Remove constrained dofs from matrix:
-        K = K[free, :][:, free]
-
-        # Solve system:
-        u[free, 0] = spsolve(K, f[free, 0])
-
-        # Objective and sensitivity:
-        ce = np.dot(u[edofMat].reshape(nelx*nely, 8), KE)
-        ce *= u[edofMat].reshape(nelx*nely, 8)
-        ce = ce.sum(1)
-        obj = Emin + (Emax - Emin) * xPhys**penal
-        obj = (obj * ce).sum()
-        return obj
-
-    return f_loss
-
-
-def lk(E=1, nu=0.3):
-    """Element stiffness matrix."""
-    k = np.array([
-        1/2-nu/6, 1/8+nu/8, -1/4-nu/12, -1/8+3*nu/8,
-        -1/4+nu/12, -1/8-nu/8, nu/6, 1/8-3*nu/8])
-
-    return E / (1-nu**2) * np.array([
-        [k[0], k[1], k[2], k[3], k[4], k[5], k[6], k[7]],
-        [k[1], k[0], k[7], k[6], k[5], k[4], k[3], k[2]],
-        [k[2], k[7], k[0], k[5], k[6], k[3], k[4], k[1]],
-        [k[3], k[6], k[5], k[0], k[7], k[2], k[1], k[4]],
-        [k[4], k[5], k[6], k[7], k[0], k[1], k[2], k[3]],
-        [k[5], k[4], k[3], k[2], k[1], k[0], k[7], k[6]],
-        [k[6], k[3], k[4], k[1], k[2], k[7], k[0], k[5]],
-        [k[7], k[2], k[1], k[4], k[3], k[6], k[5], k[0]]])
+    def _optimize_baseline(self):
+        """Draft!"""
+        solver = TopOptLite(self._nx, self._ny, self._penal, self._rmin)
+        solver.init(Emin=1.E-9, Emax=1.0)
+        solver.prep()
+        x_ini = self._k_frac * np.ones(self._nx * self._ny, dtype=float)
+        x_opt = solver.solve(x_ini)
+        return x_opt
 
 
 class TopOptLite:
@@ -240,8 +140,8 @@ class TopOptLite:
         return self
 
     def prep(self):
-        self.edofMat = edof_matrix(self.nx, self.ny)
-        self.KE = stiffness_matrix()
+        self.edofMat = _edof_matrix(self.nx, self.ny)
+        self.KE = _stiffness_matrix()
         self.iK = np.kron(self.edofMat, np.ones((8,1))).flatten()
         self.jK = np.kron(self.edofMat, np.ones((1,8))).flatten()
 
@@ -341,7 +241,7 @@ class TopOptLite:
         return xnew
 
 
-def edof_matrix(nx, ny):
+def _edof_matrix(nx, ny):
     edofMat = np.zeros((nx * ny, 8), dtype=int)
     for elx in range(nx):
         for ely in range(ny):
@@ -353,7 +253,7 @@ def edof_matrix(nx, ny):
     return edofMat
 
 
-def stiffness_matrix(E=1, nu=0.3):
+def _lk(E=1, nu=0.3):
     """Element stiffness matrix."""
     k = np.array([
         1/2-nu/6, 1/8+nu/8, -1/4-nu/12, -1/8+3*nu/8,
@@ -368,6 +268,108 @@ def stiffness_matrix(E=1, nu=0.3):
         [k[5], k[4], k[3], k[2], k[1], k[0], k[7], k[6]],
         [k[6], k[3], k[4], k[1], k[2], k[7], k[0], k[5]],
         [k[7], k[2], k[1], k[4], k[3], k[6], k[5], k[0]]])
+
+
+def _stiffness_matrix(E=1, nu=0.3):
+    """Element stiffness matrix."""
+    k = np.array([
+        1/2-nu/6, 1/8+nu/8, -1/4-nu/12, -1/8+3*nu/8,
+        -1/4+nu/12, -1/8-nu/8, nu/6, 1/8-3*nu/8])
+
+    return E / (1-nu**2) * np.array([
+        [k[0], k[1], k[2], k[3], k[4], k[5], k[6], k[7]],
+        [k[1], k[0], k[7], k[6], k[5], k[4], k[3], k[2]],
+        [k[2], k[7], k[0], k[5], k[6], k[3], k[4], k[1]],
+        [k[3], k[6], k[5], k[0], k[7], k[2], k[1], k[4]],
+        [k[4], k[5], k[6], k[7], k[0], k[1], k[2], k[3]],
+        [k[5], k[4], k[3], k[2], k[1], k[0], k[7], k[6]],
+        [k[6], k[3], k[4], k[1], k[2], k[7], k[0], k[5]],
+        [k[7], k[2], k[1], k[4], k[3], k[6], k[5], k[0]]])
+
+
+def _topopt_lite(nelx, nely, volfrac, penal, rmin, ft=1):
+    Emin = 1.E-9
+    Emax = 1.0
+    ndof = 2 * (nelx+1) * (nely+1)
+
+    # FE: Build the index vectors for the for coo matrix format.
+    KE = _lk()
+    edofMat = np.zeros((nelx*nely, 8), dtype=int)
+    for elx in range(nelx):
+        for ely in range(nely):
+            el = ely + elx*nely
+            n1 = (nely+1)*elx + ely
+            n2 = (nely+1)*(elx+1) + ely
+            edofMat[el, :]= np.array(
+                [2*n1+2, 2*n1+3, 2*n2+2, 2*n2+3,2*n2, 2*n2+1, 2*n1, 2*n1+1])
+
+    # Construct the index pointers for the coo format:
+    iK = np.kron(edofMat,np.ones((8,1))).flatten()
+    jK = np.kron(edofMat,np.ones((1,8))).flatten()
+
+    # Filter: Build and assemble the index+data vectors for the coo matrix:
+    nfilter = int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
+    iH = np.zeros(nfilter)
+    jH = np.zeros(nfilter)
+    sH = np.zeros(nfilter)
+    cc = 0
+    for i in range(nelx):
+        for j in range(nely):
+            row = i*nely + j
+            kk1 = int(np.maximum(i - (np.ceil(rmin)-1), 0))
+            kk2 = int(np.minimum(i + np.ceil(rmin), nelx))
+            ll1 = int(np.maximum(j - (np.ceil(rmin)-1), 0))
+            ll2 = int(np.minimum(j + np.ceil(rmin), nely))
+            for k in range(kk1, kk2):
+                for l in range(ll1, ll2):
+                    col = k*nely + l
+                    fac = rmin - np.sqrt(((i-k)*(i-k)+(j-l)*(j-l)))
+                    iH[cc] = row
+                    jH[cc] = col
+                    sH[cc] = np.maximum(0., fac)
+                    cc = cc + 1
+
+    # Finalize assembly and convert to csc format:
+    H = coo_matrix((sH, (iH, jH)), shape=(nelx*nely, nelx*nely)).tocsc()
+    Hs = H.sum(1)
+
+    # BC's and support:
+    dofs = np.arange(2*(nelx+1)*(nely+1))
+    fixed = np.union1d(dofs[0:2*(nely+1):2], np.array([2*(nelx+1)*(nely+1)-1]))
+    free = np.setdiff1d(dofs, fixed)
+
+    # Solution and RHS vectors:
+    f = np.zeros((ndof, 1))
+    u = np.zeros((ndof, 1))
+
+    # Set load:
+    f[1, 0] = -1
+
+    def f_loss(x):
+
+        # Filter design variables:
+        xPhys = np.asarray(H * x[np.newaxis].T / Hs)[:, 0] if ft == 1 else x
+
+        # Setup and solve FE problem:
+        sK = ((KE.flatten()[np.newaxis]).T*(Emin+(xPhys)**penal*(Emax-Emin)))
+        sK = sK.flatten(order='F')
+        K = coo_matrix((sK, (iK, jK)), shape=(ndof, ndof)).tocsc()
+
+        # Remove constrained dofs from matrix:
+        K = K[free, :][:, free]
+
+        # Solve system:
+        u[free, 0] = spsolve(K, f[free, 0])
+
+        # Objective and sensitivity:
+        ce = np.dot(u[edofMat].reshape(nelx*nely, 8), KE)
+        ce *= u[edofMat].reshape(nelx*nely, 8)
+        ce = ce.sum(1)
+        obj = Emin + (Emax - Emin) * xPhys**penal
+        obj = (obj * ce).sum()
+        return obj
+
+    return f_loss
 
 
 if __name__ == '__main__':
@@ -392,4 +394,9 @@ if __name__ == '__main__':
     I = [i1, i2, i3]
     y = bm[I]
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
+    print(text)
+
+    text = 'Generate image for a random multi-index  :  '
+    bm.show('result/BmTopopt_demo', np.array(i))
+    text += 'see "result" folder with png file'
     print(text)

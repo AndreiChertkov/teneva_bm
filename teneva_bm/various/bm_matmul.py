@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm import Bm
@@ -68,12 +67,16 @@ class BmMatmul(Bm):
                 2, 0, 2, 1, 1, 2, 1]
             self.set_min(i=i, y=0.)
 
-        self.bm_T = T_real
-        self.bm_E = E
+        self._T = T_real
+        self._E = E
 
-        self.opt_size = size
-        self.opt_rank = rank
-        self.opt_only2 = only2
+        self._size = size
+        self._rank = rank
+        self._only2 = only2
+
+    @property
+    def identity(self):
+        return ['_size', '_rank', '_only2']
 
     @property
     def is_tens(self):
@@ -81,49 +84,44 @@ class BmMatmul(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['opt_size'] = self.opt_size
-        conf['opt_rank'] = self.opt_rank
-        conf['opt_only2'] = self.opt_only2
+        conf['_size'] = self._size
+        conf['_rank'] = self._rank
+        conf['_only2'] = self._only2
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param size (sizes of the matrices)       : '
-        v = self.opt_size
+        v = self._size
         text += f'{v:.0f}\n'
 
         text += 'Param rank (search rank for CP-decomp.)  : '
-        v = self.opt_rank
+        v = self._rank
         text += f'{v:.0f}\n'
 
         text += 'Param only2 (if True, use 2 CP-factors)  : '
-        v = 'YES' if self.opt_only2 else 'no'
+        v = 'YES' if self._only2 else 'no'
         text += f'{v}\n'
 
         return super().info(text+footer)
 
-    def prep(self):
-        self.check_err()
+    def prep_bm(self):
+        self.loss = _loss_build(self._T, self._E, self._rank, self._only2)
 
-        self.loss = _loss_build(self.bm_T, self.bm_E, self.opt_rank,
-            self.opt_only2)
+    def recover(self, i=None, best=True):
+        i, y = self.get_solution(i, best)
+        x = _ind_to_poi(i, self._E)
 
-        self.is_prep = True
-        return self
-
-    def recover(self, i):
-        x = _ind_to_poi(i, self.bm_E)
-
-        if self.opt_only2:
-            U, V = _factor_from_poi(x, self.opt_rank, True)
-            W = _factor_recover(U, V, self.bm_T)
+        if self._only2:
+            U, V = _factor_from_poi(x, self._rank, True)
+            W = _factor_recover(U, V, self._T)
         else:
-            U, V, W = _factor_from_poi(x, self.opt_rank, False)
+            U, V, W = _factor_from_poi(x, self._rank, False)
 
         return U, V, W
 
-    def _f(self, i):
+    def target(self, i):
         return self.loss(i)
 
 
@@ -233,7 +231,7 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    if bm.opt_size == 2 and bm.n0 == 3:
+    if bm._size == 2 and bm.n0 == 3:
         text = 'Value at the minimum (real vs calc)      :  '
         y_real = bm.y_min_real
         y_calc = bm[bm.i_min_real]
@@ -251,6 +249,6 @@ if __name__ == '__main__':
     bm = BmMatmul(size=2, rank=7).prep()
     U, V, W = bm.recover(bm.i_min_real)
     T_appr = np.einsum('nr,mr,sr->nms', U, V, W)
-    e = np.linalg.norm(T_appr.reshape(-1) - bm.bm_T.reshape(-1))
+    e = np.linalg.norm(T_appr.reshape(-1) - bm._T.reshape(-1))
     text += f'{e:-10.3e}'
     print(text)

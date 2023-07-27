@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 
 
 from teneva_bm import Bm
@@ -26,7 +25,7 @@ class BmWallSimple(Bm):
     def is_tens(self):
         return True
 
-    def _f(self, i):
+    def target(self, i):
         if len(np.where(i == self.i_min_real)[0]) == self.d:
             return 0.
         elif len(np.where(i == self.i_min_real)[0]) > 0:
