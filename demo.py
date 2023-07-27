@@ -7,6 +7,9 @@ for a specific benchmark "<name_of_benchmark>" from the collection (folder)
 code for the demo run is at the end of the corresponding benchmark file in the
 section "if __name__ == '__main__':".
 
+You can also run this script as ""python demo.py info" to present only info
+about existing collections and benchmarks.
+
 """
 import sys
 

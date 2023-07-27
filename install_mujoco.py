@@ -55,6 +55,7 @@ PY_PACKAGES = [
     'gym==0.26.2',
     'numpy<1.25',
     'opencv-python==4.7.0.72',
+    'pygame==2.5.0',
 ]
 PY_PACKAGES_COLAB = [
     'PyOpenGL_accelerate',
@@ -64,6 +65,7 @@ PY_PACKAGES_COLAB = [
     'imageio==2.31.1',
     'numpy<1.25',
     'opencv-python==4.7.0.72',
+    'pygame==2.5.0',
 ]
 
 
@@ -266,7 +268,7 @@ def test(with_video=True):
         for frame in frames:
             out.write(frame)
         out.release()
-        print(f'DONE      | Video is seved into "{fpath}"')
+        print(f'DONE      | Video is saved into "{fpath}"')
     else:
         print(f'DONE      |')
 

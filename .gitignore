@@ -7,7 +7,7 @@
 .ipynb_checkpoints
 .thumbs.db
 __pycache__/
-_result/
 _tmp/
 build/
 dist/
+result/
