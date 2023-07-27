@@ -55,7 +55,7 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 - `agent_toe` - the same as `agent` collection, but with optimization of the discrete Toeplitz policy. The collection includes the following benchmarks: `BmAgentToeSwimmer`.
 
-- `func` - a collection of analytic functions of a real multidimensional argument. The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncDixon`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncPiston`, `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchaffer`, `BmFuncSchwefel`.
+- `func` - a collection of analytic functions of a real multidimensional argument. The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncDixon`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncPiston` (only `d=7` is supported), `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchaffer`, `BmFuncSchwefel`.
     > For almost all functions, the exact global minimum ("continuous x point", not multi-index) is known (see `bm.x_min_real` and `bm.y_min_real`). For a number of functions (`BmFuncAlpine`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchwefel`), a `bm.build_cores()` method is available that returns an exact representation of the function on the discrete grid used in the benchmark in the tensor train (TT) format as a list of 3D TT-cores. Note also that we apply small random shift of the grid limits for all functions, to make the optimization problem more difficult (because many functions have a minimum at the center point of the domain).
 
 - `hs` (draft!) - the [Hock & Schittkowski](http://apmonitor.com/wiki/index.php/Apps/HockSchittkowski) collection of benchmark functions, containing continuous analytic functions of small dimensions (2-5), some of which have given constraints. The collection includes the following benchmarks: `BmHsFunc001`, `BmHsFunc006`.
@@ -174,6 +174,10 @@ During requests to the benchmark, that is, when calling functions `bm[]` (or `bm
 - `bm.i_min`, `bm.x_min`, `bm.y_min` - same as in the previous point, but for the minimum value.
 
 The following function may be used to print the corresponding values: `print(bm.info_history())`.
+
+##### Notes
+
+- For some benchmarks (e.g., for all benchmarks from `agent` collection) the method `show` (present the current state, the state for provided input or the final state for the best found input) and `render` (present the animation for the current solution, the solution from the provided input or for the solution from the best found input) are available.
 
 
 ## Authors

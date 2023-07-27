@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import teneva
 from time import perf_counter as tpc
 
@@ -53,6 +54,11 @@ class Bm:
         return self.b[0]
 
     @property
+    def identity(self):
+        """Returns a list of parameter names that define the benchmark."""
+        return ['d', 'n']
+
+    @property
     def is_a_equal(self):
         """Check if all the lower grid sizes are the same."""
         v = self.list_convert(self.a, 'float')
@@ -89,6 +95,11 @@ class Bm:
     def is_n_odd(self):
         """Check if all the mode sizes are odd (1, 3, ...)."""
         return not self.is_n_even
+
+    @property
+    def is_opti_max(self):
+        """If the benchmark relates to maximization task."""
+        return False
 
     @property
     def is_tens(self):
@@ -342,6 +353,21 @@ class Bm:
 
         return hist
 
+    def get_solution(self, i=None, best=True):
+        """Return the solution for given i or current solution or the best."""
+        if i is None:
+            if best:
+                i = self.i_max if self.is_opti_max else self.i_min
+            else:
+                i = self.i
+
+        if i is None:
+            raise ValueError('Input is not set')
+
+        y = self.get(i, skip_process=True)
+
+        return i, y
+
     def get_poi(self, X, skip_process=False):
         """Return a value or batch of values for provided x-point."""
         t = tpc()
@@ -573,6 +599,11 @@ class Bm:
     def init(self):
         self.err = []
 
+        # Last solution:
+        self.i = None
+        self.x = None
+        self.y = None
+
         self.is_y_max_new = False
         self.i_max = None
         self.x_max = None
@@ -692,6 +723,19 @@ class Bm:
 
         return I, X, is_batch
 
+    def path_build(self, fpath=None, ext=None):
+        if not fpath:
+            return
+
+        fold = os.path.dirname(fpath)
+        if fold:
+            os.makedirs(fold, exist_ok=True)
+
+        if ext and not fpath.endswith('.' + ext):
+            fpath += '.' + ext
+
+        return fpath
+
     def prep(self):
         """A function with a specific benchmark preparation code."""
         self.check_err()
@@ -713,6 +757,10 @@ class Bm:
         self.m_cache += dm_cache
 
         self.time += tpc() - t
+
+        self.i = I[-1, :].copy() if I is not None else None
+        self.x = X[-1, :].copy() if X is not None else None
+        self.y = y[-1]
 
         ind = np.argmax(y)
         if self.y_max is None or self.y_max < y[ind]:
@@ -741,6 +789,17 @@ class Bm:
             self.wrn('The maximum cache size has been exceeded. Cache cleared')
 
         return y if is_batch else y[0]
+
+    def recover(self, i=None, best=True):
+        """Restores some benchmark-specific values."""
+        raise NotImplementedError
+        i, y = self.get_solution(i, best)
+
+    def render(self, fpath=None, i=None, best=True):
+        """Render the solution for benchmark."""
+        raise NotImplementedError
+        i, y = self.get_solution(i, best)
+        fpath = self.path_build(fpath)
 
     def sample_lhs(self, m):
         """Generate LHS smaples (multi-indices).
@@ -892,6 +951,12 @@ class Bm:
         shift = self.rand.normal(size=self.d) / scale
         self.a = self.a - (self.b-self.a) * shift
         self.b = self.b + (self.b-self.a) * shift
+
+    def show(self, fpath=None, i=None, best=True):
+        """Present the state of the benchmark (image, graph, etc.)."""
+        raise NotImplementedError
+        i, y = self.get_solution(i, best)
+        fpath = self.path_build(fpath)
 
     def target(self, x):
         """Function that computes value for a given point/index."""
