@@ -13,7 +13,8 @@ class Bm:
 
         self.set_seed()
 
-        self.set_size(d, n)
+        self.set_dimension(d)
+        self.set_size(n)
         self.set_constr()
 
         self.set_grid()
@@ -148,7 +149,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        I_trn = self.sample_lhs(m)
+        I_trn = teneva.sample_lhs(self.n, m, seed=self.seed)
         y_trn = self.get(I_trn, skip_process)
 
         if y_trn is None:
@@ -161,7 +162,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        I_tst = self.sample_random(m)
+        I_tst = teneva.sample_random(self.n, m, seed=self.seed)
         y_tst = self.get(I_tst, skip_process)
 
         if y_tst is None:
@@ -241,7 +242,7 @@ class Bm:
         """Helper function for the construction of the TT-cores."""
         return [x[None, :, None] for x in X]
 
-    def get(self, I, skip_process=False):
+    def get(self, I, skip_process=False, skip_cache=False):
         """Return a value or batch of values for provided multi-index."""
         t = tpc()
 
@@ -249,7 +250,7 @@ class Bm:
 
         I, X, is_batch = self.parse_input(I=I)
 
-        if self.with_cache:
+        if self.with_cache and not skip_cache:
             m = I.shape[0]
             ind = [k for k in range(m) if tuple(I[k]) not in self.cache]
 
@@ -259,16 +260,16 @@ class Bm:
             if self.budget_m_cache:
                 if self.budget_is_strict:
                     if self.m_cache + dm_cache > self.budget_m_cache:
-                        return None
+                        return self.process_last()
                 else:
                     if self.m_cache > self.budget_m_cache:
-                        return None
+                        return self.process_last()
 
             if m_new > 0:
                 Z = X[ind] if self.is_func else I[ind]
                 y_new = self.compute(Z, skip_process)
                 if y_new is None:
-                    return None
+                    return self.process_last()
 
                 for k in range(m_new):
                     self.cache[tuple(I[ind[k]])] = y_new[k]
@@ -281,7 +282,7 @@ class Bm:
             Z = X if self.is_func else I
             y = self.compute(Z, skip_process)
             if y is None:
-                return None
+                return self.process_last()
 
         return self.process(I, X, y, dm_cache, t, is_batch, skip_process)
 
@@ -364,7 +365,7 @@ class Bm:
         if i is None:
             raise ValueError('Input is not set')
 
-        y = self.get(i, skip_process=True)
+        y = self.get(i, skip_process=True, skip_cache=True)
 
         return i, y
 
@@ -378,7 +379,7 @@ class Bm:
 
         y = self.compute(X, skip_process)
         if y is None:
-            return None
+            return self.process_last()
 
         return self.process(I, X, y, 0, t, is_batch, skip_process)
 
@@ -535,6 +536,32 @@ class Bm:
         text += '=' * 78 + '\n'
         return text
 
+    def info_current(self, footer=''):
+        text = ''
+
+        if self.log_prefix:
+            text += self.log_prefix + ' > '
+
+        text += f'm {self.m:-7.1e}'
+        if self.with_cache:
+            text += f' [+ {self.m_cache:-7.1e}]'
+        text += ' | '
+
+        text += f't {self.time_full:-7.1e} | '
+
+        if self.log_with_min and self.y_min is not None:
+            text += f'min {self.y_min:-10.3e} | '
+
+        if self.log_with_max and self.y_max is not None:
+            text += f'max {self.y_max:-10.3e} | '
+
+        if footer:
+            text = text + footer
+
+        self.log_m_last = self.m
+
+        return text
+
     def info_history(self, footer=''):
         """Returns an information about the request history (text)."""
         text = ''
@@ -626,6 +653,8 @@ class Bm:
 
         self.time_stamp_start = tpc()
 
+        self.cache = {}
+
     def list_convert(self, x, kind='float', eps=1.E-16):
         """Convert list of equal values to one number and back."""
         if x is None:
@@ -646,35 +675,6 @@ class Bm:
 
         else:
             raise ValueError('Unsupported kind for list conversion')
-
-    def log(self, postfix='', out=False):
-        text = ''
-
-        if self.log_prefix:
-            text += self.log_prefix + ' > '
-
-        text += f'm {self.m:-7.1e}'
-        if self.with_cache:
-            text += f' [+ {self.m_cache:-7.1e}]'
-        text += ' | '
-
-        text += f't {self.time_full:-7.1e} | '
-
-        if self.log_with_min and self.y_min is not None:
-            text += f'min {self.y_min:-10.3e} | '
-
-        if self.log_with_max and self.y_max is not None:
-            text += f'max {self.y_max:-10.3e} | '
-
-        if postfix:
-            text = text + postfix
-
-        if out:
-            print(text)
-
-        self.log_m_last = self.m
-
-        return text
 
     def log_check(self):
         if not self.with_log:
@@ -782,13 +782,17 @@ class Bm:
             self.is_y_min_new = False
 
         if self.log_check():
-            print(self.log())
+            self.log(self.info_current())
 
         if self.cache_m_max and len(self.cache.keys()) > self.cache_m_max:
             self.cache = {}
             self.wrn('The maximum cache size has been exceeded. Cache cleared')
 
         return y if is_batch else y[0]
+
+    def process_last(self):
+        if self.with_log:
+            self.log(self.info_current('<<< DONE'))
 
     def recover(self, i=None, best=True):
         """Restores some benchmark-specific values."""
@@ -800,48 +804,6 @@ class Bm:
         raise NotImplementedError
         i, y = self.get_solution(i, best)
         fpath = self.path_build(fpath)
-
-    def sample_lhs(self, m):
-        """Generate LHS smaples (multi-indices).
-
-        Args:
-            m (int, float): number of samples.
-
-        Returns:
-            np.ndarray: generated multi-indices for the tensor in the form of
-            array of the shape [m, d], where d is the dimension of the tensor.
-
-        """
-        d = self.d
-        n = self.n
-        m = int(m)
-
-        I = np.empty((m, d), dtype=int)
-        for i, k in enumerate(n):
-            I1 = np.repeat(np.arange(k), m // k)
-            I2 = self.rand.choice(np.arange(k), m-len(I1), replace=False)
-            I[:, i] = np.concatenate([I1, I2])
-            self.rand.shuffle(I[:, i])
-
-        return I
-
-    def sample_random(self, m):
-        """Generate random smaples (multi-indices).
-
-        Args:
-            m (int, float): number of samples.
-
-        Returns:
-            np.ndarray: generated multi-indices for the tensor in the form of
-            array of the shape [m, d], where d is the dimension of the tensor.
-
-        """
-        n = self.n
-        m = int(m)
-
-        I = np.vstack([self.rand.choice(np.arange(k), m) for k in n]).T
-
-        return I
 
     def set_budget(self, m=None, m_cache=None, is_strict=True):
         """Set computation buget."""
@@ -862,8 +824,19 @@ class Bm:
         self.constr_with_amplitude = with_amplitude
 
     def set_desc(self, desc=''):
-        """Set text description of the problem."""
+        """Set text description of the benchmark."""
         self.desc = desc
+
+    def set_dimension(self, d=None):
+        """Set dimension (d)."""
+        self.d = None if d is None else int(d)
+
+        if getattr(self, 'n', None) is not None:
+            raise ValueError('Dimension shanged but "n" already set')
+        if getattr(self, 'a', None) is not None:
+            raise ValueError('Dimension shanged but "a" already set')
+        if getattr(self, 'b', None) is not None:
+            raise ValueError('Dimension shanged but "b" already set')
 
     def set_err(self, err=''):
         """Set the error text (can not import external module, etc.)."""
@@ -887,24 +860,30 @@ class Bm:
             be taken into account.
 
         """
-        self.grid_kind = kind
-
-        if not self.grid_kind in ['uni', 'cheb']:
+        if not kind in ['uni', 'cheb']:
             msg = f'Invalid kind of the grid (should be "uni" or "cheb")'
             raise ValueError(msg)
 
-    def set_log(self, with_log=False, cond='min-max', step=1000, prefix='bm',
+        self.grid_kind = kind
+
+    def set_log(self, log=False, cond='min-max', step=1000, prefix='bm',
                 with_min=True, with_max=True):
-        """Set the log options."""
-        self.with_log = with_log
+        """Set the log options. The "log" may be bool or print-like function."""
+        if not log:
+            self.with_log = False
+            self.log = lambda text: None
+        else:
+            self.with_log = True
+            self.log = print if isinstance(log, bool) else log
+
+        if not cond in ['min', 'max', 'min-max', 'step']:
+            raise ValueError(f'Invalid "log_cond" argument "{cond}"')
+
         self.log_cond = cond
         self.log_step = int(step) if step else None
         self.log_prefix = prefix
         self.log_with_min = with_min
         self.log_with_max = with_max
-
-        if not self.log_cond in ['min', 'max', 'min-max', 'step']:
-            raise ValueError(f'Invalid "log_cond" argument "{self.log_cond}"')
 
     def set_max(self, i=None, x=None, y=None):
         """Set exact (real) global maximum (index, point and related value)."""
@@ -933,7 +912,7 @@ class Bm:
             self.y_min_real = float(self.y_min_real)
 
     def set_name(self, name=''):
-        """Set display name for the problem."""
+        """Set display name for the benchmark."""
         self.name = name
 
     def set_opts(self):
@@ -941,13 +920,12 @@ class Bm:
         return
 
     def set_seed(self, seed=42):
+        """Set random seed and inner generator of random numbers."""
         self.seed = seed
         self.rand = np.random.default_rng(self.seed)
 
-    def set_size(self, d=None, n=None):
-        """Set dimension (d) and sizes for all d-modes (n: int or list)."""
-        self.d = None if d is None else int(d)
-
+    def set_size(self, n=None):
+        """Set sizes for all d-modes (n should be int or list)."""
         if n is not None and not self.d:
             raise ValueError('Please, set dimension "d" before')
 
@@ -955,6 +933,9 @@ class Bm:
 
     def shift_grid(self, scale=25):
         """Apply random shift for the grid limits."""
+        if self.a is None or self.b is None:
+            raise ValueError('Please, set grid before')
+
         shift = self.rand.normal(size=self.d) / scale
         self.a = self.a - (self.b-self.a) * shift
         self.b = self.b + (self.b-self.a) * shift
@@ -974,5 +955,4 @@ class Bm:
         return np.array([self.target(x) for x in X])
 
     def wrn(self, text):
-        text = '!!! BM-WARNING | ' + text
-        print(text)
+        self.log('!!! BM-WARNING | ' + text)
