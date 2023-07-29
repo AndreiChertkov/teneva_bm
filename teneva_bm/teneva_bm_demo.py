@@ -6,12 +6,12 @@ import subprocess
 def teneva_bm_demo(bm_use=None, with_info=True, all=False):
     """Demo script for teneva_bm.
 
-    Run demo for all existing benchmarks (if "bm_use" is None) or for a
-    specific benchmark (if "bm_use" is provided; e.g., "bm_qubo_knap_amba"). If
-    the flag "with_info" is set, then the stats for existing collections and
-    benchmarks will be also printed. Note that the code for the demo run of
-    benchmarks should be at the end of the corresponding benchmark file in the
-    section "if __name__ == '__main__':".
+    Run demo for all existing benchmarks (if "bm_use" is None and "all" is
+    True) or for a specific benchmark (if "bm_use" is provided). If the flag
+    "with_info" is set, then the stats for existing collections and benchmarks
+    will be also printed. Note that the code for the demo run of benchmarks
+    should be at the end of the corresponding benchmark file in the section
+    "if __name__ == '__main__':".
 
     """
     bms = {}
