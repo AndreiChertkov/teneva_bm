@@ -1,35 +1,40 @@
 # workflow
 
-> Workflow instructions for `teneva_bm` developers
+> Workflow instructions for `teneva_bm` developers.
 
 
 ## How to install the current local version
 
-1. Install [python](https://www.python.org) (version 3.8; you may use [anaconda](https://www.anaconda.com) package manager)
+1. Install [python](https://www.python.org) (version 3.8; you may use [anaconda](https://www.anaconda.com) package manager);
 
-2. Create and activate a virtual environment:
+2. Create a virtual environment:
     ```bash
-    conda create --name teneva_bm python=3.8 -y && conda activate teneva_bm
+    conda create --name teneva_bm python=3.8 -y
     ```
 
-3. Install special dependencies (for developers only):
+3. Activate the environment:
+    ```bash
+    conda activate teneva_bm
+    ```
+
+4. Install special dependencies (for developers only):
     ```bash
     pip install jupyterlab twine
     ```
 
-4. Install `teneva_bm` from the source:
+5. Install `teneva_bm` from the source:
     ```bash
     python setup.py install
     ```
 
-5. Install dependencies for all benchmarks (see instructions in the section `Installation` in `README.md` file)
+6. Install dependencies for all benchmarks (see instructions in the section `Installation` in the `README.md` file);
 
-6. Reinstall `teneva_bm` from the source (after updates of the code):
+7. Reinstall `teneva_bm` from the source (after updates of the code):
     ```bash
     clear && pip uninstall teneva_bm -y && python setup.py install
     ```
 
-7. Optionally delete virtual environment at the end of the work:
+8. Optionally delete virtual environment at the end of the work:
     ```bash
     conda activate && conda remove --name teneva_bm --all -y
     ```
@@ -37,25 +42,25 @@
 
 ## How to add a new benchmark
 
-1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_det`)
+1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_det`).
 
 2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file and then write a demo example of its usage (initialization, get method, training dataset generation, etc.; please, do it by analogy with other benchmarks) in the bottom section after `if __name__ == '__main__':`. Please, note:
-    - We should necessarily rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point)
-    - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function)
-    - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for property `with_constr`
-    - Method `cores` can be specified to generate an exact TT-representation of the benchmark, in which case the property `with_cores` should be set to `True`
+    - We should necessarily rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark value for a given multidimensional index or point);
+    - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function);
+    - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for property `with_constr`;
+    - Method `cores` can be specified to generate an exact TT-representation of the benchmark, in which case the property `with_cores` should be set to `True`.
 
 3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py bm_<subfolder>_<name>
     ```
-    > This script will run the demo (from the section `if __name__ == '__main__':`) for the benchmark specified as an argument. If the argument is not provided, then the examples for all benchmarks from all collections will be run sequentially
+    > This script will run the demo (from the section `if __name__ == '__main__':`) for the benchmark specified as an argument. If the argument is not provided, then the examples for all benchmarks from all collections will be run sequentially.
 
-4. Add a description of the new benchmark to section `Available benchmarks`  of file `README.md`
+4. Add a description of the new benchmark to section `Available benchmarks`  of the `README.md` file.
 
-5. Update the package version
+5. Update the package version.
 
-> Please use underscore prefixes for all new class instance variables and functions entered in the benchmark (e.g., `_temperature`) so that there is no name conflict with the base class `Bm`
+> Please use underscore prefixes for all new class instance variables and functions created in the benchmark (e.g., `_temperature`) so that there is no name conflict with the base class `Bm`.
 
 
 ## How to update the base class Bm
@@ -65,14 +70,14 @@ Modifying this class may break the functionality of all benchmarks, so please do
 
 ## How to update the package version
 
-1. Reinstall the package and run the demo script for all benchmarks:
+1. Reinstall the package locally and run the demo script for all benchmarks:
     ```bash
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py
     ```
 
-2. Update version (like `0.5.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion number
+2. Update the package version (like `0.5.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion number;
 
-3. Do commit like `Update version (0.5.X)` and push
+3. Do commit like `Update version (0.5.X)` and push;
 
 4. Upload the new version to `pypi` (login: AndreiChertkov):
     ```bash

@@ -23,7 +23,7 @@ Some benchmarks require additional installation of specialized libraries. The co
     pip install networkx==3.0 qubogen==0.1.1 gekko==1.0.6
     ```
 
-- Сollections `agent` and `agent_toe` require a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so we have prepared a special python installation script [install_mujoco.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_mujoco.py). Detailed instructions for using the script are presented in the file header.
+- Сollection `agent` require a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so we have prepared a special python installation script [install_mujoco.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_mujoco.py). Detailed instructions for using the script are presented in the file header.
 
 > To run benchmark optimization examples (see `demo_opti` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.3`).
 
@@ -44,9 +44,7 @@ from teneva_bm import teneva_bm_demo
 teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 ```
 
-> We prepare some demo scripts with benchmark optimization examples in the `demo_opti` folder. To run these examples (e.g., `python demo_opti/demo_base.py`), you need to install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.3`).
-
-> We also present some examples in this [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing).
+> We prepare some demo scripts with benchmark optimization examples in the `demo_opti` folder. To run these examples (e.g., `python demo_opti/base.py`), you need to install the [PROTES](https://github.com/anabatsh/PROTES) optimizer). We also present some examples in this [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing).
 
 
 ## Available benchmarks
@@ -90,7 +88,7 @@ The class constructor of all benchmarks has the following optional arguments:
 
 - `n` - number of possible discrete values for benchmark input variables, i.e., the mode size of the related tensor / multidimensional array (non-negative integer if all mode sizes are equal or a list of non-negative integers of the length `d`). For some benchmarks, this number is hardcoded (or depends on other specified auxiliary arguments), if another value is explicitly passed, an error message will be generated (e.g., in `qubo` collection all benchmarks should have `n = 2`). By default, some correct value is used (specified in the benchmark description).
 
-- `name` - the display name of the benchmark (string). By default, the name corresponding to the file/class name is used.
+- `name` - the display name of the benchmark (string). By default, the name corresponding to the file/class name (without `Bm` prefix) is used.
 
 - `desc` - the description of the benchmark (string). By default, a detailed description of the benchmark is used, provided in the corresponding python file.
 
@@ -102,21 +100,23 @@ Before calling the `bm.prep()` method, you can set a number of additional benchm
 
 - `bm.set_seed(seed=42)` - with this function we can set a custom random seed. Note that we use `Random Generator` from numpy (i.e., `numpy.random.default_rng(seed)`) and for a fixed value of the seed, the behavior of the benchmark will always be the same, however, not all benchmarks depend on a seed.
 
-- `bm.set_grid_kind(kind='cheb')` - by default, we use the Chebyshev grid (`kind = 'cheb'`), but you can alternatively set it manually to use a uniform grid (`kind = 'uni'`).
+- `bm.set_grid_kind(kind='cheb')` - by default, we use the Chebyshev grid (`kind = 'cheb'`) for benchmarks corresponds to a function of a continuous argument, but you can alternatively set it manually to use a uniform grid (`kind = 'uni'`).
 
 - `bm.set_budget(m=None, m_cache=None, is_strict=True)` - optional method to set the computation buget `m`. If the number of requests to the benchmark (from calls to `bm.get` and `bm.get_poi` methods) exceeds the specified budget, then `None` will be returned. If the flag `is_strict` is disabled, then the request for the last batch will be allowed, after which the budget will be exceeded, otherwise this last batch will not be considered. Note that when the budget is exceeded, `None` will be returned both when requesting a single value and a batch of values. Also, in a similar way, you can set a limit on the use of the cache by `m_cache` parameter.
 
-- `bm.set_constr(penalty=1.E+42, eps=1.E-16, with_amplitude=True)` - if the benchmark has a constraint, then using this function you can set a `penalty` (for the requested points that do not satisfy the constraint, the value `penalty * constraint_value` will be returned) and a `eps` (threshold value to check that the constraint has been fulfilled). Note that we set the constraints as a function (`bm.constr`) that returns the value `constraint_value` (amplitude) of the constraint, and if the constraint is met, then the value must be non-positive, otherwise, the objective function is not calculated and a value proportional to the amplitude of the constraint is returned (if you disable flag `with_amplitude`, then just the value of the penalty will be returned). For the case of maximization task you should set negative `penalty` value.
+- `bm.set_constr(penalty=1.E+42, eps=1.E-16, with_amplitude=True)` - if the benchmark has a constraint, then using this function you can set a `penalty` (for the requested points that do not satisfy the constraint, the value `penalty * constraint_value` will be returned) and a `eps` (threshold value to check that the constraint has been fulfilled). Note that we set the constraints as a function (`bm.constr` / `bm.constr_batch`) that returns the value `constraint_value` (amplitude) of the constraint, and if the constraint is met, then the value must be non-positive, otherwise, the objective function is not calculated and a value proportional to the amplitude of the constraint is returned (if you disable flag `with_amplitude`, then just the value of the penalty will be returned). For the case of maximization task you should set negative `penalty` value.
 
 - `bm.set_max(i=None, x=None, y=None)` - if necessary, you can manually set the multi-index, the corresponding continuous point (for benchmarks, which relate to functions of a continuous argument), and the corresponding value for the exact global maximum of the function. The corresponding values will be further available in the benchmark as `bm.i_max_real`, `bm.x_max_real` and `bm.y_max_real` respectively. When the benchmark is initialized, this function is called automatically if the optimum is known.
 
 - `bm.set_min(i=None, x=None, y=None)` - the same as in the previous point, but for the global minimum.
 
-- `bm.set_log(with_log=False, cond='min-max', step=1000, prefix='bm', with_min=True, with_max=True)` - when calling this function with the `True` argument `with_log`, the log will be printed while requests to benchmark. You may set the log codition `cond` (`min`, `max`, `min-max` or `step`; e.g., in the case `min` the log will be presented each time the `min` value is updated), the log step (for condition `step`) and a string `prefix` for the log. You can also disable the display of current minimum values (`with_min`) or maximum values (`with_max`) in the log string.
+- `bm.set_log(log=False, cond='min-max', step=1000, prefix='bm', with_min=True, with_max=True)` - when calling this function with the `True` argument `log`, the log will be printed while requests to benchmark. You may set the log codition `cond` (`min`, `max`, `min-max` or `step`; e.g., in the case `min` the log will be presented each time the `min` value is updated), the log step (for condition `step`) and a string `prefix` for the log. You can also disable the display of current minimum values (`with_min`) or maximum values (`with_max`) in the log string. Note that you can provide as `log` argument some print-like function, e.g., `log=print`, in this case, printing will occur not to the console, but to the corresponding function.
 
-- `bm.set_cache(with_cache=False, cache=None, m_max=1.E+8)` - when calling this function with the `True` argument `with_cache`, the cache will be used, that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values. Optionally, you can set `m_max` argument that specifies the maximum cache size. If the size is exceeded, the cache will be cleared and a corresponding warning will be displayed.
+- `bm.set_cache(with_cache=False, cache=None, m_max=1.E+8)` - when calling this function with the `True` argument `with_cache`, the cache will be used, that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values. Optionally, you can set `m_max` argument that specifies the maximum cache size. If the size is exceeded, the cache will be cleared and a corresponding warning will be displayed. Note that when the `bm.init` method is called, the cache is always reset to zero.
 
 - `bm.set_opts(...)` - for some benchmarks, this function may be called to set additional benchmark-specific options (please see the description of arguments in the relevant benchmark code file).
+
+> You can get the configuration options as a dictionary by the function `bm.get_config()`.
 
 ##### Computing benchmark values
 
@@ -132,7 +132,7 @@ print(bm[I]) # you can use the alias "bm.get(I)"
 ```
 Note that the `get` method can be used instead of `[ ]` notation, for example, if it is necessary to pass somewhere a function that calculates benchmark values.
 
-Since the considered benchmark (`BmFuncAckley`) corresponds to a function of a continuous argument, above we calculated the values for the discretization of the function on a given grid. Additionally, we can calculate values at continuous points by analogy:
+Since the considered benchmark (`BmFuncAckley`) corresponds to a function of a continuous argument, above we calculated the values for the discretization of the function on a automatically selected grid. Additionally, we can calculate values at continuous points by analogy:
 ```python
 # Get value at point x:
 x = np.ones(bm.d) * 0.42
@@ -143,7 +143,7 @@ X = np.array([x, x*0.3, x*1.1])
 print(bm(X)) # you can use the alias "bm.get_poi(X)"
 ```
 
-##### Data set generation
+##### Dataset generation
 
 For convenience, the benchmark also has functions that allow you to generate training and test data sets on a discrete grid:
 ```python
@@ -156,6 +156,8 @@ I_trn, y_trn = bm.build_trn(500)
 I_tst, y_tst = bm.build_tst(100)
 ```
 
+> Note that, by default, the spent computational budget (see `bm.set_budget` function) and time spent does not change when the test dataset is generated (this is controlled by the default `skip_process` flag value in `bm.build_tst(m=0, skip_process=True)`), but is consumed when generating the training dataset (i.e., `bm.build_trn(m=0, skip_process=False)`).
+
 ##### Request history analysis
 
 During requests to the benchmark, that is, when calling functions `bm[]` (or `bm.get`), `bm()` (or `bm.get_poi`), `bm.build_trn` (if the flag `skip_process` is not set in the function arguments; it has a value `False` by default) and `bm.build_tst` (if `skip_process` is not set; it is `True` by default for this function), the following useful class parameters are updated:
@@ -166,13 +168,17 @@ During requests to the benchmark, that is, when calling functions `bm[]` (or `bm
 
 - `bm.time` - total time in seconds spent on calculating the benchmark values (the time spent on cache accesses is also taken into account).
 
+- `bm.time_full` - benchmark lifetime in seconds from the moment of initialization.
+
 - `bm.y_list` - a list of all sequentially calculated benchmark values (results of cache accesses are also added to the list).
 
 - `bm.i_max`, `bm.x_max`, `bm.y_max` - a discrete multi-index, a continuous multi-dimensional point, and benchmark values corresponding to the maximum of all requested values. Note that for the case of a discrete function, the value of `x_max` will be `None`, and for the case of a continuous function, the values of `i_max` and `x_max` will correlate, while if requests were made for continuous points, then `x_max` will correspond to the exact position of the point, and `i_max` will be the nearest multi-index of the used discrete grid.
 
 - `bm.i_min`, `bm.x_min`, `bm.y_min` - same as in the previous point, but for the minimum value.
 
-The following function may be used to print the corresponding values: `print(bm.info_history())`.
+- `bm.i`, `bm.x`, `bm.y` - the last requested multi-index / point and the related computed benchmark's values.
+
+> The following function may be used to print the corresponding values: `print(bm.info_history())`. You can also get these values as a dictionary by the function `bm.get_history()`.
 
 ##### Notes
 
