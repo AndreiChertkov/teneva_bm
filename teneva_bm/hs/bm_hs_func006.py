@@ -19,6 +19,9 @@ class BmHsFunc006(Bm):
     def __init__(self, d=2, n=64, name='HsFunc006', desc=DESC):
         super().__init__(d, n, name, desc)
 
+        if self.d != 2:
+            self.set_err('Dimension should be 2')
+            
         self.set_grid(-10., +10.)
         # self.shift_grid()
         # TODO: do we need a random shift as in "func" collection???
