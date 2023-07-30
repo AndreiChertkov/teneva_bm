@@ -32,14 +32,21 @@ class BmAgentLake(Agent):
                     holes.append(np.array([i, j], dtype=int))
         return holes
 
-    def map(size=5, prob_hole=0.4, seed=42):
+    def map(size=5, prob_hole=0.4, seed=42, iters=1.E+9):
         map = []
         rand = np.random.default_rng(seed) if isinstance(seed, int) else seed
+        iter = 0
         while len(map) == 0 or not Agent.frozen_lake.is_valid(map, size):
+            iter += 1
+            if iter > iters:
+                msg = 'Can not build the map for selected probability'
+                raise ValueError(msg)
+
             map = rand.choice([BmAgentLake.FROZ, BmAgentLake.HOLE],
                 (size, size), p=[1-prob_hole, prob_hole])
             map[0, 0] = BmAgentLake.INIT
             map[-1, -1] = BmAgentLake.GOAL
+
         return [''.join(x) for x in map]
 
     def __init__(self, d=None, n=4, name='AgentLake', desc=DESC,
@@ -150,6 +157,10 @@ class BmAgentLake(Agent):
 
         text += 'Probability of the hole                  : '
         v = self._prob_hole
+        text += f'{v}\n'
+
+        text += 'Number of holes                          : '
+        v = len(self._holes)
         text += f'{v}\n'
 
         text += 'State is extended                        : '
