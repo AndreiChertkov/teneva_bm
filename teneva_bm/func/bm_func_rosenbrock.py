@@ -7,32 +7,26 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Rosenbrock function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-2.048, 2.048]; the exact global minimum
-    is known: x = [1, ..., 1], y = 0.
-    See https://www.sfu.ca/~ssurjano/rosen.html for details.
-    See also the work Momin Jamil, Xin-She Yang. "A literature survey of
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [-2.048, 2.048] (with small random shift);
+    the exact global minimum is known: x = [1, ..., 1], y = 0.
+    See the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("105. Rosenbrock Function"; Continuous, Differentiable,
     Non-Separable, Scalable, Unimodal).
-    Note that the method "build_cores" for construction of the function
-    in the TT-format on the discrete grid is available.
+    See also https://www.sfu.ca/~ssurjano/rosen.html for details.
 """
 
 
 class BmFuncRosenbrock(Bm):
-    def __init__(self, d=50, n=15, name='FuncRosenbrock', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncRosenbrock', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-2.048, +2.048)
-        self.shift_grid()
+        self.shift_grid(sign=-1)
 
         self.set_min(x=[1.]*self.d, y=0.)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):

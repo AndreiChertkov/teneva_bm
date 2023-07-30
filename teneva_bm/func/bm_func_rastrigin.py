@@ -7,30 +7,24 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Rastrigin function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-5.12, 5.12]; the exact global minimum
-    is known: x = [0, ..., 0], y = 0.
-    See https://www.sfu.ca/~ssurjano/rastr.html for details.
-    See also the work Johannes M Dieterich, Bernd Hartke. "Empirical review
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [-5.12, 5.12] (with small random shift);
+    the exact global minimum is known: x = [0, ..., 0], y = 0.
+    See the work Johannes M Dieterich, Bernd Hartke. "Empirical review
     of standard benchmark functions using evolutionary global optimization".
     Applied Mathematics 2012; 3:1552-1564.
-    Note that the method "build_cores" for construction of the function
-    in the TT-format on the discrete grid is available.
+    See also https://www.sfu.ca/~ssurjano/rastr.html for details.
 """
 
 
 class BmFuncRastrigin(Bm):
-    def __init__(self, d=50, n=15, name='FuncRastrigin', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncRastrigin', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-5.12, +5.12)
         self.shift_grid()
 
         self.set_min(x=[0.]*self.d, y=0.)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):

@@ -7,32 +7,26 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Schwefel function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-500, 500]; the exact global minimum
-    is known: x = [420.9687, ..., 420.9687], y = 0.
-    See https://www.sfu.ca/~ssurjano/schwef.html for details.
-    See also the work Momin Jamil, Xin-She Yang. "A literature survey of
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [-500, 500] (with small random shift);
+    the exact global minimum is known: x = 420.9687, y = 0.
+    See the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("128. Schwefel 2.26 Function"; Continuous, Differentiable,
     Separable, Scalable, Multimodal).
-    Note that the method "build_cores" for construction of the function
-    in the TT-format on the discrete grid is available.
+    See also https://www.sfu.ca/~ssurjano/schwef.html for details.
 """
 
 
 class BmFuncSchwefel(Bm):
-    def __init__(self, d=50, n=15, name='FuncSchwefel', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncSchwefel', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-500., +500.)
         self.shift_grid()
 
         self.set_min(x=[420.9687]*self.d, y=0.)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):

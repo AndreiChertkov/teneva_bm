@@ -7,31 +7,25 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Alpine function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-10, 10]; the exact global minimum
-    is known: x = [0, ..., 0], y = 0.
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [-10, 10] (with small random shift);
+    the exact global minimum is known: x = [0, ..., 0], y = 0.
     See the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("6. Alpine 1 Function"; Continuous, Non-Differentiable, Separable,
     Non-Scalable, Multimodal).
-    Note that the method "build_cores" for construction of the function
-    in the TT-format on the discrete grid is available.
 """
 
 
 class BmFuncAlpine(Bm):
-    def __init__(self, d=50, n=15, name='FuncAlpine', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncAlpine', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-10., +10.)
         self.shift_grid()
 
         self.set_min(x=[0.]*self.d, y=0.)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):

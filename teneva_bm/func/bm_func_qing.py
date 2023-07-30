@@ -7,33 +7,27 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Qing function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [0, 500] (note that we limit this function
-    to this domain instead of often used [-500, 500] to make sure it has
-    a single global minimum); the exact global minimum
-    is known: x_i = \sqrt{i} (i = 1, ..., d), y = 0.
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [0, 500] (with small random shift; note
+    also that we limit this function to this domain instead of often
+    used [-500, 500] to make sure it has a single global minimum);
+    the exact global minimum is known: x_i = \sqrt{i}, y = 0.
     See the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("98. Qing Function"; Continuous, Differentiable, Separable
     Scalable, Multimodal).
-    Note that the method "build_cores" for construction of the function
-    in the TT-format on the discrete grid is available.
 """
 
 
 class BmFuncQing(Bm):
-    def __init__(self, d=50, n=15, name='FuncQing', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncQing', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(0., +500.)
-        self.shift_grid()
+        self.shift_grid(sign=-1)
 
         self.set_min(x=np.sqrt(np.arange(1, self.d+1)), y=0.)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):

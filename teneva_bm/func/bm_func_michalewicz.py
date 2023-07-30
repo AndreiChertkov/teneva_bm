@@ -7,22 +7,21 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Michalewicz function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [0, pi]; the exact global minimum is known
-    only for the case of dimensions 2, 5, and 10; in this cases, only the
-    corresponding value of the function is known, but not the argument.
-    See https://www.sfu.ca/~ssurjano/michal.html for details.
-    See also Charlie Vanaret, Jean-Baptiste Gotteland, Nicolas Durand,
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [0, pi] (with small random shift);
+    the exact global minimum is known only for the case of dimensions 2, 5,
+    and 10; in this cases, only the corresponding value of the function is
+    known, but not the argument (except the 2D case).
+    See Charlie Vanaret, Jean-Baptiste Gotteland, Nicolas Durand,
     Jean-Marc Alliot. "Certified global minima for a benchmark of difficult
     optimization problems". arXiv preprint arXiv:2003.09867 2020
     (the function has d! local minima, and it is multimodal).
-    Note that the method "build_cores" for construction of the function
-    in the TT-format on the discrete grid is available.
+    See also https://www.sfu.ca/~ssurjano/michal.html for details.
 """
 
 
 class BmFuncMichalewicz(Bm):
-    def __init__(self, d=50, n=15, name='FuncMichalewicz', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncMichalewicz', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(0., np.pi)
@@ -34,10 +33,6 @@ class BmFuncMichalewicz(Bm):
             self.set_min(y=-4.687658)
         if self.d == 10:
             self.set_min(y=-9.66015)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):
@@ -122,4 +117,11 @@ if __name__ == '__main__':
     Y = bm.build_cores()
     e = teneva.accuracy_on_data(Y, I_trn, y_trn)
     text += f'{e:-10.1e}'
+    print(text)
+
+    text = 'Value at the minimum (real vs calc) 2D   :  '
+    bm = BmFuncMichalewicz(d=2).prep()
+    y_real = bm.y_min_real
+    y_calc = bm(bm.x_min_real)
+    text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
     print(text)

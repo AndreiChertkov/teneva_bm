@@ -6,30 +6,26 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Ackley function (continuous).
-    The dimension and mode size may be any (default are d=50, n=15).
-    Default grid limits are [-32.768, 32.768]; the exact global minimum
-    is known: x = [0, ..., 0], y = 0.
-    See https://www.sfu.ca/~ssurjano/ackley.html for details.
-    See also the work Momin Jamil, Xin-She Yang. "A literature survey of
+    The dimension and mode size may be any (default are d=7, n=16).
+    Default grid limits are [-32.768, 32.768] (with small random shift);
+    the exact global minimum is known: x = [0, ..., 0], y = 0.
+    See the work Momin Jamil, Xin-She Yang. "A literature survey of
     benchmark functions for global optimization problems". Journal of
     Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
     ("1. Ackley 1 Function"; Continuous, Differentiable, Non-separable,
     Scalable, Multimodal).
+    See also https://www.sfu.ca/~ssurjano/ackley.html for details.
 """
 
 
 class BmFuncAckley(Bm):
-    def __init__(self, d=50, n=15, name='FuncAckley', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncAckley', desc=DESC):
         super().__init__(d, n, name, desc)
 
         self.set_grid(-32.768, +32.768)
         self.shift_grid()
 
         self.set_min(x=[0.]*self.d, y=0.)
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):

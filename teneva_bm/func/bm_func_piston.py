@@ -7,8 +7,8 @@ from teneva_bm import Bm
 
 DESC = """
     Analytical Piston function (continuous).
-    The dimension is 7 and the mode size may be any (default is n=15),
-    each mode has its own (substantially different) limits.
+    The dimension is 7 and the mode size may be any (default is n=16), each
+    mode has its own different limits (with small random shift).
     See Vitaly Zankin, Gleb Ryzhakov, Ivan Oseledets. "Gradient descent
     based D-optimal design for the least-squares polynomial approximation".
     arXiv preprint arXiv:1806.06631 2018 for details.
@@ -16,7 +16,7 @@ DESC = """
 
 
 class BmFuncPiston(Bm):
-    def __init__(self, d=7, n=15, name='FuncPiston', desc=DESC):
+    def __init__(self, d=7, n=16, name='FuncPiston', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if self.d != 7:
@@ -26,10 +26,6 @@ class BmFuncPiston(Bm):
             [30., 0.005, 0.002, 1000,  90000, 290, 340],
             [60., 0.020, 0.010, 5000, 110000, 296, 360])
         self.shift_grid()
-
-    @property
-    def identity(self):
-        return super().identity + ['seed']
 
     @property
     def is_func(self):
