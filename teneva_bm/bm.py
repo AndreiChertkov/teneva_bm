@@ -975,7 +975,7 @@ class Bm:
         self.y_min_real = y
 
         if self.i_min_real is not None:
-            self.i_min_real = self.list_copy(self.i_mn_real, 'int')
+            self.i_min_real = self.list_copy(self.i_min_real, 'int')
         if self.x_min_real is not None:
             self.x_min_real = self.list_copy(self.x_min_real, 'float')
         if self.y_min_real is not None:
