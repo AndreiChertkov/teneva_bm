@@ -5,23 +5,29 @@ from teneva_bm import Bm
 
 
 DESC = """
-    The function 001 from the Hock & Schittkowski collection.
-    The dimension should be 2, and the mode size may be any (default is 21),
+    DRAFT!!! The function 001 from the Hock & Schittkowski collection.
+    The dimension should be 2, and the mode size may be any (default is 64),
     the default limits for function inputs are [-10, 10].
     The exact global minimum is known: x = [1, 1], y = 0.
 """
 
 
 class BmHsFunc001(Bm):
-    def __init__(self, d=2, n=21, name='HsFunc001', desc=DESC):
+    def __init__(self, d=2, n=64, name='HsFunc001', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if self.d != 2:
             self.set_err('Dimension should be 2')
 
-        self.set_grid(-10., +10.) # TODO: do we need random shift?
+        self.set_grid(-10., +10.)
+        # self.shift_grid()
+        # TODO: do we need a random shift as in "func" collection???
 
         self.set_min(x=[1.]*self.d, y=0.)
+
+    @property
+    def identity(self):
+        return ['n']
 
     @property
     def is_func(self):

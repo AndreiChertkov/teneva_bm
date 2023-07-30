@@ -5,9 +5,9 @@ from teneva_bm import Bm
 
 
 DESC = """
-    The function 006 from the Hock & Schittkowski collection
+    DRAFT!!! The function 006 from the Hock & Schittkowski collection
     with the explicit constraint.
-    The dimension should be 2, and the mode size may be any (default is 21),
+    The dimension should be 2, and the mode size may be any (default is 64),
     the default limits for function inputs are [-10, 10].
     The exact global minimum is known: x = [1, 1], y = 0.
     Note that the default penalty for the constraint is "1.E+3"
@@ -16,14 +16,21 @@ DESC = """
 
 
 class BmHsFunc006(Bm):
-    def __init__(self, d=2, n=21, name='HsFunc006', desc=DESC):
+    def __init__(self, d=2, n=64, name='HsFunc006', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        self.set_grid(-10., +10.) # TODO: do we need random shift?
+        self.set_grid(-10., +10.)
+        # self.shift_grid()
+        # TODO: do we need a random shift as in "func" collection???
 
         self.set_min(x=[1.]*self.d, y=0.)
 
+        # TODO: is it ok, to set such constraint by default???
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
+
+    @property
+    def identity(self):
+        return ['n']
 
     @property
     def is_func(self):
