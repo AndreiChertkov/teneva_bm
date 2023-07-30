@@ -8,6 +8,6 @@ from .teneva_bm_demo import teneva_bm_demo
 from .agent import *
 from .func import *
 from .hs import *
-from .oc import *
+from .odeoc import *
 from .qubo import *
 from .various import *

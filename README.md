@@ -18,7 +18,7 @@ Some benchmarks require additional installation of specialized libraries. The co
 
 - Collections `func`, `hs` and `various` do not require installation of additional libraries.
 
-- Сollections `oc` and `qubo` require installation of the following libraries:
+- Сollections `odeoc` and `qubo` require installation of the following libraries:
     ```bash
     pip install networkx==3.0 qubogen==0.1.1 gekko==1.0.6
     ```
@@ -57,7 +57,7 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 - `hs` (draft!) - the [Hock & Schittkowski](http://apmonitor.com/wiki/index.php/Apps/HockSchittkowski) collection of benchmark functions, containing continuous analytic functions of small dimensions (2-5), some of which have given constraints. The collection includes the following benchmarks: `BmHsFunc001`, `BmHsFunc006`.
 
-- `oc` - a collection of optimal control problems described by ordinary differential equations with discrete binary control variable, some of the problems have explicit restrictions on the elements of the control vector. The collection includes the following benchmarks: `BmOcSimple`, `BmOcSimpleConstr`.
+- `odeoc` - a collection of optimal control problems described by ordinary differential equations, some of the problems have explicit restrictions on the elements of the control vector. The collection includes the following benchmarks: `BmOdeocSimple`, `BmOdeocSimpleConstr`.
 
 - `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems; all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapDet`, `BmQuboKnapQuad`, `BmQuboMaxcut`, `BmQuboMvc`.
     > The exact global minimum is known only for `BmQuboKnapDet` benchmark (note that this benchmark supports only dimensions `10`, `20`, `50`, `80` and `100`).

@@ -19,14 +19,14 @@ DESC = """
     the maximum time value is "t_max". Note that for some control values
     the solver (gekko) fails, in this case we return the value "y_err".
     By default (see parameters of the "set_opts" function), "x_ini = 0.8",
-    "x_ref = 0.7", "t_max = 1" and "y_err = 1.E+50".
-    The dimension may be any (default is 50), and the mode size should be 2.
-    The benchmark needs "gekko==1.0.6" library (it is used for ODE solution).
+    "x_ref = 0.7", "t_max = 1" and "y_err = 1.E+50". The dimension may be
+    any (default is 100), and the mode size should be 2. The benchmark
+    needs "gekko==1.0.6" library (it is used for ODE solution).
 """
 
 
-class BmOcSimple(Bm):
-    def __init__(self, d=50, n=2, name='OcSimple', desc=DESC):
+class BmOdeocSimple(Bm):
+    def __init__(self, d=100, n=2, name='OdeocSimple', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n[0] != 2:
@@ -36,6 +36,10 @@ class BmOcSimple(Bm):
             msg = 'Need "gekko" module. For installation please run '
             msg += '"pip install gekko==1.0.6"'
             self.set_err(msg)
+
+    @property
+    def identity(self):
+        return ['d']
 
     @property
     def is_tens(self):
@@ -121,7 +125,7 @@ class BmOcSimple(Bm):
 if __name__ == '__main__':
     np.random.seed(42)
 
-    bm = BmOcSimple().prep()
+    bm = BmOdeocSimple().prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+2)

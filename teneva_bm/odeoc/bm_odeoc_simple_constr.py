@@ -1,25 +1,25 @@
 import numpy as np
 
 
-from teneva_bm.oc import BmOcSimple
+from teneva_bm.odeoc import BmOdeocSimple
 
 
 DESC = """
     Discrete optimal control (OC) problem with constraint of the special
-    form. This benchmark is the same as "BmOcSimple", except the constraint.
-    Please see the description of BmOcSimple for more details.
-    The dimension may be any (default is 50), and the mode size should be 2.
+    form. This benchmark is the same as "BmOdeocSimple", except the
+    constraint. Please see the description of BmOdeocSimple for more details.
+    The dimension may be any (default is 100), and the mode size should be 2.
     The benchmark needs "gekko==1.0.6" library (it is used for ODE solution).
-    Note that the default penalty for the constraint is "1.E+42"
-    and the amplitude of the constraint does not used.
+    Note that the default penalty for the constraint is "1.E+42" and the
+    amplitude of the constraint does not used.
 """
 
 
-class BmOcSimpleConstr(BmOcSimple):
-    def __init__(self, d=50, n=2, name='OcSimpleConstr', desc=DESC):
+class BmOdeocSimpleConstr(BmOdeocSimple):
+    def __init__(self, d=100, n=2, name='OdeocSimpleConstr', desc=DESC):
         super().__init__(d, n, name, desc)
 
-        self.set_constr(penalty=1.E+42, with_amplitude=True)
+        self.set_constr(penalty=1.E+42, with_amplitude=False)
 
     @property
     def with_constr(self):
@@ -42,7 +42,7 @@ class BmOcSimpleConstr(BmOcSimple):
 if __name__ == '__main__':
     np.random.seed(42)
 
-    bm = BmOcSimpleConstr().prep()
+    bm = BmOdeocSimpleConstr().prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+2)
