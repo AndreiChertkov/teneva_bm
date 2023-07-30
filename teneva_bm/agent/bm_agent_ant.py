@@ -6,35 +6,32 @@ from teneva_bm.agent.agent import Agent
 
 
 DESC = """
-    Agent from myjoco environment "Ant". For details, see
+    Agent "Ant" from myjoco environment. For details, see
     https://mgoulao.github.io/gym-docs/environments/mujoco/ant/
-
-    By default, no policy is used ("policy_name" is 'none"). The Toeplitz
-    discrete policy may be also used (if "policy_name" is 'toeplitz"), see
-    https://github.com/jparkerholder/ASEBO/blob/master/asebo/policies.py
+    By default, the Toeplitz policy ("policy='toeplitz'") is used
+    (https://github.com/jparkerholder/ASEBO/blob/master/asebo/policies.py).
+    You can also set "direct" policy (direct optimization of agent's actions)
+    or own policy class instance (see "agent/policy.py" with a description of
+    the interface design details). The dimension is determined automatically
+    according to the properties of the agent and the used policy; the default
+    mode size is 3 and the number of agent's steps is 1000.
 """
 
 
 class BmAgentAnt(Agent):
     def __init__(self, d=None, n=3, name='AgentAnt', desc=DESC,
-                 steps=1000, policy_name='toeplitz'):
-        super().__init__(d, n, name, desc, steps, policy_name)
+                 steps=1000, policy='toeplitz'):
+        super().__init__(d, n, name, desc, steps, policy)
 
-    def prep_bm(self, policy=None):
+    def prep_bm(self):
         env = Agent.make('Ant-v4')
-        return super().prep_bm(env, policy)
-
-    def _set_state(self, state, x=0., y=0.):
-        return # TODO !!!
-        qpos = np.array([x, y] + list(state[:3]))
-        qvel = state[3:]
-        self._env.set_state(qpos, qvel)
+        return super().prep_bm(env)
 
 
 if __name__ == '__main__':
     np.random.seed(42)
 
-    bm = BmAgentAnt().prep()
+    bm = BmAgentAnt(steps=250).prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+1)
@@ -46,18 +43,26 @@ if __name__ == '__main__':
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Generate video for a random multi-index  :  '
-    bm = BmAgentAnt(steps=200).prep()
+    text = 'Render for "direct" policy               :  '
+    bm = BmAgentAnt(steps=250, policy='direct').prep()
+    fpath = f'result/{bm.name}/render_direct'
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.render('result/BmAgentAnt_demo_none')
-    text += 'see "result/...demo_none.mp4'
+    bm.render(fpath)
+    text += f' see {fpath}'
     print(text)
 
-    text = 'Generate video for a random multi-index  :  '
-    bm = BmAgentAnt(steps=200, policy_name='toeplitz').prep()
+    text = 'Render for "toeplitz" policy             :  '
+    bm = BmAgentAnt(steps=250, policy='toeplitz').prep()
+    fpath = f'result/{bm.name}/render_toeplitz'
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.render('result/BmAgentAnt_demo_toeplitz')
-    text += 'see "result/...demo_toeplitz.mp4'
+    bm.render(fpath)
+    text += f' see {fpath}'
+    print(text)
+
+    text = 'Generate image for a random multi-index  :  '
+    fpath = f'result/{bm.name}/show'
+    bm.show(fpath)
+    text += f' see {fpath}'
     print(text)

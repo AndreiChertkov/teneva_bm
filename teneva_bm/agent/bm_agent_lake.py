@@ -2,25 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-try:
-    from gym.envs.toy_text import frozen_lake
-    with_gym = True
-    np.bool8 = bool
-except Exception as e:
-    with_gym = False
-
-
 from teneva_bm.agent.agent import Agent
 
 
 DESC = """
-    Agent from myjoco environment "FrozenLake". For details, see
+    Agent "FrozenLake" from gym environment. For details, see
     https://www.gymlibrary.dev/environments/toy_text/frozen_lake/
-    Note that agent actions mean: 0: LEFT, 1: DOWN, 2: RIGHT, 3: UP
-
-    By default ("policy_name" is 'none"), no policy is used. The Toeplitz
-    discrete policy may be also used (if "policy_name" is 'toeplitz"), see
-    https://github.com/jparkerholder/ASEBO/blob/master/asebo/policies.py
+    By default, the direct optimization of agent's actions is performed
+    (i.e., "policy='direct'"). You can also set own policy class instance
+    (see "agent/policy.py" with a description of the interface design
+    details). The dimension is determined automatically according to the
+    properties of the agent and the used policy; the mode size should be 4.
+    Note that agent actions mean: 0: LEFT, 1: DOWN, 2: RIGHT, 3: UP.
 """
 
 
@@ -35,7 +28,7 @@ class BmAgentLake(Agent):
             return [], []
 
         map = []
-        while len(map) == 0 or not frozen_lake.is_valid(map, size):
+        while len(map) == 0 or not Agent.frozen_lake.is_valid(map, size):
             p = min(1., p)
             map = rand.choice([BmAgentLake.FROZ, BmAgentLake.HOLE],
                 (size, size), p=[p, 1-p])
@@ -55,7 +48,7 @@ class BmAgentLake(Agent):
 
     def __init__(self, d=None, n=4, name='AgentLake', desc=DESC,
                  steps=100, size=5, holes_min=10, holes_max=20,
-                 policy_name='none', with_state_ext=False):
+                 policy='direct', with_state_ext=False):
         super().__init__(d, n, name, desc, steps, policy_name)
 
         self._size = size
@@ -182,9 +175,6 @@ class BmAgentLake(Agent):
         x, y = (state // self._size, state % self._size)
         return np.array([x, y], dtype=int)
 
-    def _gen_state0(self):
-        return np.zeros(self._d_st, dtype=int)
-
     def _parse_state(self, state):
         return self._discretize(state)
 
@@ -213,20 +203,17 @@ if __name__ == '__main__':
     text += f'{y:-10.3e}'
     print(text)
 
-    text = 'Generate image for start state           :  '
+    text = 'Render for "direct" policy               :  '
     bm = BmAgentLake().prep()
-    bm.show('result/BmAgentLake_demo_start')
-    text += 'see "result/...demo_start.png'
-    print(text)
-
-    text = 'Generate image for final state           :  '
+    fpath = f'result/{bm.name}/render_direct'
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.show('result/BmAgentLake_demo_final')
-    text += 'see "result/...demo_final.png'
+    bm.render(fpath)
+    text += f' see {fpath}'
     print(text)
 
-    text = 'Generate video for a random multi-index  :  '
-    bm.render('result/BmAgentLake_demo_none', i)
-    text += 'see "result/...demo_none.mp4'
+    text = 'Generate image for a random multi-index  :  '
+    fpath = f'result/{bm.name}/show'
+    bm.show(fpath)
+    text += f' see {fpath}'
     print(text)
