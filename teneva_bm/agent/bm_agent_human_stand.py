@@ -6,8 +6,8 @@ from teneva_bm.agent.agent import Agent
 
 
 DESC = """
-    Agent from myjoco environment "Ant". For details, see
-    https://mgoulao.github.io/gym-docs/environments/mujoco/ant/
+    Agent from myjoco environment "Humanoid Standup". For details, see
+    https://mgoulao.github.io/gym-docs/environments/mujoco/humanoid_standup/
 
     By default, no policy is used ("policy_name" is 'none"). The Toeplitz
     discrete policy may be also used (if "policy_name" is 'toeplitz"), see
@@ -15,26 +15,20 @@ DESC = """
 """
 
 
-class BmAgentAnt(Agent):
-    def __init__(self, d=None, n=3, name='AgentAnt', desc=DESC,
+class BmAgentHumanStand(Agent):
+    def __init__(self, d=None, n=3, name='AgentHumanStand', desc=DESC,
                  steps=1000, policy_name='toeplitz'):
         super().__init__(d, n, name, desc, steps, policy_name)
 
     def prep_bm(self, policy=None):
-        env = Agent.make('Ant-v4')
+        env = Agent.make('HumanoidStandup-v4')
         return super().prep_bm(env, policy)
-
-    def _set_state(self, state, x=0., y=0.):
-        return # TODO !!!
-        qpos = np.array([x, y] + list(state[:3]))
-        qvel = state[3:]
-        self._env.set_state(qpos, qvel)
 
 
 if __name__ == '__main__':
     np.random.seed(42)
 
-    bm = BmAgentAnt().prep()
+    bm = BmAgentHumanStand().prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+1)
@@ -47,17 +41,17 @@ if __name__ == '__main__':
     print(text)
 
     text = 'Generate video for a random multi-index  :  '
-    bm = BmAgentAnt(steps=200).prep()
+    bm = BmAgentHumanStand(steps=200).prep()
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.render('result/BmAgentAnt_demo_none')
+    bm.render('result/BmAgentHumanStand_demo_none')
     text += 'see "result/...demo_none.mp4'
     print(text)
 
     text = 'Generate video for a random multi-index  :  '
-    bm = BmAgentAnt(steps=200, policy_name='toeplitz').prep()
+    bm = BmAgentHumanStand(steps=200, policy_name='toeplitz').prep()
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.render('result/BmAgentAnt_demo_toeplitz')
+    bm.render('result/BmAgentHumanStand_demo_toeplitz')
     text += 'see "result/...demo_toeplitz.mp4'
     print(text)

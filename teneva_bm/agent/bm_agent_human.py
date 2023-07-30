@@ -6,35 +6,29 @@ from teneva_bm.agent.agent import Agent
 
 
 DESC = """
-    Agent from myjoco environment "Humanoid". For details, see
-    https://mgoulao.github.io/gym-docs/environments/mujoco/humanoid/
+    Agent from myjoco environment "Human". For details, see
+    https://mgoulao.github.io/gym-docs/environments/mujoco/Human/
 
-    By default ("policy_name" is 'none"), no policy is used. The Toeplitz
+    By default, no policy is used ("policy_name" is 'none"). The Toeplitz
     discrete policy may be also used (if "policy_name" is 'toeplitz"), see
     https://github.com/jparkerholder/ASEBO/blob/master/asebo/policies.py
 """
 
 
-class BmAgentHumanoid(Agent):
-    def __init__(self, d=None, n=32, name='AgentHumanoid', desc=DESC,
-                 steps=1000, policy_name='none'):
+class BmAgentHuman(Agent):
+    def __init__(self, d=None, n=3, name='AgentHuman', desc=DESC,
+                 steps=1000, policy_name='toeplitz'):
         super().__init__(d, n, name, desc, steps, policy_name)
 
     def prep_bm(self, policy=None):
-        env = Agent.env_build('Humanoid-v4')
+        env = Agent.make('Human-v4')
         return super().prep_bm(env, policy)
-
-    def _set_state(self, state, x=0., y=0.):
-        return # TODO !!!
-        qpos = np.array([x, y] + list(state[:3]))
-        qvel = state[3:]
-        self._env.set_state(qpos, qvel)
 
 
 if __name__ == '__main__':
     np.random.seed(42)
 
-    bm = BmAgentHumanoid().prep()
+    bm = BmAgentHuman().prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+1)
@@ -47,17 +41,17 @@ if __name__ == '__main__':
     print(text)
 
     text = 'Generate video for a random multi-index  :  '
-    bm = BmAgentHumanoid(steps=200).prep()
+    bm = BmAgentHuman(steps=200).prep()
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.render('result/BmAgentHumanoid_demo_none')
+    bm.render('result/BmAgentHuman_demo_none')
     text += 'see "result/...demo_none.mp4'
     print(text)
 
     text = 'Generate video for a random multi-index  :  '
-    bm = BmAgentHumanoid(steps=200, policy_name='toeplitz').prep()
+    bm = BmAgentHuman(steps=200, policy_name='toeplitz').prep()
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
-    bm.render('result/BmAgentHumanoid_demo_toeplitz')
+    bm.render('result/BmAgentHuman_demo_toeplitz')
     text += 'see "result/...demo_toeplitz.mp4'
     print(text)

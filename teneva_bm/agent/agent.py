@@ -23,12 +23,12 @@ from teneva_bm.agent.policy import PolicyToeplitz
 
 
 class Agent(Bm):
-    def env_build(name, **args):
+    def make(name, **args):
         if with_gym:
             return gym.make(name, render_mode='rgb_array', **args)
 
-    def __init__(self, d=None, n=32, name='Agent-abstract-class', desc='',
-                 steps=1000, policy_name='none'):
+    def __init__(self, d=None, n=3, name='Agent-abstract-class', desc='',
+                 steps=1000, policy_name='toeplitz'):
         super().__init__(None, None, name, desc)
         self._n_raw = n # We'll set it later in "prep_bm" method
 
@@ -97,38 +97,12 @@ class Agent(Bm):
         return super().info(text+footer)
 
     def prep_bm(self, env, policy=None, d_st=None, d_ac=None):
-        if env is None:
-            raise ValueError('Environment is not set')
-        self._env = env
+        self._prep_env(env)
+        self._prep_space(d_st, d_ac)
+        self._prep_policy(policy)
 
-        if d_st:
-            self._d_st = d_st
-            self._a_st = None
-            self._b_st = None
-        else:
-            self._d_st = len(self._env.observation_space.low)
-            self._a_st = list(self._env.observation_space.low)
-            self._b_st = list(self._env.observation_space.high)
-
-        if d_ac:
-            self._d_ac = d_ac
-            self._a_ac = None
-            self._b_ac = None
-        else:
-            self._d_ac = len(self._env.action_space.low)
-            self._a_ac = list(self._env.action_space.low)
-            self._b_ac = list(self._env.action_space.high)
-
-        if policy is not None:
-            self._policy = policy
-        elif self._policy_name == 'none':
-            self._policy = Policy(self._d_st, self._d_ac, self._steps)
-        elif self._policy_name == 'toeplitz':
-            self._policy = PolicyToeplitz(self._d_st, self._d_ac, self._steps)
-        else:
-            raise ValueError('Policy is not set')
-
-        self.set_size(self._policy.d, self._n_raw)
+        self.set_dimension(self._policy.d)
+        self.set_size(self._n_raw)
         if self.is_func: # TODO !!!
             self.set_grid(self._a_ac*self._steps, self._b_ac*self._steps)
 
@@ -155,45 +129,81 @@ class Agent(Bm):
         self._run()
         return self._reward
 
-    def _gen_state0(self):
-        return np.zeros(self._d_st)
-
-    def _parse_state(self, state):
-        return state
+    def _parse_action(self, action):
+        return action
+        if len(action) == 1:
+            action = action[0]
 
     def _parse_reward(self, reward=0.):
         return reward
 
-    def _reset(self, state0=None):
+    def _parse_state(self, state):
+        return state
+
+    def _prep_env(self, env):
+        if env is None:
+            raise ValueError('Environment is not set')
+        self._env = env
+
+    def _prep_policy(self, policy=None):
+        if policy is not None:
+            self._policy = policy
+        elif self._policy_name == 'none':
+            self._policy = Policy(self._d_st, self._d_ac, self._steps)
+        elif self._policy_name == 'toeplitz':
+            self._policy = PolicyToeplitz(self._d_st, self._d_ac, self._steps)
+        else:
+            raise ValueError('Policy is not set')
+
+    def _prep_space(self, d_st=None, d_ac=None):
+        if d_st:
+            self._d_st = d_st
+            self._a_st = None
+            self._b_st = None
+        else:
+            self._d_st = len(self._env.observation_space.low)
+            self._a_st = list(self._env.observation_space.low)
+            self._b_st = list(self._env.observation_space.high)
+
+        if d_ac:
+            self._d_ac = d_ac
+            self._a_ac = None
+            self._b_ac = None
+        else:
+            self._d_ac = len(self._env.action_space.low)
+            self._a_ac = list(self._env.action_space.low)
+            self._b_ac = list(self._env.action_space.high)
+
+    def _reset(self):
+        state, info = self._env.reset(seed=self.seed)
+
+        self._step = 0
+        self._state0 = self._parse_state(state)
+        self._state_prev = None
+        self._done = False
+
         self._actions = []
         self._frames = []
         self._rewards = []
         self._states = []
-
-        self._step = 0
-        self._state0 = self._gen_state0() if state0 is None else state0
-        self._state_prev = None
-        self._done = False
-
-        __state, __info = self._env.reset(seed=self.seed)
-        self._set_state(self._state0)
 
     def _run(self):
         self._reset()
 
         for step in range(self._steps):
             self._step = step
-            self._state_prev = self._state.copy()
 
             action = self._policy(self._state, step)
-            if len(action) == 1:
-                action = action[0]
+            action = self._parse_action(action)
 
             state, reward, self._done = self._env.step(action)[:3]
+            state = self._parse_state(state)
+            reward = self._parse_reward(reward)
 
+            self._state_prev = self._state.copy()
             self._actions.append(action)
-            self._rewards.append(self._parse_reward(reward))
-            self._states.append(self._parse_state(state))
+            self._rewards.append(reward)
+            self._states.append(state)
 
             if self._with_render:
                 try:
@@ -203,6 +213,3 @@ class Agent(Bm):
 
             if self._done:
                 break
-
-    def _set_state(self, state):
-        return
