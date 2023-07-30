@@ -12,13 +12,13 @@ DESC = """
     k1-k5), where phase angle modulated bat algorithm (P-AMBA) was proposed
     for high dimensional binary optimization problems with application to
     antenna topology optimization. The dimension should be in 10, 20, 50, 80,
-    100, and the mode size should be 2. Note that the default penalty for the
-    constraint is "0".
+    100 (the default value is 100), and the mode size should be 2. Note that
+    the default penalty for the constraint is "0".
 """
 
 
 class BmQuboKnapDet(Bm):
-    def __init__(self, d=50, n=2, name='QuboKnapDet', desc=DESC):
+    def __init__(self, d=100, n=2, name='QuboKnapDet', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n0 != 2:
@@ -57,6 +57,10 @@ class BmQuboKnapDet(Bm):
             self.set_err('Dimension should be in 10, 20, 50, 80, 100')
 
         self.set_constr(penalty=0.)
+
+    @property
+    def identity(self):
+        return ['d']
 
     @property
     def is_tens(self):

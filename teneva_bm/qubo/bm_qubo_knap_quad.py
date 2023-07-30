@@ -13,14 +13,13 @@ from teneva_bm import Bm
 
 DESC = """
     Quadratic unconstrained binary optimization (QUBO) knapsack problem
-    represented as a discrete function.
-    The dimension may be any (default is 50), and the mode size should be 2.
-    The benchmark needs "qubogen==0.1.1" library.
+    represented as a discrete function. The dimension may be any (default is
+    100), and the mode size should be 2. It needs "qubogen==0.1.1" library.
 """
 
 
 class BmQuboKnapQuad(Bm):
-    def __init__(self, d=50, n=2, name='QuboKnapQuad', desc=DESC):
+    def __init__(self, d=100, n=2, name='QuboKnapQuad', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n0 != 2:
@@ -33,7 +32,7 @@ class BmQuboKnapQuad(Bm):
 
     @property
     def identity(self):
-        return super().identity + ['seed']
+        return ['d', 'seed']
 
     @property
     def is_tens(self):

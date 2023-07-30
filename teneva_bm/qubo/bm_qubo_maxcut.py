@@ -20,14 +20,14 @@ from teneva_bm import Bm
 
 DESC = """
     Quadratic unconstrained binary optimization (QUBO) Max-Cut problem
-    represented as a discrete function.
-    The dimension may be any (default is 50), and the mode size should be 2.
-    The benchmark needs "networkx==3.0" and "qubogen==0.1.1" libraries.
+    represented as a discrete function. The dimension may be any (default
+    is 100), and the mode size should be 2. The benchmark needs
+    "networkx==3.0" and "qubogen==0.1.1" libraries.
 """
 
 
 class BmQuboMaxcut(Bm):
-    def __init__(self, d=50, n=2, name='QuboMaxcut', desc=DESC):
+    def __init__(self, d=100, n=2, name='QuboMaxcut', desc=DESC):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n0 != 2:
@@ -45,7 +45,7 @@ class BmQuboMaxcut(Bm):
 
     @property
     def identity(self):
-        return super().identity + ['seed']
+        return ['d', 'seed']
 
     @property
     def is_tens(self):
