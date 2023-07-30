@@ -11,6 +11,8 @@ class Bm:
     def __init__(self, d=None, n=None, name='', desc=''):
         self.init()
 
+        self.set_log()
+
         self.set_seed()
 
         self.set_dimension(d)
@@ -27,10 +29,8 @@ class Bm:
         self.set_cache()
         self.set_budget()
 
-        self.set_min()
         self.set_max()
-
-        self.set_log()
+        self.set_min()
 
     def __call__(self, X):
         """Return a value or batch of values for provided x-point."""
@@ -45,14 +45,14 @@ class Bm:
         """Return the lower grid size float value if it is constant."""
         if not self.is_a_equal:
             raise ValueError('Lower grid size is not constant, can`t get a0')
-        return self.a[0]
+        return self.a[0] if self.a is not None else None
 
     @property
     def b0(self):
         """Return the upper grid size float value if it is constant."""
         if not self.is_b_equal:
             raise ValueError('Upper grid size is not constant, can`t get b0')
-        return self.b[0]
+        return self.b[0] if self.b is not None else None
 
     @property
     def identity(self):
@@ -112,7 +112,7 @@ class Bm:
         """Return the mode size int value if it is constant."""
         if not self.is_n_equal:
             raise ValueError('Mode size is not constant, can`t get n0')
-        return self.n[0]
+        return self.n[0] if self.n is not None else None
 
     @property
     def time_full(self):
@@ -149,7 +149,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        I_trn = teneva.sample_lhs(self.n, m, seed=self.seed)
+        I_trn = teneva.sample_lhs(self.n, m, seed=self.rand)
         y_trn = self.get(I_trn, skip_process)
 
         if y_trn is None:
@@ -162,7 +162,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        I_tst = teneva.sample_random(self.n, m, seed=self.seed)
+        I_tst = teneva.sample_random(self.n, m, seed=self.rand)
         y_tst = self.get(I_tst, skip_process)
 
         if y_tst is None:
@@ -340,13 +340,13 @@ class Bm:
         hist = {
             'm': self.m,
             'm_cache': self.m_cache,
-            'i_max': self.i_max,
-            'x_max': self.x_max,
+            'i_max': self.list_copy(self.i_max, 'int'),
+            'x_max': self.list_copy(self.x_max, 'float'),
             'y_max': self.y_max,
-            'i_min': self.i_min,
-            'x_min': self.x_min,
+            'i_min': self.list_copy(self.i_min, 'int'),
+            'x_min': self.list_copy(self.x_min, 'float'),
             'y_min': self.y_min,
-            'y_list': self.y_list,
+            'y_list': self.list_copy(self.y_list, 'float'),
             'time': self.time,
             'time_full': self.time_full,
             'err': '; '.join(self.err) if len(self.err) else '',
@@ -626,7 +626,6 @@ class Bm:
     def init(self):
         self.err = []
 
-        # Last solution:
         self.i = None
         self.x = None
         self.y = None
@@ -649,11 +648,11 @@ class Bm:
 
         self.log_m_last = 0
 
-        self.is_prep = False
-
         self.time_stamp_start = tpc()
 
         self.cache = {}
+
+        self.is_prep = False
 
     def list_convert(self, x, kind='float', eps=1.E-16):
         """Convert list of equal values to one number and back."""
@@ -663,18 +662,39 @@ class Bm:
         if kind == 'int':
             if isinstance(x, (int, float)):
                 return np.array([x]*self.d, dtype=int)
-            return int(x[0]) if len(set(x))==1 else np.asanyarray(x, dtype=int)
+
+            if len(set(x)) == 1:
+                return int(x[0])
+            else:
+                return self.list_copy(x, 'int')
 
         elif kind == 'float':
             if isinstance(x, (int, float)):
                 return np.array([x]*self.d, dtype=float)
             for v in x:
                 if np.abs(v - x[0]) > eps:
-                    return np.asanyarray(x, dtype=float)
+                    return self.list_copy(x, 'float')
             return float(x[0])
 
         else:
             raise ValueError('Unsupported kind for list conversion')
+
+    def list_copy(self, x, kind=None):
+        """Copy list or array and return the new array."""
+        if x is None:
+            return None
+
+        if kind:
+            if kind == 'int':
+                x = np.asanyarray(x, dtype=int)
+            elif kind == 'float':
+                x = np.asanyarray(x, dtype=float)
+            else:
+                raise ValueError('Unsupported kind for list copy')
+        else:
+            x = np.asanyarray(x)
+
+        return x.copy()
 
     def log_check(self):
         if not self.with_log:
@@ -765,8 +785,8 @@ class Bm:
         ind = np.argmax(y)
         if self.y_max is None or self.y_max < y[ind]:
             self.is_y_max_new = True
-            self.i_max = I[ind, :] if I is not None else None
-            self.x_max = X[ind, :] if X is not None else None
+            self.i_max = I[ind, :].copy() if I is not None else None
+            self.x_max = X[ind, :].copy() if X is not None else None
             self.y_max = y[ind]
         else:
             self.is_y_max_new = False
@@ -775,8 +795,8 @@ class Bm:
         ind = np.argmin(y)
         if self.y_min is None or self.y_min > y[ind]:
             self.is_y_min_new = True
-            self.i_min = I[ind, :] if I is not None else None
-            self.x_min = X[ind, :] if X is not None else None
+            self.i_min = I[ind, :].copy() if I is not None else None
+            self.x_min = X[ind, :].copy() if X is not None else None
             self.y_min = y[ind]
         else:
             self.is_y_min_new = False
@@ -792,7 +812,7 @@ class Bm:
 
     def process_last(self):
         if self.with_log:
-            self.log(self.info_current('<<< DONE'))
+            self.log(self.info_current('<<< DONE\n'))
 
     def recover(self, i=None, best=True):
         """Restores some benchmark-specific values."""
@@ -867,14 +887,19 @@ class Bm:
         self.grid_kind = kind
 
     def set_log(self, log=False, cond='min-max', step=1000, prefix='bm',
-                with_min=True, with_max=True):
+                with_min=True, with_max=True, log_wrn=None):
         """Set the log options. The "log" may be bool or print-like function."""
-        if not log:
-            self.with_log = False
-            self.log = lambda text: None
-        else:
+        if log:
             self.with_log = True
             self.log = print if isinstance(log, bool) else log
+        else:
+            self.with_log = False
+            self.log = lambda text: None
+
+        if log_wrn:
+            self.log_wrn = log_wrn
+        else:
+            self.log_wrn = print
 
         if not cond in ['min', 'max', 'min-max', 'step']:
             raise ValueError(f'Invalid "log_cond" argument "{cond}"')
@@ -892,9 +917,9 @@ class Bm:
         self.y_max_real = y
 
         if self.i_max_real is not None:
-            self.i_max_real = np.asanyarray(self.i_max_real, dtype=int)
+            self.i_max_real = self.list_copy(self.i_max_real, 'int')
         if self.x_max_real is not None:
-            self.x_max_real = np.asanyarray(self.x_max_real, dtype=float)
+            self.x_max_real = self.list_copy(self.x_max_real, 'float')
         if self.y_max_real is not None:
             self.y_max_real = float(self.y_max_real)
 
@@ -905,9 +930,9 @@ class Bm:
         self.y_min_real = y
 
         if self.i_min_real is not None:
-            self.i_min_real = np.asanyarray(self.i_min_real, dtype=int)
+            self.i_min_real = self.list_copy(self.i_mn_real, 'int')
         if self.x_min_real is not None:
-            self.x_min_real = np.asanyarray(self.x_min_real, dtype=float)
+            self.x_min_real = self.list_copy(self.x_min_real, 'float')
         if self.y_min_real is not None:
             self.y_min_real = float(self.y_min_real)
 
@@ -936,7 +961,8 @@ class Bm:
         if self.a is None or self.b is None:
             raise ValueError('Please, set grid before')
 
-        shift = self.rand.normal(size=self.d) / scale
+        rand = np.random.default_rng(42)
+        shift = rand.normal(size=self.d) / scale
         self.a = self.a - (self.b-self.a) * shift
         self.b = self.b + (self.b-self.a) * shift
 
@@ -955,4 +981,4 @@ class Bm:
         return np.array([self.target(x) for x in X])
 
     def wrn(self, text):
-        self.log('!!! BM-WARNING | ' + text)
+        self.log_wrn('!!! BM-WARNING | ' + text)
