@@ -174,7 +174,7 @@ class Agent(Bm):
             self.set_grid(self._policy.a, self._policy.b)
         self._reset()
 
-    def render(self, fpath=None, i=None, best=True):
+    def render(self, fpath=None, i=None, best=True, fps=20.):
         self._with_render = True
         i, y = self.get_solution(i, best)
         self._with_render = False
@@ -185,7 +185,7 @@ class Agent(Bm):
 
         fpath = self.path_build(fpath, 'mp4')
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(fpath, fourcc, 20.0, (frames[0].shape[:2]))
+        out = cv2.VideoWriter(fpath, fourcc, fps, (frames[0].shape[:2]))
         for frame in frames:
             out.write(frame)
         out.release()
@@ -212,10 +212,16 @@ class Agent(Bm):
     def _parse_action(self, action):
         return action
 
-    def _parse_reward(self, reward, state):
+    def _parse_action_gym(self, action):
+        return action
+
+    def _parse_reward(self, reward):
         return reward
 
     def _parse_state(self, state):
+        return state
+
+    def _parse_state_policy(self, state):
         return state
 
     def _reset(self):
@@ -235,19 +241,28 @@ class Agent(Bm):
     def _run(self):
         self._reset()
 
+        if self._with_render:
+            try:
+                self._frames.append(self._env.render())
+            except Exception as e:
+                self._wrn('Can not render agent for video generation')
+
         for step in range(self._steps):
             self._step = step
 
-            action = self._policy(self._state)
+            state = self._parse_state_policy(self._state)
+            action = self._policy(state)
             action = self._parse_action(action)
-
-            state, reward, self._done = self._env.step(action)[:3]
-            state = self._parse_state(state)
-            reward = self._parse_reward(reward, state)
-
             self._actions.append(action)
-            self._rewards.append(reward)
+
+            action_gym = self._parse_action_gym(action)
+            state, reward, self._done = self._env.step(action_gym)[:3]
+
+            state = self._parse_state(state)
             self._states.append(state)
+
+            reward = self._parse_reward(reward)
+            self._rewards.append(reward)
 
             if self._with_render:
                 try:
