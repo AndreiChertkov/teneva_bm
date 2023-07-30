@@ -196,7 +196,7 @@ class Agent(Bm):
         try:
             frame = self._env.render()
         except Exception as e:
-            self._wrn('Can not render agent for image generation')
+            self.wrn('Can not render agent for image generation')
 
         plt.imshow(frame)
         plt.axis('off')
@@ -245,7 +245,7 @@ class Agent(Bm):
             try:
                 self._frames.append(self._env.render())
             except Exception as e:
-                self._wrn('Can not render agent for video generation')
+                self.wrn('Can not render agent for video generation')
 
         for step in range(self._steps):
             self._step = step
@@ -268,7 +268,7 @@ class Agent(Bm):
                 try:
                     self._frames.append(self._env.render())
                 except Exception as e:
-                    self._wrn('Can not render agent for video generation')
+                    self.wrn('Can not render agent for video generation')
 
             if self._done:
                 break
