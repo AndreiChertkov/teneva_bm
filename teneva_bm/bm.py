@@ -176,6 +176,22 @@ class Bm:
             msg = 'Run "prep" method for BM before call it'
             self.set_err(msg)
 
+        if self.d is None:
+            msg = 'Dimension "d" should be set'
+            self.set_err(msg)
+
+        if self.n is None:
+            msg = 'Mode size "n" should be set'
+            self.set_err(msg)
+
+        if self.is_func and self.a is None:
+            msg = 'Lower grid limit "a" should be set for continuous function'
+            self.set_err(msg)
+
+        if self.is_func and self.b is None:
+            msg = 'Lower grid limit "b" should be set for continuous function'
+            self.set_err(msg)
+
         return self.check_err()
 
     def check_err(self):
@@ -870,6 +886,11 @@ class Bm:
         self.a = teneva.grid_prep_opt(a, self.d)
         self.b = teneva.grid_prep_opt(b, self.d)
 
+        if self.a is not None and self.b is not None:
+            for k in range(self.d):
+                if self.a[k] >= self.b[k]:
+                    raise ValueError('Invalid grid limits (a >= b)')
+
     def set_grid_kind(self, kind='cheb'):
         """Set the kind of the grid ('cheb' or 'uni').
 
@@ -923,6 +944,30 @@ class Bm:
         if self.y_max_real is not None:
             self.y_max_real = float(self.y_max_real)
 
+        if self.i_max_real is not None:
+            if getattr(self, 'n', None) is None:
+                raise ValueError('Please set mode sizes before the max')
+
+            for k in range(self.d):
+                is_out_a = self.i_max_real[k] < 0
+                is_out_b = self.i_max_real[k] > self.n[k] - 1
+                if is_out_a or is_out_b:
+                    raise ValueError('The i_max is out of grid bounds')
+
+        if self.x_max_real is not None:
+            if not self.is_func:
+                raise ValueError('Can not set x_max for discrete function')
+            if getattr(self, 'a', None) is None:
+                raise ValueError('Please set lower grid limit before the max')
+            if getattr(self, 'b', None) is None:
+                raise ValueError('Please set upper grid limit before the max')
+
+            for k in range(self.d):
+                is_out_a = self.x_max_real[k] < self.a[k]
+                is_out_b = self.x_max_real[k] > self.b[k]
+                if is_out_a or is_out_b:
+                    raise ValueError('The x_max is out of grid bounds')
+
     def set_min(self, i=None, x=None, y=None):
         """Set exact (real) global minimum (index, point and related value)."""
         self.i_min_real = i
@@ -935,6 +980,30 @@ class Bm:
             self.x_min_real = self.list_copy(self.x_min_real, 'float')
         if self.y_min_real is not None:
             self.y_min_real = float(self.y_min_real)
+
+        if self.i_min_real is not None:
+            if getattr(self, 'n', None) is None:
+                raise ValueError('Please set mode sizes before the min')
+
+            for k in range(self.d):
+                is_out_a = self.i_min_real[k] < 0
+                is_out_b = self.i_min_real[k] > self.n[k] - 1
+                if is_out_a or is_out_b:
+                    raise ValueError('The i_min is out of grid bounds')
+
+        if self.x_min_real is not None:
+            if not self.is_func:
+                raise ValueError('Can not set x_min for discrete function')
+            if getattr(self, 'a', None) is None:
+                raise ValueError('Please set lower grid limit before the min')
+            if getattr(self, 'b', None) is None:
+                raise ValueError('Please set upper grid limit before the min')
+
+            for k in range(self.d):
+                is_out_a = self.x_min_real[k] < self.a[k]
+                is_out_b = self.x_min_real[k] > self.b[k]
+                if is_out_a or is_out_b:
+                    raise ValueError('The x_min is out of grid bounds')
 
     def set_name(self, name=''):
         """Set display name for the benchmark."""
@@ -956,15 +1025,18 @@ class Bm:
 
         self.n = teneva.grid_prep_opt(n, self.d, int)
 
-    def shift_grid(self, scale=25):
+    def shift_grid(self, scale=100., sign=1):
         """Apply random shift for the grid limits."""
         if self.a is None or self.b is None:
             raise ValueError('Please, set grid before')
 
         rand = np.random.default_rng(42)
-        shift = rand.normal(size=self.d) / scale
-        self.a = self.a - (self.b-self.a) * shift
-        self.b = self.b + (self.b-self.a) * shift
+
+        a_shift = rand.uniform(0, (self.b-self.a) / scale, size=self.d)
+        b_shift = rand.uniform(0, (self.b-self.a) / scale, size=self.d)
+
+        self.a = self.a + a_shift * sign
+        self.b = self.b - b_shift * sign
 
     def show(self, fpath=None, i=None, best=True):
         """Present the state of the benchmark (image, graph, etc.)."""
