@@ -19,12 +19,11 @@ DESC = """
     is also supported, which relates to the possible values "-2, -1, 0, 1, 2".
     If the "only2" flag is set during initialization, then only two factor
     matrices will be constructed, and the third matrix will be restored as a
-    solution to the corresponding system of linear equations.
-    The benchmark has also the method "recover", which returns the factor
-    matrices for the given multi-indices.
-    For more details, see the work Fawzi, A., et al. "Discovering faster
-    matrix multiplication algorithms with reinforcement learning." Nature
-    610.7930 (2022): 47-53.
+    solution to the corresponding system of linear equations. The benchmark
+    has also the method "recover", which returns the factor matrices for the
+    given multi-indices. For more details, see the work Fawzi, A., et al.
+    "Discovering faster matrix multiplication algorithms with reinforcement
+    learning." Nature 610.7930 (2022): 47-53.
 """
 
 

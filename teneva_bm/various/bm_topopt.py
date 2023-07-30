@@ -8,8 +8,9 @@ from teneva_bm import Bm
 
 
 DESC = """
-    Discrete Topology optimization task. This is a draft!!!
-    The dimension and mode size are defined from "nx" and "ny" parameters.
+    DRAFT!!! Discrete Topology optimization task.
+    The dimension is defined from "nx" and "ny" parameters and mode size
+    should be 2.
 """
 
 
@@ -397,6 +398,7 @@ if __name__ == '__main__':
     print(text)
 
     text = 'Generate image for a random multi-index  :  '
-    bm.show('result/BmTopopt_demo', np.array(i))
-    text += 'see "result" folder with png file'
+    fpath = f'result/{bm.name}/show'
+    bm.show(fpath)
+    text += f' see {fpath}'
     print(text)
