@@ -75,9 +75,9 @@ Modifying this class may break the functionality of all benchmarks, so please do
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py
     ```
 
-2. Update the package version (like `0.5.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion number;
+2. Update the package version (like `0.6.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion number;
 
-3. Do commit like `Update version (0.5.X)` and push;
+3. Do commit like `Update version (0.6.X)` and push;
 
 4. Upload the new version to `pypi` (login: AndreiChertkov):
     ```bash
