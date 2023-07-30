@@ -14,7 +14,7 @@ The package can be installed via pip: `pip install teneva_bm` (it requires the [
 
 > Required python packages (see `requirements.txt`) [matplotlib](https://matplotlib.org/) (3.7.0+) and [teneva](https://github.com/AndreiChertkov/teneva) (0.14.5+) will be automatically installed during the installation of the main software product.
 
-Some benchmarks require additional installation of specialized libraries. The corresponding instructions are given in the description of each benchmark (see `DESC` string in the python files with benchmarks). Installation of all required libraries for all benchmarks can be done with the following command:
+Some benchmarks require additional installation of specialized libraries. The corresponding instructions are given in the description of each benchmark (see `DESC` string in the python files with benchmarks). Installation of all required libraries for all benchmarks can be done with the following commands:
 
 - Collections `func`, `hs` and `various` do not require installation of additional libraries.
 
@@ -49,8 +49,8 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 ## Available benchmarks
 
-- `agent` - the collection of problems from [gym](https://www.gymlibrary.dev/) framework, including [mujoco agents](https://www.gymlibrary.dev/environments/mujoco/index.html) based on the physics engine [mujoco](https://mujoco.org/) for faciliatating research and development in robotics, biomechanics, graphics and animation. The collection includes the following benchmarks: `BmAgentSwimmer`.
-    > Within the framework of this collection, explicit optimization of the entire set of actions (discrete or continuous) may be performed (i.e., `none` policy) or discrete Toeplitz policy may be used.
+- `agent` - the collection of problems from [gym](https://www.gymlibrary.dev/) framework, including [mujoco agents](https://www.gymlibrary.dev/environments/mujoco/index.html) based on the physics engine [mujoco](https://mujoco.org/) for faciliatating research and development in robotics, biomechanics, graphics and animation. The collection includes the following benchmarks: `BmAgentAnt`, `BmAgentHuman`, `BmAgentHumanStand`, `BmAgentLake`, `BmAgentSwimmer`.
+    > Within the framework of this collection, explicit optimization of the entire set of actions (discrete or continuous) may be performed (if `direct` policy name is set) or discrete Toeplitz policy may be used (if `toeplitz` policy name is set; it is the default value).
 
 - `func` - a collection of analytic functions of a real multidimensional argument. The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncDixon`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncPiston` (only `d=7` is supported), `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchaffer`, `BmFuncSchwefel`.
     > For almost all functions, the exact global minimum ("continuous x point", not multi-index) is known (see `bm.x_min_real` and `bm.y_min_real`). For a number of functions (`BmFuncAlpine`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchwefel`), a `bm.build_cores()` method is available that returns an exact representation of the function on the discrete grid used in the benchmark in the tensor train (TT) format as a list of 3D TT-cores. Note also that we apply small random shift of the grid limits for all functions, to make the optimization problem more difficult (because many functions have a minimum at the center point of the domain).
@@ -75,7 +75,6 @@ First, we create an instance of the desired benchmark class and manually call th
 ```python
 import numpy as np
 from teneva_bm import *
-np.random.seed(42)
 
 bm = BmFuncAckley()
 bm.prep()
@@ -112,11 +111,11 @@ Before calling the `bm.prep()` method, you can set a number of additional benchm
 
 - `bm.set_log(log=False, cond='min-max', step=1000, prefix='bm', with_min=True, with_max=True)` - when calling this function with the `True` argument `log`, the log will be printed while requests to benchmark. You may set the log codition `cond` (`min`, `max`, `min-max` or `step`; e.g., in the case `min` the log will be presented each time the `min` value is updated), the log step (for condition `step`) and a string `prefix` for the log. You can also disable the display of current minimum values (`with_min`) or maximum values (`with_max`) in the log string. Note that you can provide as `log` argument some print-like function, e.g., `log=print`, in this case, printing will occur not to the console, but to the corresponding function.
 
-- `bm.set_cache(with_cache=False, cache=None, m_max=1.E+8)` - when calling this function with the `True` argument `with_cache`, the cache will be used, that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values. Optionally, you can set `m_max` argument that specifies the maximum cache size. If the size is exceeded, the cache will be cleared and a corresponding warning will be displayed. Note that when the `bm.init` method is called, the cache is always reset to zero.
+- `bm.set_cache(with_cache=False, cache=None, m_max=1.E+8)` - when calling this function with the `True` argument `with_cache`, the cache will be used, that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values. Optionally, you can set `m_max` argument that specifies the maximum cache size. If the size is exceeded, the cache will be cleared and a corresponding warning will be displayed to the log. Note that when the `bm.init` method is called, the cache is always reset to zero.
 
 - `bm.set_opts(...)` - for some benchmarks, this function may be called to set additional benchmark-specific options (please see the description of arguments in the relevant benchmark code file).
 
-> You can get the configuration options as a dictionary by the function `bm.get_config()`.
+> You can get all configuration options as a dictionary by the function `bm.get_config()`.
 
 ##### Computing benchmark values
 
@@ -168,7 +167,7 @@ During requests to the benchmark, that is, when calling functions `bm[]` (or `bm
 
 - `bm.time` - total time in seconds spent on calculating the benchmark values (the time spent on cache accesses is also taken into account).
 
-- `bm.time_full` - benchmark lifetime in seconds from the moment of initialization.
+- `bm.time_full` - benchmark lifetime in seconds from the moment of initialization (i.e., the call to `bm.init` method).
 
 - `bm.y_list` - a list of all sequentially calculated benchmark values (results of cache accesses are also added to the list).
 
@@ -176,7 +175,7 @@ During requests to the benchmark, that is, when calling functions `bm[]` (or `bm
 
 - `bm.i_min`, `bm.x_min`, `bm.y_min` - same as in the previous point, but for the minimum value.
 
-- `bm.i`, `bm.x`, `bm.y` - the last requested multi-index / point and the related computed benchmark's values.
+- `bm.i`, `bm.x`, `bm.y` - the last requested multi-index / point and the related computed benchmark's value.
 
 > The following function may be used to print the corresponding values: `print(bm.info_history())`. You can also get these values as a dictionary by the function `bm.get_history()`.
 

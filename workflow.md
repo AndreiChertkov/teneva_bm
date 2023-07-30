@@ -58,7 +58,7 @@
 
 4. Add a description of the new benchmark to section `Available benchmarks`  of the `README.md` file.
 
-5. Update the package version.
+5. Use the new benchmark locally until the next library version update.
 
 > Please use underscore prefixes for all new class instance variables and functions created in the benchmark (e.g., `_temperature`) so that there is no name conflict with the base class `Bm`.
 
