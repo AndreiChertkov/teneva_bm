@@ -87,6 +87,14 @@ class Agent(Bm):
         return True
 
     @property
+    def with_render(self):
+        return True
+
+    @property
+    def with_show(self):
+        return True
+
+    @property
     def _d_ac(self):
         return len(self._env.action_space.low)
 

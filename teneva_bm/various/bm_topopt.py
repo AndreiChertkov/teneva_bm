@@ -35,6 +35,10 @@ class BmTopopt(Bm):
     def is_tens(self):
         return True
 
+    @property
+    def with_show(self):
+        return True
+
     def get_config(self):
         conf = super().get_config()
         conf['_nx'] = self._nx

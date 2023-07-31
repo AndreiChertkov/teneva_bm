@@ -131,6 +131,16 @@ class Bm:
         """Return True if exact TT-cores can be constructed for benchmark."""
         return False
 
+    @property
+    def with_render(self):
+        """Return True if benchmark supports rendering."""
+        return False
+
+    @property
+    def with_show(self):
+        """Return True if benchmark supports "show"."""
+        return False
+
     def build_cores(self):
         """Return exact TT-cores for the TT-representation of the tensor."""
         if self.is_tens:
