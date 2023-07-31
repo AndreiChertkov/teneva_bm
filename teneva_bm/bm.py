@@ -11,6 +11,8 @@ class Bm:
     def __init__(self, d=None, n=None, name='', desc=''):
         self.init()
 
+        self.is_prep = False
+
         self.set_log()
 
         self.set_seed()
@@ -667,8 +669,6 @@ class Bm:
         self.time_stamp_start = tpc()
 
         self.cache = {}
-
-        self.is_prep = False
 
     def list_convert(self, x, kind='float', eps=1.E-16):
         """Convert list of equal values to one number and back."""
