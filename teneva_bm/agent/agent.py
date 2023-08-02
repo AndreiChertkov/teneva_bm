@@ -32,11 +32,11 @@ from teneva_bm.agent.policy import PolicyToeplitz
 
 
 class Agent(Bm):
+    frozen_lake = gym_frozen_lake if with_gym else None
+
     def make(name, **args):
         if with_gym:
             return gym.make(name, render_mode='rgb_array', **args)
-
-    frozen_lake = gym_frozen_lake if with_gym else None
 
     def __init__(self, d=None, n=3, name='Agent-abstract-class', desc='',
                  steps=1000, policy='toeplitz'):
@@ -65,7 +65,8 @@ class Agent(Bm):
             elif self.policy == 'toeplitz':
                 self._policy = PolicyToeplitz()
             else:
-                raise ValueError('Invalid policy name')
+                msg = f'Policy "{policy}" is not supported'
+                self.set_err(msg)
 
         else:
             self.policy = policy.name
@@ -187,6 +188,10 @@ class Agent(Bm):
         i, y = self.get_solution(i, best)
         self._with_render = False
 
+        if not len(self._frames):
+            msg = 'Can not save rendered video for agent (empty frames)'
+            self.wrn(msg)
+
         frames = self._frames
         frames = [cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) for frame in frames]
         # frame = cv2.resize(frame,(512, 512))
@@ -253,7 +258,7 @@ class Agent(Bm):
     def _run(self):
         self._reset()
 
-        if self._with_render:
+        def _render():
             try:
                 self._frames.append(self._env.render())
             except Exception as e:
@@ -261,6 +266,9 @@ class Agent(Bm):
                 msg += f' [Error: {e}]'
                 self.wrn(msg)
                 self._with_render = False
+
+        if self._with_render:
+            _render()
 
         for step in range(self.steps):
             self._step = step
@@ -270,8 +278,8 @@ class Agent(Bm):
             action = self._parse_action(action)
             self._actions.append(action)
 
-            action_gym = self._parse_action_gym(action)
-            state, reward, self._done = self._env.step(action_gym)[:3]
+            action = self._parse_action_gym(action)
+            state, reward, self._done = self._env.step(action)[:3]
 
             state = self._parse_state(state)
             self._states.append(state)
@@ -280,13 +288,7 @@ class Agent(Bm):
             self._rewards.append(reward)
 
             if self._with_render:
-                try:
-                    self._frames.append(self._env.render())
-                except Exception as e:
-                    msg = 'Can not render agent for video generation'
-                    msg += f' [Error: {e}]'
-                    self.wrn(msg)
-                    self._with_render = False
+                _render()
 
             if self._done:
                 break
