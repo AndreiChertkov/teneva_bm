@@ -16,7 +16,7 @@ DESC = """
 
 class BmTopopt(Bm):
     def __init__(self, d=None, n=2, name='BmTopopt', desc=DESC, nx=128, ny=32):
-        super().__init__(nx*ny, n, name, desc)
+        super().__init__(int(nx*ny), n, name, desc)
 
         if d is not None:
             self.set_err('Dimension number (d) should not be set manually')
@@ -24,12 +24,12 @@ class BmTopopt(Bm):
         if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
 
-        self._nx = nx
-        self._ny = ny
+        self.nx = int(nx)
+        self.ny = int(ny)
 
     @property
     def identity(self):
-        return ['_nx', '_ny']
+        return ['nx', 'ny']
 
     @property
     def is_tens(self):
@@ -41,41 +41,41 @@ class BmTopopt(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['_nx'] = self._nx
-        conf['_ny'] = self._ny
-        conf['_k_frac'] = self._k_frac
-        conf['_penal'] = self._penal
-        conf['_rmin'] = self._rmin
+        conf['nx'] = self.nx
+        conf['ny'] = self.ny
+        conf['k_frac'] = self.k_frac
+        conf['penal'] = self.penal
+        conf['rmin'] = self.rmin
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param nx (grid x-size)                   : '
-        v = self._nx
+        v = self.nx
         text += f'{v:.0f}\n'
 
         text += 'Param ny (grid y-size)                   : '
-        v = self._ny
+        v = self.ny
         text += f'{v:.0f}\n'
 
         text += 'Param k_frac for Topopt                  : '
-        v = self._k_frac
+        v = self.k_frac
         text += f'{v:.6f}\n'
 
         text += 'Param penal for Topopt                   : '
-        v = self._penal
+        v = self.penal
         text += f'{v:.6f}\n'
 
         text += 'Param rmin for Topopt                    : '
-        v = self._rmin
+        v = self.rmin
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def prep_bm(self):
-        self._solver = _topopt_lite(self._nx, self._ny,
-            self._k_frac, self._penal, self._rmin)
+        self._solver = _topopt_lite(self.nx, self.ny,
+            self.k_frac, self.penal, self.rmin)
 
     def set_opts(self, k_frac=0.4, penal=3., rmin=5.4):
         """Setting options specific to this benchmark.
@@ -88,14 +88,14 @@ class BmTopopt(Bm):
             rmin (float): ?.
 
         """
-        self._k_frac = k_frac
-        self._penal = penal
-        self._rmin = rmin
+        self.k_frac = k_frac
+        self.penal = penal
+        self.rmin = rmin
 
     def show(self, fpath=None, i=None, best=True):
         i, y = self.get_solution(i, best)
 
-        x = i.reshape(self._nx, self._ny).T
+        x = i.reshape(self.nx, self.ny).T
 
         fig, ax = plt.subplots(1, 1, figsize=(21, 7))
         ax.imshow(x, cmap='gray', interpolation='none')
@@ -104,7 +104,7 @@ class BmTopopt(Bm):
 
         title = ''
         title += f'Shape: {x.shape[0]} x {x.shape[1]}. '
-        title += f'Frac: {k_frac_real:.2f} ({self._k_frac:.2f}). '
+        title += f'Frac: {k_frac_real:.2f} ({self.k_frac:.2f}). '
         title += f'Value: {y:.2f}.'
         fig.suptitle(title, fontsize=18)
 
@@ -116,10 +116,10 @@ class BmTopopt(Bm):
 
     def _optimize_baseline(self):
         """Draft!"""
-        solver = TopOptLite(self._nx, self._ny, self._penal, self._rmin)
+        solver = TopOptLite(self.nx, self.ny, self.penal, self.rmin)
         solver.init(Emin=1.E-9, Emax=1.0)
         solver.prep()
-        x_ini = self._k_frac * np.ones(self._nx * self._ny, dtype=float)
+        x_ini = self.k_frac * np.ones(self.nx * self.ny, dtype=float)
         x_opt = solver.solve(x_ini)
         return x_opt
 

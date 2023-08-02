@@ -54,9 +54,13 @@ class BmAgentLake(Agent):
                  size=5, prob_hole=0.4, with_state_ext=False):
         super().__init__(d, n, name, desc, steps, policy)
 
-        self._size = size
-        self._prob_hole = prob_hole
-        self._with_state_ext = with_state_ext
+        self.size = size
+        self.prob_hole = prob_hole
+        self.with_state_ext = with_state_ext
+
+    @property
+    def identity(self):
+        return ['steps', 'policy', 'n', 'size', 'prob_hole', 'with_state_ext']
 
     @property
     def is_func(self):
@@ -84,7 +88,7 @@ class BmAgentLake(Agent):
 
     @property
     def _d_st(self):
-        if self._with_state_ext:
+        if self.with_state_ext:
             # State includes positions of the holes, goal and agent
             return len(self._holes) * 2 + 2 + 2
         else:
@@ -143,20 +147,20 @@ class BmAgentLake(Agent):
 
     def get_config(self):
         conf = super().get_config()
-        conf['_size'] = self._size
-        conf['_prob_hole'] = self._prob_hole
-        conf['_with_state_ext'] = self._with_state_ext
+        conf['size'] = self.size
+        conf['prob_hole'] = self.prob_hole
+        conf['with_state_ext'] = self.with_state_ext
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Size of the lake                         : '
-        v = self._size
+        v = self.size
         text += f'{v}x{v}\n'
 
         text += 'Probability of the hole                  : '
-        v = self._prob_hole
+        v = self.prob_hole
         text += f'{v}\n'
 
         text += 'Number of holes                          : '
@@ -164,18 +168,18 @@ class BmAgentLake(Agent):
         text += f'{v}\n'
 
         text += 'State is extended                        : '
-        v = 'YES' if self._with_state_ext else 'no'
+        v = 'YES' if self.with_state_ext else 'no'
         text += f'{v}\n'
 
         return super().info(text+footer)
 
     def prep_bm(self, policy=None):
-        self._map = BmAgentLake.map(self._size, self._prob_hole, self.rand)
+        self._map = BmAgentLake.map(self.size, self.prob_hole, self.rand)
         self._holes = BmAgentLake.holes(self._map)
 
         env = Agent.make('FrozenLake-v1', desc=self._map, is_slippery=False)
 
-        self._state_goal = self._discretize(self._size*self._size-1)
+        self._state_goal = self._discretize(self.size*self.size-1)
 
         return super().prep_bm(env)
 
@@ -183,7 +187,7 @@ class BmAgentLake(Agent):
         return super().render(fpath, i, best, fps)
 
     def _discretize(self, state):
-        x, y = (state // self._size, state % self._size)
+        x, y = (state // self.size, state % self.size)
         return np.array([x, y], dtype=int)
 
     def _parse_action_gym(self, action):
@@ -193,7 +197,7 @@ class BmAgentLake(Agent):
         return self._discretize(state)
 
     def _parse_state_policy(self, state):
-        if not self._with_state_ext:
+        if not self.with_state_ext:
             return state
 
         state_ext = []

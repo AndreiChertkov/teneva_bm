@@ -47,29 +47,29 @@ class BmOdeocSimple(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['_x_ini'] = self._x_ini
-        conf['_x_ref'] = self._x_ref
-        conf['_t_max'] = self._t_max
-        conf['_y_err'] = self._y_err
+        conf['x_ini'] = self.x_ini
+        conf['x_ref'] = self.x_ref
+        conf['t_max'] = self.t_max
+        conf['y_err'] = self.y_err
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param x_ini (initial condition)          : '
-        v = self._x_ini
+        v = self.x_ini
         text += f'{v:.6f}\n'
 
         text += 'Param x_ref (target value)               : '
-        v = self._x_ref
+        v = self.x_ref
         text += f'{v:.6f}\n'
 
         text += 'Param t_max (upper limit for time)       : '
-        v = self._t_max
+        v = self.t_max
         text += f'{v:.6f}\n'
 
         text += 'Param y_err (returned value if error)    : '
-        v = self._y_err
+        v = self.y_err
         text += f'{v:-7.1e}\n'
 
         return super().info(text+footer)
@@ -86,10 +86,10 @@ class BmOdeocSimple(Bm):
             y_err (float): returned value if GEKKO solver ends with error.
 
         """
-        self._x_ini = x_ini
-        self._x_ref = x_ref
-        self._t_max = t_max
-        self._y_err = y_err
+        self.x_ini = x_ini
+        self.x_ref = x_ref
+        self.t_max = t_max
+        self.y_err = y_err
 
         self._times = np.linspace(0, t_max, self.d)
 
@@ -98,7 +98,7 @@ class BmOdeocSimple(Bm):
         solver.options.IMODE = 4
         solver.time = self._times
 
-        x = solver.Var(value=self._x_ini, name='x')
+        x = solver.Var(value=self.x_ini, name='x')
         c = solver.Param(list(i), name='i')
         y = solver.Var(value=0.)
 
@@ -109,7 +109,7 @@ class BmOdeocSimple(Bm):
             solver.solve(disp=False)
             y = sum(y.VALUE)
         except Exception as e:
-            y = self._y_err
+            y = self.y_err
 
         return y
 
@@ -119,7 +119,7 @@ class BmOdeocSimple(Bm):
 
     def _obj(self, x, i):
         """Objective function for ODE solution."""
-        return 0.5 * (x - self._x_ref)**2
+        return 0.5 * (x - self.x_ref)**2
 
 
 if __name__ == '__main__':

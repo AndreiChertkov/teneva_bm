@@ -55,20 +55,20 @@ class Agent(Bm):
             msg = 'Dimension number (d) should not be set manually'
             self.set_err(msg)
 
-        self._steps = steps
+        self.steps = steps
 
         if isinstance(policy, str):
-            self._policy_name = policy
+            self.policy = policy
 
-            if self._policy_name == 'direct':
+            if self.policy == 'direct':
                 self._policy = Policy()
-            elif self._policy_name == 'toeplitz':
+            elif self.policy == 'toeplitz':
                 self._policy = PolicyToeplitz()
             else:
                 raise ValueError('Invalid policy name')
 
         else:
-            self._policy_name = policy.name
+            self.policy = policy.name
 
             self._policy = policy
 
@@ -76,7 +76,7 @@ class Agent(Bm):
 
     @property
     def identity(self):
-        return ['_steps', '_policy_name', 'n']
+        return ['steps', 'policy', 'n']
 
     @property
     def is_func(self):
@@ -140,8 +140,8 @@ class Agent(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['_steps'] = self._steps
-        conf['_policy_name'] = self._policy_name
+        conf['steps'] = self.steps
+        conf['policy'] = self.policy
         conf['_d_st'] = self._d_st
         conf['_d_ac'] = self._d_ac
         return conf
@@ -150,11 +150,11 @@ class Agent(Bm):
         text = ''
 
         text += 'Number of agent steps                    : '
-        v = self._steps
+        v = self.steps
         text += f'{v}\n'
 
         text += 'Used policy                              : '
-        v = self._policy_name
+        v = self.policy
         text += f'{v}\n'
 
         text += 'Dimension of state space for agent       : '
@@ -172,7 +172,7 @@ class Agent(Bm):
             raise ValueError('Environment is not set')
         self._env = env
 
-        self._policy.prep(self._steps,
+        self._policy.prep(self.steps,
             self._d_st, self._n_st, self._a_st, self._b_st,
             self._d_ac, self._n_ac, self._a_ac, self._b_ac)
 
@@ -262,7 +262,7 @@ class Agent(Bm):
                 self.wrn(msg)
                 self._with_render = False
 
-        for step in range(self._steps):
+        for step in range(self.steps):
             self._step = step
 
             state = self._parse_state_policy(self._state)

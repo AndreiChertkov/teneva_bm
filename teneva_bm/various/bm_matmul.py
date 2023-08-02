@@ -69,13 +69,13 @@ class BmMatmul(Bm):
         self._T = T_real
         self._E = E
 
-        self._size = size
-        self._rank = rank
-        self._only2 = only2
+        self.size = size
+        self.rank = rank
+        self.only2 = only2
 
     @property
     def identity(self):
-        return ['_size', '_rank', '_only2']
+        return ['size', 'rank', 'n', 'only2']
 
     @property
     def is_tens(self):
@@ -83,40 +83,40 @@ class BmMatmul(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['_size'] = self._size
-        conf['_rank'] = self._rank
-        conf['_only2'] = self._only2
+        conf['size'] = self.size
+        conf['rank'] = self.rank
+        conf['only2'] = self.only2
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param size (sizes of the matrices)       : '
-        v = self._size
+        v = self.size
         text += f'{v:.0f}\n'
 
         text += 'Param rank (search rank for CP-decomp.)  : '
-        v = self._rank
+        v = self.rank
         text += f'{v:.0f}\n'
 
         text += 'Param only2 (if True, use 2 CP-factors)  : '
-        v = 'YES' if self._only2 else 'no'
+        v = 'YES' if self.only2 else 'no'
         text += f'{v}\n'
 
         return super().info(text+footer)
 
     def prep_bm(self):
-        self.loss = _loss_build(self._T, self._E, self._rank, self._only2)
+        self.loss = _loss_build(self._T, self._E, self.rank, self.only2)
 
     def recover(self, i=None, best=True):
         i, y = self.get_solution(i, best)
         x = _ind_to_poi(i, self._E)
 
-        if self._only2:
-            U, V = _factor_from_poi(x, self._rank, True)
+        if self.only2:
+            U, V = _factor_from_poi(x, self.rank, True)
             W = _factor_recover(U, V, self._T)
         else:
-            U, V, W = _factor_from_poi(x, self._rank, False)
+            U, V, W = _factor_from_poi(x, self.rank, False)
 
         return U, V, W
 
@@ -230,7 +230,7 @@ if __name__ == '__main__':
     text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
     print(text)
 
-    if bm._size == 2 and bm.n0 == 3:
+    if bm.size == 2 and bm.n0 == 3:
         text = 'Value at the minimum (real vs calc)      :  '
         y_real = bm.y_min_real
         y_calc = bm[bm.i_min_real]

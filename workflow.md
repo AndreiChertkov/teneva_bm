@@ -60,7 +60,7 @@
 
 5. Use the new benchmark locally until the next library version update.
 
-> Please use underscore prefixes for all new class instance variables and functions created in the benchmark (e.g., `_temperature`) so that there is no name conflict with the base class `Bm`.
+> Please use underscore prefixes for all new class instance variables (except the names of the benchmarks' options, i.e., the args in `__init__` or `bm.set_opts` method; for options, please make sure their names do not conflict with base class variable names) and functions created in the benchmark (e.g., `_env`) so that there is no name conflict with the base class `Bm`.
 
 
 ## How to update the base class Bm

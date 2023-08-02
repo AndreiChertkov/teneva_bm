@@ -53,21 +53,21 @@ class BmQuboMvc(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['_prob_con'] = self._prob_con
+        conf['prob_con'] = self.prob_con
         return conf
 
     def info(self, footer=''):
         text = ''
 
         text += 'Param prob_con (connection probability)  : '
-        v = self._prob_con
+        v = self.prob_con
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def prep_bm(self):
         d = self.d
-        p = self._prob_con
+        p = self.prob_con
         graph = nx.fast_gnp_random_graph(n=d, p=p, seed=self.seed)
         edges = np.array(list([list(e) for e in graph.edges]))
         n_nodes = len(np.unique(np.array(edges).flatten()))
@@ -84,7 +84,7 @@ class BmQuboMvc(Bm):
             prob_con (float): probability of the connection in the graph.
 
         """
-        self._prob_con = prob_con
+        self.prob_con = prob_con
 
     def target_batch(self, I):
         return ((I @ self._Q) * I).sum(axis=1)
