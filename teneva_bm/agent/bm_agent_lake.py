@@ -32,39 +32,52 @@ class BmAgentLake(Agent):
                     holes.append(np.array([i, j], dtype=int))
         return holes
 
-    def map(size=5, prob_hole=0.4, seed=42, iters=1.E+9):
+    def map(size=10, holes=10, seed=42, iters=1.E+4, prob_hole=0.05):
         map = []
         rand = np.random.default_rng(seed) if isinstance(seed, int) else seed
         iter = 0
         while len(map) == 0 or not Agent.frozen_lake.is_valid(map, size):
             iter += 1
             if iter > iters:
-                msg = 'Can not build the map for selected probability'
-                raise ValueError(msg)
+                if prob_hole > 0.9:
+                    msg = 'Can not build the map for selected size / holes'
+                    raise ValueError(msg)
+                return BmAgentLake.map(size, holes, seed, iters, prob_hole+0.1)
 
             map = rand.choice([BmAgentLake.FROZ, BmAgentLake.HOLE],
                 (size, size), p=[1-prob_hole, prob_hole])
             map[0, 0] = BmAgentLake.INIT
             map[-1, -1] = BmAgentLake.GOAL
 
+            if len(BmAgentLake.holes(map)) != holes:
+                map = []
+
         return [''.join(x) for x in map]
 
     def __init__(self, d=None, n=4, name='AgentLake', desc=DESC,
-                 steps=100, policy='direct',
-                 size=5, prob_hole=0.4, with_state_ext=False):
-        super().__init__(d, n, name, desc, steps, policy)
+                 policy='direct', size=10, holes=10, with_state_ext=False):
+        super().__init__(d, n, name, desc, size*size, policy)
 
         self.size = size
-        self.prob_hole = prob_hole
+        self.holes = holes
         self.with_state_ext = with_state_ext
+
+        if isinstance(policy, str):
+            if policy == 'direct':
+                if n != 4:
+                    msg = f'Mode size should be 4 for "direct" policy'
+                    self.set_err(msg)
+            else:
+                msg = f'Policy "{policy}" is not supported'
+                self.set_err(msg)
 
     @property
     def identity(self):
-        return ['steps', 'policy', 'n', 'size', 'prob_hole', 'with_state_ext']
+        return ['size', 'holes', 'policy', 'n', 'with_state_ext']
 
     @property
     def is_func(self):
-        return False
+        return False if self.policy == 'direct' else True
 
     @property
     def _a_ac(self):
@@ -148,7 +161,7 @@ class BmAgentLake(Agent):
     def get_config(self):
         conf = super().get_config()
         conf['size'] = self.size
-        conf['prob_hole'] = self.prob_hole
+        conf['holes'] = self.holes
         conf['with_state_ext'] = self.with_state_ext
         return conf
 
@@ -159,12 +172,8 @@ class BmAgentLake(Agent):
         v = self.size
         text += f'{v}x{v}\n'
 
-        text += 'Probability of the hole                  : '
-        v = self.prob_hole
-        text += f'{v}\n'
-
-        text += 'Number of holes                          : '
-        v = len(self._holes)
+        text += 'Number of the holes                      : '
+        v = self.holes
         text += f'{v}\n'
 
         text += 'State is extended                        : '
@@ -174,7 +183,7 @@ class BmAgentLake(Agent):
         return super().info(text+footer)
 
     def prep_bm(self, policy=None):
-        self._map = BmAgentLake.map(self.size, self.prob_hole, self.rand)
+        self._map = BmAgentLake.map(self.size, self.holes, self.rand)
         self._holes = BmAgentLake.holes(self._map)
 
         env = Agent.make('FrozenLake-v1', desc=self._map, is_slippery=False)
@@ -233,7 +242,7 @@ if __name__ == '__main__':
     print(text)
 
     text = 'Render for "direct" policy               :  '
-    bm = BmAgentLake().prep()
+    bm = BmAgentLake(size=10, holes=50).prep()
     fpath = f'result/{bm.name}/render_direct'
     i = [np.random.choice(k) for k in bm.n]
     y = bm[i]
