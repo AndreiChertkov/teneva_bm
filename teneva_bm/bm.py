@@ -119,7 +119,7 @@ class Bm:
     @property
     def time_full(self):
         """Full time of benchmark existence in seconds."""
-        return tpc() - self.time_stamp_start
+        return tpc() - self.timestamp_start
 
     @property
     def with_constr(self):
@@ -375,7 +375,7 @@ class Bm:
             'x_min': self.list_copy(self.x_min, 'float'),
             'y_min': self.y_min,
             'y_list': self.list_copy(self.y_list, 'float'),
-            'time': self.time,
+            'time_call': self.time_call,
             'time_full': self.time_full,
             'err': '; '.join(self.err) if len(self.err) else '',
         }
@@ -616,10 +616,10 @@ class Bm:
         text += f'{self.m_cache:-10.3e}\n'
 
         text += 'Average time of one request (sec)        : '
-        text += f'{self.time/self.m:-10.3e}\n'
+        text += f'{self.time_call/self.m:-10.3e}\n'
 
         text += 'Total requests time (sec)                : '
-        text += f'{self.time:-10.3e}\n'
+        text += f'{self.time_call:-10.3e}\n'
 
         text += 'Total work time (sec)                    : '
         text += f'{self.time_full:-10.3e}\n'
@@ -672,11 +672,11 @@ class Bm:
 
         self.m = 0
         self.m_cache = 0
-        self.time = 0.
 
         self.log_m_last = 0
 
-        self.time_stamp_start = tpc()
+        self.time_call = 0.
+        self.timestamp_start = tpc()
 
         self.cache = {}
 
@@ -802,7 +802,7 @@ class Bm:
         self.m += y.shape[0] - dm_cache
         self.m_cache += dm_cache
 
-        self.time += tpc() - t
+        self.time_call += tpc() - t
 
         self.i = I[-1, :].copy() if I is not None else None
         self.x = X[-1, :].copy() if X is not None else None
