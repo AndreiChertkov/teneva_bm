@@ -325,6 +325,8 @@ class Bm:
             'version': __version__,
             'is_tens': self.is_tens,
             'is_func': self.is_func,
+            'is_opti_max': self.is_opti_max,
+            'is_opti_min': not self.is_opti_max,
             'with_cache': self.with_cache,
             'with_constr': self.with_constr,
             'with_cores': self.with_cores,
