@@ -8,17 +8,19 @@ Benchmarks library, based on the software product [teneva](https://github.com/An
 
 ## Installation
 
-1. The package can be installed via pip: `pip install teneva_bm==0.7.1` (it requires the [Python](https://www.python.org) programming language of the version 3.8 or 3.9).
+1. The package can be installed via pip (it requires the [Python](https://www.python.org) programming language of the version 3.8 or 3.9):
     ```bash
     pip install teneva_bm==0.7.1
     ```
-    >  The package can be also downloaded from the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm) and be installed by `python setup.py install` command from the root folder of the project.
+    > The package can be also downloaded from the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm) and be installed by `python setup.py install` command from the root folder of the project.
 
-2. Some benchmarks require additional installation of specialized libraries. The corresponding instructions are given in the description of each benchmark (see `DESC` string in the python files with benchmarks). Installation of all required libraries for all benchmarks can be done with the script [install_gym.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_gym.py) for existing conda environment `ENV_NAME` (except the colab platform, where `env` flag should not be used):
+2. Some benchmarks require additional installation of specialized libraries. The corresponding instructions are given in the description of each benchmark (see `DESC` string in the python files with benchmarks). Installation of all required libraries for all benchmarks can be done with the script [install_all.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_all.py) for existing [anaconda](https://www.anaconda.com) environment `ENV_NAME` (except the colab platform, where `env` flag should not be used):
     ```bash
-    wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_gym.py && python install_gym.py --env ENV_NAME --silent
+    conda create --name ENV_NAME python=3.8 -y
+    wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_all.py
+    python install_all.py --env ENV_NAME --silent
     ```
-    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_gym.py` is rather complicated. You can find mode details for using this script in the header of the file.
+    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_all.py` is rather complicated. You can find mode details for using this script in the header of the file.
 
 3. To run benchmark optimization examples (see `demo_opti` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer:
     ```bash
