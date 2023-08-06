@@ -22,14 +22,14 @@ DESC = """
     Quadratic unconstrained binary optimization (QUBO) Minimum Vertex Cover
     (MVC) problem represented as a discrete function. The dimension may be
     any (default is 100), and the mode size should be 2. The default value
-    of the probability of the connection in the graph if 0.5 (pcon).
+    of the probability of the connection in the graph if 0.5 (pcon=5).
     The benchmark needs "networkx==3.0" and "qubogen==0.1.1" libraries.
     TODO: fix inner bm name from "QuboMVC" to "QuboMvc".
 """
 
 
 class BmQuboMvc(Bm):
-    def __init__(self, d=100, n=2, name='QuboMVC', desc=DESC, pcon=0.5):
+    def __init__(self, d=100, n=2, name='QuboMVC', desc=DESC, pcon=5):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n0 != 2:
@@ -43,6 +43,10 @@ class BmQuboMvc(Bm):
         if not with_qubogen:
             msg = 'Need "qubogen" module. For installation please run '
             msg += '"pip install qubogen==0.1.1"'
+            self.set_err(msg)
+
+        if not isinstance(pcon, int) or pcon < 1 or pcon > 9:
+            msg = 'Param "pcon" should be of int type and in range 1...9'
             self.set_err(msg)
 
         self.pcon = pcon
@@ -64,14 +68,14 @@ class BmQuboMvc(Bm):
         text = ''
 
         text += 'Param pcon (connection probability)      : '
-        v = self.pcon
+        v = 0.1 * self.pcon
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def prep_bm(self):
         d = self.d
-        p = self.pcon
+        p = 0.1 * self.pcon
         graph = nx.fast_gnp_random_graph(n=d, p=p, seed=self.seed)
         edges = np.array(list([list(e) for e in graph.edges]))
         n_nodes = len(np.unique(np.array(edges).flatten()))
