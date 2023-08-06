@@ -56,7 +56,9 @@ PY_PACKAGES = [
     'gym==0.26.2',
     'numpy<1.25',
     'opencv-python==4.7.0.72',
-    'pygame==2.5.0',
+    'pygame==2.1.0',
+    'swig-4.1.1',
+    'box2d-py-2.3.5',
     'networkx==3.0',
     'qubogen==0.1.1',
     'gekko==1.0.6']
@@ -68,7 +70,9 @@ PY_PACKAGES_COLAB = [
     'imageio==2.31.1',
     'numpy<1.25',
     'opencv-python==4.7.0.72',
-    'pygame==2.5.0',
+    'pygame==2.1.0',
+    'swig-4.1.1',
+    'box2d-py-2.3.5',
     'networkx==3.0',
     'qubogen==0.1.1',
     'gekko==1.0.6']
