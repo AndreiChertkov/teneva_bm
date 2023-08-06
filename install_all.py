@@ -1,23 +1,24 @@
-"""Python script to install mujoco (teneva_bm.install_mujoco.py).
+"""Python script to install additional dependencies for teneva_bm.
 
-This script may be used for mujoco installation on linux, osx and colab
-platforms. You should set the name of existing conda environment as an
-argument (except the colab platform), e.g., "--env install_mujoco", and
-installation will be done in the related environment.
+This script may be used for installation of additional dependencies (including
+gym, mujoco and several other libs) on linux, osx and colab platforms. You
+should set the name of existing conda environment as an argument (except the
+colab platform), e.g., "--env teneva_bm", and installation will be done in the
+related environment.
 
 * The correctness of the script was verified, including on noisy and zhores
 clusters of our group. If you run this script on zhores, then you should set
 the flag "--zhores" (note that rendering does not work in this case now).
 
 For convenience, the script can be downloaded with the following command:
-$ wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_mujoco.py
+$ wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_all.py
 
 An existing environment can be specified as an argument to the script, or a new
 one can be pre-created:
-$ conda create --name install_mujoco python=3.8 -y
+$ conda create --name teneva_bm python=3.8 -y
 
 * If the environment already exists, you can (optionally) delete it before:
-$ conda activate && conda remove --name install_mujoco --all -y
+$ conda activate && conda remove --name teneva_bm --all -y
 
 * In the case of zhores, you should run before environment creation the command:
 $ module load python/anaconda3
@@ -25,7 +26,7 @@ $ module load python/anaconda3
 >>>>> To run the script, use the following command (in the case of a colab
 platform, you should not set the environment; also note that you does not need
 to activate the environment manually before run the script):
-$ clear && python install_mujoco.py --env install_mujoco
+$ clear && python install_all.py --env teneva_bm
 
 * If there are any problems with the script, you can run it with "--log" flag
 (full output from all commands will be presented) and check the outputs. If you
@@ -34,7 +35,7 @@ can specify the flag "--silent".
 
 >>>>> To check the success of the script, you can activate the environment and
 run a test computation (the video will be generated after computation):
-$ conda activate install_mujoco && clear && python install_mujoco.py --test
+$ conda activate teneva_bm && clear && python install_all.py --test
 
 * In the case of zhores cluster you should set the flag "--zhores", the video
 will not be generated in this case.
@@ -56,7 +57,9 @@ PY_PACKAGES = [
     'numpy<1.25',
     'opencv-python==4.7.0.72',
     'pygame==2.5.0',
-]
+    'networkx==3.0',
+    'qubogen==0.1.1',
+    'gekko==1.0.6']
 PY_PACKAGES_COLAB = [
     'PyOpenGL_accelerate',
     'free-mujoco-py==2.1.6',
@@ -66,10 +69,12 @@ PY_PACKAGES_COLAB = [
     'numpy<1.25',
     'opencv-python==4.7.0.72',
     'pygame==2.5.0',
-]
+    'networkx==3.0',
+    'qubogen==0.1.1',
+    'gekko==1.0.6']
 
 
-def install_mujoco(env=None, with_info=True, with_log=False, is_zhores=False):
+def install_all(env=None, with_info=True, with_log=False, is_zhores=False):
     global WITH_INFO, WITH_LOG
     WITH_INFO, WITH_LOG = with_info, with_log
 
@@ -94,34 +99,32 @@ def install_mujoco(env=None, with_info=True, with_log=False, is_zhores=False):
         _log(f'Environment "{env}" is valid')
 
     if platform == 'colab':
-        install_mujoco_colab()
+        install_all_colab()
     if platform == 'linux':
-        install_mujoco_linux(env)
+        install_all_linux(env)
     if platform == 'osx':
-        install_mujoco_osx(env)
+        install_all_osx(env)
     if platform == 'zhores':
-        install_mujoco_zhores(env)
+        install_all_zhores(env)
 
     msg = 'Work is finished'
     if platform != 'colab':
         msg += '. Please activate your environment as '
-        msg += f'"conda activate {env}" and use it with mujoco...'
+        msg += f'"conda activate {env}" and use the teneva_bm package...'
 
     msg += '\n... you can check the result as "'
     if env:
         msg += f'conda activate {env} && '
-    msg += 'python install_mujoco.py --test'
+    msg += 'python install_all.py --test'
     if platform == 'zhores':
         msg += ' --zhores'
     msg += '"'
     _log(msg)
 
 
-def install_mujoco_colab():
-    GL_LIBS_COLAB = [
-        'libgl1-mesa-dev', 'libgl1-mesa-glx', 'libglew-dev', 'libosmesa6-dev',
-        'xpra', 'patchelf', 'libglfw3-dev'
-    ]
+def install_all_colab():
+    GL_LIBS_COLAB = ['libgl1-mesa-dev', 'libgl1-mesa-glx', 'libglew-dev',
+        'libosmesa6-dev', 'xpra', 'patchelf', 'libglfw3-dev']
 
     for lib in GL_LIBS_COLAB:
         _log(f'Install library "{lib}" for GL', 'PRC')
@@ -150,13 +153,12 @@ def install_mujoco_colab():
         _log(f'GLFW lib was not (!) edited', 'WRN')
 
 
-def install_mujoco_linux(env):
+def install_all_linux(env):
     GL_LIBS_LINUX = [
         ['glew', 'conda-forge'],
         ['mesalib', 'conda-forge'],
         ['mesa-libgl-cos6-x86_64', 'anaconda'],
-        ['glfw3', 'menpo'],
-    ]
+        ['glfw3', 'menpo']]
 
     for [lib, repo] in GL_LIBS_LINUX:
         _log(f'Install library "{lib}" for GL', 'PRC')
@@ -193,7 +195,7 @@ def install_mujoco_linux(env):
             _log(f'OpenGL lib was not (!) edited', 'WRN')
 
 
-def install_mujoco_osx(env):
+def install_all_osx(env):
     _log('Download mujoco', 'PRC')
     res, out = _run(
         'wget https://mujoco.org/download/mujoco210-macos-x86_64.tar.gz',
@@ -222,7 +224,7 @@ def install_mujoco_osx(env):
         _log(f'GLFW lib was not (!) edited', 'WRN')
 
 
-def install_mujoco_zhores(env):
+def install_all_zhores(env):
     _log('Download mujoco', 'PRC')
     res, out = _run('rm -r ~/.mujoco')
     res, out = _run(
@@ -265,7 +267,7 @@ def test(with_video=True):
 
     if with_video:
         frames = [cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) for frame in frames]
-        fpath = 'video_install_mujoco.mp4'
+        fpath = 'video_install_all.mp4'
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(fpath, fourcc, 20.0, (frames[0].shape[:2]))
         for frame in frames:
@@ -278,8 +280,8 @@ def test(with_video=True):
 
 def _args_build():
     parser = argparse.ArgumentParser(
-        prog='install_mujoco',
-        description='Python script to install mujoco in conda environment.',
+        prog='install_all',
+        description='Python script to install dependencies for teneva_bm',
         epilog = '© Andrei Chertkov'
     )
     parser.add_argument('--env',
@@ -308,7 +310,7 @@ def _args_build():
 
 def _check_env(env):
     res, out = _run(
-        'echo "Start install_mujoco script (check environment)..."',
+        'echo "Start install_all script (check environment)..."',
         env=env, check_false='EnvironmentLocationNotFound')
 
     if not res:
@@ -437,4 +439,4 @@ if __name__ == '__main__':
     if is_test:
         test(with_video=not is_zhores)
     else:
-        install_mujoco(env, with_info, with_log, is_zhores)
+        install_all(env, with_info, with_log, is_zhores)
