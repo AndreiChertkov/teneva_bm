@@ -21,13 +21,15 @@ from teneva_bm import Bm
 DESC = """
     Quadratic unconstrained binary optimization (QUBO) Minimum Vertex Cover
     (MVC) problem represented as a discrete function. The dimension may be
-    any (default is 100), and the mode size should be 2. The benchmark needs
-    "networkx==3.0" and "qubogen==0.1.1" libraries.
+    any (default is 100), and the mode size should be 2. The default value
+    of the probability of the connection in the graph if 0.5 (pcon).
+    The benchmark needs "networkx==3.0" and "qubogen==0.1.1" libraries.
+    TODO: fix inner bm name from "QuboMVC" to "QuboMvc".
 """
 
 
 class BmQuboMvc(Bm):
-    def __init__(self, d=100, n=2, name='QuboMVC', desc=DESC):
+    def __init__(self, d=100, n=2, name='QuboMVC', desc=DESC, pcon=0.5):
         super().__init__(d, n, name, desc)
 
         if not self.is_n_equal or self.n0 != 2:
@@ -43,9 +45,11 @@ class BmQuboMvc(Bm):
             msg += '"pip install qubogen==0.1.1"'
             self.set_err(msg)
 
+        self.pcon = pcon
+
     @property
     def identity(self):
-        return ['d', 'seed']
+        return ['d', 'pcon', 'seed']
 
     @property
     def is_tens(self):
@@ -53,38 +57,27 @@ class BmQuboMvc(Bm):
 
     def get_config(self):
         conf = super().get_config()
-        conf['prob_con'] = self.prob_con
+        conf['pcon'] = self.pcon
         return conf
 
     def info(self, footer=''):
         text = ''
 
-        text += 'Param prob_con (connection probability)  : '
-        v = self.prob_con
+        text += 'Param pcon (connection probability)      : '
+        v = self.pcon
         text += f'{v:.6f}\n'
 
         return super().info(text+footer)
 
     def prep_bm(self):
         d = self.d
-        p = self.prob_con
+        p = self.pcon
         graph = nx.fast_gnp_random_graph(n=d, p=p, seed=self.seed)
         edges = np.array(list([list(e) for e in graph.edges]))
         n_nodes = len(np.unique(np.array(edges).flatten()))
 
         g = qubogen.Graph(edges=edges, n_nodes=n_nodes)
         self._Q = qubogen.qubo_mvc(g)
-
-    def set_opts(self, prob_con=0.5):
-        """Setting options specific to the benchmark.
-
-        There are no plans to manually change the default values.
-
-        Args:
-            prob_con (float): probability of the connection in the graph.
-
-        """
-        self.prob_con = prob_con
 
     def target_batch(self, I):
         return ((I @ self._Q) * I).sum(axis=1)
