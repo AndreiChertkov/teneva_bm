@@ -32,12 +32,17 @@
     python install_all.py --env teneva_bm --silent
     ```
 
-7. Reinstall `teneva_bm` from the source (after updates of the code):
+7. Install dependency to run benchmark optimization examples:
+    ```bash
+    pip install protes==0.3.4
+    ```
+
+8. Reinstall `teneva_bm` from the source (after updates of the code):
     ```bash
     clear && pip uninstall teneva_bm -y && python setup.py install
     ```
 
-8. Optionally delete virtual environment at the end of the work:
+9. Optionally delete virtual environment at the end of the work:
     ```bash
     conda activate && conda remove --name teneva_bm --all -y
     ```
