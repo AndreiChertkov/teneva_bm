@@ -8,24 +8,22 @@ Benchmarks library, based on the software product [teneva](https://github.com/An
 
 ## Installation
 
-> Current version "0.7.1".
-
-The package can be installed via pip: `pip install teneva_bm` (it requires the [Python](https://www.python.org) programming language of the version 3.8 or 3.9). It can be also downloaded from the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm) and installed by `python setup.py install` command from the root folder of the project.
-
-> Required python packages (see `requirements.txt`) [matplotlib](https://matplotlib.org/) (3.7.0+) and [teneva](https://github.com/AndreiChertkov/teneva) (0.14.5+) will be automatically installed during the installation of the main software product.
-
-Some benchmarks require additional installation of specialized libraries. The corresponding instructions are given in the description of each benchmark (see `DESC` string in the python files with benchmarks). Installation of all required libraries for all benchmarks can be done with the following commands:
-
-- Collections `func`, `hs` and `various` do not require installation of additional libraries.
-
-- Сollections `odeoc` and `qubo` require installation of the following libraries:
+1. The package can be installed via pip: `pip install teneva_bm==0.7.1` (it requires the [Python](https://www.python.org) programming language of the version 3.8 or 3.9).
     ```bash
-    pip install networkx==3.0 qubogen==0.1.1 gekko==1.0.6
+    pip install teneva_bm==0.7.1
     ```
+    >  The package can be also downloaded from the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm) and be installed by `python setup.py install` command from the root folder of the project.
 
-- Сollection `agent` require a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so we have prepared a special python installation script [install_mujoco.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_mujoco.py). Detailed instructions for using the script are presented in the file header.
+2. Some benchmarks require additional installation of specialized libraries. The corresponding instructions are given in the description of each benchmark (see `DESC` string in the python files with benchmarks). Installation of all required libraries for all benchmarks can be done with the script [install_gym.py](https://github.com/AndreiChertkov/teneva_bm/blob/main/install_gym.py) for existing conda environment `ENV_NAME` (except the colab platform, where `env` flag should not be used):
+    ```bash
+    wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_gym.py && python install_gym.py --env ENV_NAME --silent
+    ```
+    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_gym.py` is rather complicated. You can find mode details for using this script in the header of the file.
 
-> To run benchmark optimization examples (see `demo_opti` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer (`pip install protes==0.3.4`).
+3. To run benchmark optimization examples (see `demo_opti` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer:
+    ```bash
+    pip install protes==0.3.4
+    ```
 
 
 ## Documentation and examples
@@ -49,7 +47,7 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 ## Available benchmarks
 
-- `agent` - the collection of problems from [gym](https://www.gymlibrary.dev/) framework, including [mujoco agents](https://www.gymlibrary.dev/environments/mujoco/index.html) based on the physics engine [mujoco](https://mujoco.org/) for faciliatating research and development in robotics, biomechanics, graphics and animation. The collection includes the following benchmarks: `BmAgentAnt`, `BmAgentCheetah`, `BmAgentHuman`, `BmAgentHumanStand`, `BmAgentLake`, `BmAgentPendInv`, `BmAgentPendInvDouble`, `BmAgentReacher`, `BmAgentSwimmer`.
+- `agent` - the collection of problems from [gym](https://www.gymlibrary.dev/) framework, including [mujoco agents](https://www.gymlibrary.dev/environments/mujoco/index.html) based on the physics engine [mujoco](https://mujoco.org/) for faciliatating research and development in robotics, biomechanics, graphics and animation. The collection includes the following benchmarks: `BmAgentAnt`, `BmAgentCheetah`, `BmAgentHuman`, `BmAgentHumanStand`, `BmAgentLake`, `BmAgentLander`, `BmAgentPendInv`, `BmAgentPendInvDouble`, `BmAgentReacher`, `BmAgentSwimmer`.
     > Within the framework of this collection, explicit optimization of the entire set of actions (discrete or continuous) may be performed (if `direct` policy name is set) or discrete Toeplitz policy may be used (if `toeplitz` policy name is set; it is the default value); you can also set your own custom policy as an instance of the correct class (see `agent/policy.py` for details).
 
 - `func` - a collection of analytic functions of a real multidimensional argument. The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncDixon`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncPiston` (only `d=7` is supported), `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchaffer`, `BmFuncSchwefel`.
@@ -67,7 +65,7 @@ teneva_bm_demo('bm_qubo_knap_det', with_info=True)
 
 ## Usage
 
-A typical scenario for working with a benchmark is as follows.
+A typical scenario for working with any benchmark from our package is as follows.
 
 ##### Benchmark initialization
 
