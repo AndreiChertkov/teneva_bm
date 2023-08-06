@@ -183,7 +183,7 @@ class Agent(Bm):
             self.set_grid(self._policy.a, self._policy.b)
         self._reset()
 
-    def render(self, fpath=None, i=None, best=True, fps=20.):
+    def render(self, fpath=None, i=None, best=True, fps=20., sz=None):
         self._with_render = True
         i, y = self.get_solution(i, best)
         self._with_render = False
@@ -194,7 +194,8 @@ class Agent(Bm):
 
         frames = self._frames
         frames = [cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) for frame in frames]
-        # frame = cv2.resize(frame,(512, 512))
+        if sz is not None:
+            frames = [cv2.resize(frame, sz) for frame in frames]
 
         fpath = self.path_build(fpath, 'mp4')
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')

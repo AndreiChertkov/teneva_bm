@@ -192,8 +192,8 @@ class BmAgentLake(Agent):
 
         return super().prep_bm(env)
 
-    def render(self, fpath=None, i=None, best=True, fps=5.):
-        return super().render(fpath, i, best, fps)
+    def render(self, fpath=None, i=None, best=True, fps=5., sz=None):
+        return super().render(fpath, i, best, fps, sz)
 
     def _discretize(self, state):
         x, y = (state // self.size, state % self.size)
