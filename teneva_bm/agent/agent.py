@@ -186,11 +186,18 @@ class Agent(Bm):
     def render(self, fpath=None, i=None, best=True, fps=20., sz=None):
         self._with_render = True
         i, y = self.get_solution(i, best)
+
+        if not self._with_render:
+            msg = 'Can not save rendered video for agent (render failed)'
+            self.wrn(msg)
+            return
+
         self._with_render = False
 
         if not len(self._frames):
             msg = 'Can not save rendered video for agent (empty frames)'
             self.wrn(msg)
+            return
 
         frames = self._frames
         frames = [cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) for frame in frames]
