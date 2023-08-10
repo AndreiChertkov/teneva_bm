@@ -174,7 +174,7 @@ class Bm:
         if m < 1:
             return None, None
 
-        I_tst = teneva.sample_random(self.n, m, seed=self.rand)
+        I_tst = teneva.sample_rand(self.n, m, seed=self.rand)
         y_tst = self.get(I_tst, skip_process)
 
         if y_tst is None:
