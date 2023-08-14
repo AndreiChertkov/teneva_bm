@@ -1,38 +1,29 @@
 import numpy as np
 import os
 import teneva
+from teneva_bm import __version__
 from time import perf_counter as tpc
 
 
-from teneva_bm import __version__
-
-
 class Bm:
-    def __init__(self, d=None, n=None, name='', desc=''):
-        self.init()
-
+    def __init__(self, d=None, n=None, seed=42):
         self.is_prep = False
-
-        self.set_log()
-
-        self.set_seed()
-
         self.set_dimension(d)
         self.set_size(n)
-        self.set_constr()
-
+        self.seed = seed
+        self.rand = np.random.default_rng(self.seed)
+        self.set_name(self.name_class[2:])
+        self.set_desc('benchmark_description')
+        self.set_opts_dflt()
         self.set_grid()
         self.set_grid_kind()
-
-        self.set_name(name)
-        self.set_desc(desc)
-
-        self.set_opts()
+        self.set_constr()
         self.set_cache()
         self.set_budget()
-
         self.set_max()
         self.set_min()
+        self.set_log()
+        self.init()
 
     def __call__(self, X):
         """Return a value or batch of values for provided x-point."""
@@ -50,6 +41,30 @@ class Bm:
         return self.a[0] if self.a is not None else None
 
     @property
+    def args(self):
+        """Dict with values of benchmark's arguments (i.e., main parameters)."""
+        return self.build_dict(self.args_info)
+
+    @property
+    def args_info(self):
+        """Dict with info about benchmark's arguments."""
+        return {
+            'd': {
+                'desc': 'Dimension',
+                'kind': 'int'
+            },
+            'n': {
+                'desc': 'Mode size',
+                'kind': 'int',
+                'list': True
+            },
+            'seed': {
+                'desc': 'Random seed',
+                'kind': 'int'
+            }
+        }
+
+    @property
     def b0(self):
         """Return the upper grid size float value if it is constant."""
         if not self.is_b_equal:
@@ -57,8 +72,107 @@ class Bm:
         return self.b[0] if self.b is not None else None
 
     @property
+    def err(self):
+        """Errors (text) while benchmark usage."""
+        return '; '.join(self.err_list) if len(self.err_list) else ''
+
+    @property
+    def hist(self):
+        """Dict with history values (requests to the benchmark)."""
+        return self.build_dict(self.hist_info)
+
+    @property
+    def hist_info(self):
+        """Dict with info about benchmark's history parameters."""
+        return {
+            'err': {
+                'desc': 'Error message',
+                'kind': 'str'
+            },
+            'm': {
+                'desc': 'Number of requests',
+                'kind': 'int',
+                'form': '-10.3e'
+            },
+            'm_cache': {
+                'desc': 'Number of cache uses',
+                'kind': 'int',
+                'form': '-10.3e'
+            },
+            'y_max': {
+                'desc': 'Found maximum value',
+                'kind': 'float',
+                'form': '-10.3e',
+                'info_add': 'y_max_real'
+            },
+            'y_min': {
+                'desc': 'Found minimum value',
+                'kind': 'float',
+                'form': '-10.3e',
+                'info_add': 'y_min_real'
+            },
+            'time_call_one': {
+                'desc': 'Time per one request (sec)',
+                'kind': 'float',
+                'form': '-10.3e'
+            },
+            'time_call': {
+                'desc': 'Total time per requests (sec)',
+                'kind': 'float',
+                'form': '-10.3e'
+            },
+            'time_full': {
+                'desc': 'Total work time (sec)',
+                'kind': 'float',
+                'form': '-10.3e'
+            },
+            'i_max': {
+                'desc': 'Multi-index for found maximum',
+                'kind': 'int',
+                'list': True,
+                'skip_list_convert': True
+            },
+            'i_min': {
+                'desc': 'Multi-index for found minimum',
+                'kind': 'int',
+                'list': True,
+                'skip_list_convert': True
+            },
+            'x_max': {
+                'desc': 'Point for found maximum',
+                'kind': 'float',
+                'list': True,
+                'form': '.3f',
+                'skip_list_convert': True
+            },
+            'x_min': {
+                'desc': 'Point for found minimum',
+                'kind': 'float',
+                'list': True,
+                'form': '.3f',
+                'skip_list_convert': True
+            },
+            'y_list': {
+                'desc': 'List of requested values',
+                'kind': 'float',
+                'list': True,
+                'form': '.2f',
+                'skip_info': True,
+                'skip_list_convert': True
+            },
+            'y_list_full': {
+                'desc': 'List of requested values (with cache)',
+                'kind': 'float',
+                'list': True,
+                'form': '.2f',
+                'skip_info': True,
+                'skip_list_convert': True
+            },
+        }
+
+    @property
     def identity(self):
-        """Returns a list of parameter names that define the benchmark."""
+        """Returns a list of arg names that define the benchmark."""
         return ['d', 'n']
 
     @property
@@ -117,9 +231,166 @@ class Bm:
         return self.n[0] if self.n is not None else None
 
     @property
+    def name_class(self):
+        return self.__class__.__name__
+
+    @property
+    def opts(self):
+        """Dict with values of benchmark's options (i.e., addit. parameters)."""
+        return self.build_dict(self.opts_info)
+
+    @property
+    def opts_info(self):
+        """Dict with info about benchmark's options."""
+        return {}
+
+    @property
+    def prps(self):
+        """Dict with values of benchmark's properties."""
+        return self.build_dict(self.prps_info)
+
+    @property
+    def prps_info(self):
+        """Dict with info about benchmark's properties."""
+        return {
+            'version': {
+                'desc': 'Package version',
+                'kind': 'str'
+            },
+            'name_class': {
+                'desc': 'Benchmark class name',
+                'kind': 'str'
+            },
+            'name': {
+                'desc': 'Benchmark name',
+                'kind': 'str'
+            },
+            'is_tens': {
+                'desc': 'Benchmark is discrete',
+                'kind': 'bool',
+                'skip_info': 'is_func'
+            },
+            'is_func': {
+                'desc': 'Benchmark is continuous',
+                'kind': 'bool',
+                'skip_info': 'is_tens'
+            },
+            'is_opti_max': {
+                'desc': 'Benchmark with maximization task',
+                'kind': 'bool'
+            },
+            'a': {
+                'desc': 'Lower grid limit',
+                'kind': 'float',
+                'list': True,
+                'form': '.2f'
+            },
+            'b': {
+                'desc': 'Upper grid limit',
+                'kind': 'float',
+                'list': True,
+                'form': '.2f'
+            },
+            'grid_kind': {
+                'desc': 'Grid kind',
+                'kind': 'str',
+                'skip_info_if_none': 'a'
+            },
+            'with_cores': {
+                'desc': 'With TT-cores',
+                'kind': 'bool'
+            },
+            'with_cache': {
+                'desc': 'With cache',
+                'kind': 'bool'
+            },
+            'with_constr': {
+                'desc': 'With constraint',
+                'kind': 'bool'
+            },
+            'constr_with_amplitude': {
+                'desc': 'Constraint with amplitude',
+                'kind': 'bool',
+                'skip_info_if_none': 'with_constr'
+            },
+            'constr_penalty': {
+                'desc': 'Constraint penalty',
+                'kind': 'float',
+                'form': '.2e',
+                'skip_info_if_none': 'with_constr'
+            },
+            'constr_eps': {
+                'desc': 'Constraint epsilon',
+                'kind': 'float',
+                'form': '.2e',
+                'skip_info_if_none': 'with_constr'
+            },
+            'budget_m': {
+                'desc': 'Computation budget',
+                'kind': 'int',
+                'form': '.2e'
+            },
+            'budget_m_cache': {
+                'desc': 'Computation budget for cache requests',
+                'kind': 'int',
+                'form': '.2e'
+            },
+            'budget_is_strict': {
+                'desc': 'Computation budget is strict',
+                'kind': 'bool',
+                'skip_info_if_none': 'budget_m'
+            },
+            'y_max_real': {
+                'desc': 'Exact max (value)',
+                'kind': 'float',
+                'form': '.4e'
+            },
+            'y_min_real': {
+                'desc': 'Exact min (value)',
+                'kind': 'float',
+                'form': '.4e'
+            },
+            'i_max_real': {
+                'desc': 'Exact max (multi-index)',
+                'kind': 'int',
+                'list': True
+            },
+            'i_min_real': {
+                'desc': 'Exact min (multi-index)',
+                'kind': 'int',
+                'list': True
+            },
+            'x_max_real': {
+                'desc': 'Exact max (point)',
+                'kind': 'float',
+                'list': True,
+                'form': '.2f'
+            },
+            'x_min_real': {
+                'desc': 'Exact min (point)',
+                'kind': 'float',
+                'list': True,
+                'form': '.2f'
+            },
+        }
+
+    @property
+    def ref(self):
+        """Get reference value (i, y) to check the benchmark."""
+        raise NotImplementedError
+
+    @property
+    def time_call_one(self):
+        return self.time_call / self.m if self.m else 0.
+
+    @property
     def time_full(self):
         """Full time of benchmark existence in seconds."""
         return tpc() - self.timestamp_start
+
+    @property
+    def version(self):
+        return __version__
 
     @property
     def with_constr(self):
@@ -144,6 +415,7 @@ class Bm:
     def build_cores(self):
         """Return exact TT-cores for the TT-representation of the tensor."""
         if self.is_tens:
+            # TODO: check and fix
             msg = 'Construction of the TT-cores does not work for tensors'
             raise ValueError(msg)
 
@@ -156,12 +428,26 @@ class Bm:
 
         return self.cores(X)
 
-    def build_trn(self, m=0, skip_process=False):
+    def build_dict(self, info):
+        """Build a dictionary with class variables."""
+        res = {}
+        for name, opts in info.items():
+            if not hasattr(self, name):
+                raise ValueError(f'Variable "{name}" does not exist')
+            res[name] = getattr(self, name, None)
+            if opts.get('list') and not opts.get('skip_list_convert'):
+                res[name] = self.list_convert(res[name], opts['kind'])
+        return res
+
+    def build_trn(self, m=0, seed=None, skip_process=False):
         """Generate random (from LHS) train dataset of (index, value)."""
         if m < 1:
             return None, None
 
-        I_trn = teneva.sample_lhs(self.n, m, seed=self.rand)
+        if seed is None:
+            seed = self.seed
+
+        I_trn = teneva.sample_lhs(self.n, m, seed=seed)
         y_trn = self.get(I_trn, skip_process)
 
         if y_trn is None:
@@ -169,12 +455,15 @@ class Bm:
 
         return I_trn, y_trn
 
-    def build_tst(self, m=0, skip_process=True):
+    def build_tst(self, m=0, seed=None, skip_process=True):
         """Generate random (from "choice") test dataset of (index, value)."""
         if m < 1:
             return None, None
 
-        I_tst = teneva.sample_rand(self.n, m, seed=self.rand)
+        if seed is None:
+            seed = self.seed
+
+        I_tst = teneva.sample_rand(self.n, m, seed=seed)
         y_tst = self.get(I_tst, skip_process)
 
         if y_tst is None:
@@ -201,17 +490,17 @@ class Bm:
             self.set_err(msg)
 
         if self.is_func and self.b is None:
-            msg = 'Lower grid limit "b" should be set for continuous function'
+            msg = 'Upper grid limit "b" should be set for continuous function'
             self.set_err(msg)
 
         return self.check_err()
 
     def check_err(self):
         """Check that benchmark has not errors."""
-        if len(self.err):
-            msg = f'BM "{self.name}" is not ready'
-            for e in self.err:
-                msg += f'\n    Error > {e}'
+        if len(self.err_list):
+            msg = f'BM "{self.name}" has errors'
+            for err in self.err_list:
+                msg += f'\n    Error > {err}'
             raise ValueError(msg)
 
         return True
@@ -280,9 +569,9 @@ class Bm:
 
         if self.with_cache and not skip_cache:
             m = I.shape[0]
-            ind = [k for k in range(m) if tuple(I[k]) not in self.cache]
+            ind_new = [k for k in range(m) if tuple(I[k]) not in self.cache]
 
-            m_new = len(ind)
+            m_new = len(ind_new)
             dm_cache = m - m_new
 
             if self.budget_m_cache:
@@ -294,95 +583,25 @@ class Bm:
                         return self.process_last()
 
             if m_new > 0:
-                Z = X[ind] if self.is_func else I[ind]
+                Z = X[ind_new] if self.is_func else I[ind_new]
                 y_new = self.compute(Z, skip_process)
                 if y_new is None:
                     return self.process_last()
 
                 for k in range(m_new):
-                    self.cache[tuple(I[ind[k]])] = y_new[k]
+                    self.cache[tuple(I[ind_new[k]])] = y_new[k]
 
             y = np.array([self.cache[tuple(i)] for i in I])
 
         else:
-            dm_cache = 0
+            ind_new = np.arange(len(I))
 
             Z = X if self.is_func else I
             y = self.compute(Z, skip_process)
             if y is None:
                 return self.process_last()
 
-        return self.process(I, X, y, dm_cache, t, is_batch, skip_process)
-
-    def get_config(self):
-        """Return a dict with configuration of the benchmark."""
-        conf = {
-            'd': self.d,
-            'n': self.list_convert(self.n, 'int'),
-            'seed': self.seed,
-            'name': self.name,
-            'benchmark': self.__class__.__name__,
-            'version': __version__,
-            'is_tens': self.is_tens,
-            'is_func': self.is_func,
-            'is_opti_max': self.is_opti_max,
-            'is_opti_min': not self.is_opti_max,
-            'with_cache': self.with_cache,
-            'with_constr': self.with_constr,
-            'with_cores': self.with_cores,
-        }
-
-        if self.is_func:
-            conf['a'] = self.list_convert(self.a, 'float')
-            conf['b'] = self.list_convert(self.b, 'float')
-            conf['grid_kind'] = self.grid_kind
-
-        if self.with_constr:
-            conf['constr_penalty'] = self.constr_penalty
-            conf['constr_eps'] = self.constr_eps
-            conf['constr_with_amplitude'] = self.constr_with_amplitude
-
-        if self.budget_m:
-            conf['budget_m'] = self.budget_m
-        if self.budget_m_cache:
-            conf['budget_m_cache'] = self.budget_m_cache
-        if self.budget_m or self.budget_m_cache:
-            conf['budget_is_strict'] = self.budget_is_strict
-
-        if self.i_max_real is not None:
-            conf['i_max_real'] = self.list_convert(self.i_max_real, 'int')
-        if self.x_max_real is not None:
-            conf['x_max_real'] = self.list_convert(self.x_max_real, 'float')
-        if self.y_max_real is not None:
-            conf['y_max_real'] = self.y_max_real
-
-        if self.i_min_real is not None:
-            conf['i_min_real'] = self.list_convert(self.i_min_real, 'int')
-        if self.x_min_real is not None:
-            conf['x_min_real'] = self.list_convert(self.x_min_real, 'float')
-        if self.y_min_real is not None:
-            conf['y_min_real'] = self.y_min_real
-
-        return conf
-
-    def get_history(self):
-        """Return a dict with results of requests to the benchmark."""
-        hist = {
-            'm': self.m,
-            'm_cache': self.m_cache,
-            'i_max': self.list_copy(self.i_max, 'int'),
-            'x_max': self.list_copy(self.x_max, 'float'),
-            'y_max': self.y_max,
-            'i_min': self.list_copy(self.i_min, 'int'),
-            'x_min': self.list_copy(self.x_min, 'float'),
-            'y_min': self.y_min,
-            'y_list': self.list_copy(self.y_list, 'float'),
-            'time_call': self.time_call,
-            'time_full': self.time_full,
-            'err': '; '.join(self.err) if len(self.err) else '',
-        }
-
-        return hist
+        return self.process(I, X, y, ind_new, t, is_batch, skip_process)
 
     def get_solution(self, i=None, best=True):
         """Return the solution for given i or current solution or the best."""
@@ -407,167 +626,41 @@ class Bm:
 
         I, X, is_batch = self.parse_input(X=X)
 
+        ind_new = np.arange(len(X))
+
         y = self.compute(X, skip_process)
         if y is None:
             return self.process_last()
 
-        return self.process(I, X, y, 0, t, is_batch, skip_process)
+        return self.process(I, X, y, ind_new, t, is_batch, skip_process)
 
     def info(self, footer=''):
         """Returns a detailed description of the benchmark as text."""
-        text = '-' * 78 + '\n' + 'BM: '
-        text += self.name + ' ' * max(0, 36-len(self.name)) +  ' | '
-        text += f'DIMS = {self.d:-4d} | '
-        n = np.mean(self.n)
-        text += '<MODE SIZE> = ' + (f'{n:-7.1f}' if n<9999 else f'{n:-7.1e}')
-        text += '\n'
-        text += '-' * 41 + '|             '
-        text += '>           Description'
-        text += '\n'
+        text = self.info_prefix()
 
-        text += '.' * 78 + '\n'
-        desc = f'    {self.desc.strip()}'
-        text += desc.replace('            ', '    ')
-        text += '\n'
-        text += '.' * 78 + '\n'
+        text += self.info_section('Description')
+        text += self.info_desc()
 
-        text += '-' * 41 + '|            '
-        text += '>          Configuration'
-        text += '\n'
+        if len(self.args_info):
+            text += self.info_section('Arguments')
+            for name, opt in self.args_info.items():
+                text += self.info_var(name, opt, with_name=True)
 
-        text += 'Package version                          : '
-        v = __version__
-        text += f'{v}\n'
+        if len(self.opts_info):
+            text += self.info_section('Options')
+            for name, opt in self.opts_info.items():
+                text += self.info_var(name, opt, with_name=True)
 
-        text += 'Random seed                              : '
-        v = self.seed
-        text += f'{v}\n'
+        if len(self.prps_info):
+            text += self.info_section('Properties')
+            for name, opt in self.prps_info.items():
+                text += self.info_var(name, opt, skip_none=True)
 
-        text += 'Benchmark                                : '
-        v = self.__class__.__name__
-        text += f'{v}\n'
-
-        text += 'Dimension                                : '
-        v = self.d
-        text += f'{v}\n'
-
-        text += 'Mode size                                : '
-        v = self.list_convert(self.n, 'int')
-        text += f'{v}\n'
-
-        if self.is_func:
-            text += 'Lower grid limit                         : '
-            va = self.list_convert(self.a, 'float')
-            if not isinstance(va, (int, float)) and self.d > 3:
-                va = f'[{va[0]:.2f}, {va[1]:.2f}, <...>, {va[-1]:.2f}]'
-            text += f'{va}\n'
-
-            text += 'Upper grid limit                         : '
-            vb = self.list_convert(self.b, 'float')
-            if not isinstance(vb, (int, float)) and self.d > 3:
-                vb = f'[{vb[0]:.2f}, {vb[1]:.2f}, <...>, {vb[-1]:.2f}]'
-            if isinstance(va, (int, float)) and isinstance(vb, (int, float)):
-                if va < 0 and vb > 0:
-                    vb = f'+{vb}'
-            text += f'{vb}\n'
-
-            text += 'Grid kind                                : '
-            v = self.grid_kind
-            text += f'{v}\n'
-
-        text += 'Function kind                            : '
-        v = 'discrete' if self.is_tens else 'continuous'
-        text += f'{v}\n'
-
-        text += 'With cache                               : '
-        v = 'YES' if self.with_cache else 'no'
-        text += f'{v}\n'
-
-        text += 'With constraint                          : '
-        v = 'YES' if self.with_constr else 'no'
-        text += f'{v}\n'
-
-        text += 'With TT-cores                            : '
-        v = 'YES' if self.with_cores else 'no'
-        text += f'{v}\n'
-
-        if self.with_constr:
-            text += 'Constraint penalty                       : '
-            v = self.constr_penalty
-            text += f'{v}\n'
-
-            text += 'Constraint epsilon                       : '
-            v = self.constr_eps
-            text += f'{v}\n'
-
-            text += 'Constraint with amplitude                : '
-            v = 'YES' if self.constr_with_amplitude else 'no'
-            text += f'{v}\n'
-
-        if self.budget_m:
-            text += 'Computation budget                       : '
-            v = self.budget_m
-            text += f'{v}\n'
-
-        if self.budget_m_cache:
-            text += 'Computation budget for cache requests    : '
-            v = self.budget_m_cache
-            text += f'{v}\n'
-
-        if self.budget_m or self.budget_m_cache:
-            text += 'Computation budget is strict             : '
-            v = 'YES' if self.budget_is_strict else 'no'
-            text += f'{v}\n'
-
-        if self.i_max_real is not None:
-            text += 'Exact max (multi-index)                  : '
-            v = self.list_convert(self.i_max_real, 'int')
-            if not isinstance(v, (int, float)) and self.d > 3:
-                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
-            text += f'{v}\n'
-
-        if self.x_max_real is not None:
-            text += 'Exact max (point)                        : '
-            v = self.list_convert(self.x_max_real, 'float')
-            if not isinstance(v, (int, float)) and self.d > 3:
-                v = f'[{v[0]:.2f}, {v[1]:.2f}, <...>, {v[-1]:.2f}]'
-            text += f'{v}\n'
-
-        if self.y_max_real is not None:
-            text += 'Exact max (value)                        : '
-            v = self.y_max_real
-            text += f'{v}\n'
-
-        if self.i_min_real is not None:
-            text += 'Exact min (multi-index)                  : '
-            v = self.list_convert(self.i_min_real, 'int')
-            if not isinstance(v, (int, float)) and self.d > 3:
-                v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
-            text += f'{v}\n'
-
-        if self.x_min_real is not None:
-            text += 'Exact min (point)                        : '
-            v = self.list_convert(self.x_min_real, 'float')
-            if not isinstance(v, (int, float)) and self.d > 3:
-                v = f'[{v[0]:.2f}, {v[1]:.2f}, <...>, {v[-1]:.2f}]'
-            text += f'{v}\n'
-
-        if self.y_min_real is not None:
-            text += 'Exact min (value)                        : '
-            v = self.y_min_real
-            text += f'{v}\n'
-
-        if footer:
-            text += '-' * 41 + '|             '
-            text += '>               Options'
-            text += '\n'
-            text += footer
-
-        text += '=' * 78 + '\n'
-        return text
+        return text + footer + '=' * 78 + '\n'
 
     def info_current(self, footer=''):
         text = ''
+        form = '{:-' + str(8 + self.log_prec) + '.' + str(self.log_prec) + '}'
 
         if self.log_prefix:
             text += self.log_prefix + ' > '
@@ -580,97 +673,127 @@ class Bm:
         text += f't {self.time_full:-7.1e} | '
 
         if self.log_with_min and self.y_min is not None:
-            text += f'min {self.y_min:-10.3e} | '
+            value = form.format(self.y_min)
+            text += f'min {value} | '
 
         if self.log_with_max and self.y_max is not None:
-            text += f'max {self.y_max:-10.3e} | '
-
-        if footer:
-            text = text + footer
+            value = form.format(self.y_max)
+            text += f'max {value} | '
 
         self.log_m_last = self.m
 
+        return text + footer
+
+    def info_desc(self):
+        text = '.' * 78 + '\n'
+        desc = f'    {self.desc.strip()}'
+        text += desc.replace('            ', '    ')
+        text += '\n'
+        text += '.' * 78 + '\n'
         return text
 
     def info_history(self, footer=''):
-        """Returns an information about the request history (text)."""
-        text = ''
+        """Returns an information about the history of requests (text)."""
+        text = self.info_prefix()
 
-        text = '-' * 78 + '\n' + 'BM: '
-        text += self.name + ' ' * max(0, 36-len(self.name)) +  ' | '
-        text += f'DIMS = {self.d:-4d} | '
-        n = np.mean(self.n)
-        text += '<MODE SIZE> = ' + (f'{n:-7.1f}' if n<9999 else f'{n:-7.1e}')
-        text += '\n'
-        text += '-' * 41 + '|             '
-        text += '>   History of requests'
-        text += '\n'
+        text += self.info_section('History of requests')
 
         if self.m == 0:
             text += '        ... history is empty ...\n'
-            text += '=' * 78 + '\n'
-            return text
 
-        text += 'Number of requests                       : '
-        text += f'{self.m:-10.3e}\n'
+        elif len(self.hist_info):
+            for name, opt in self.hist_info.items():
+                text += self.info_var(name, opt, skip_none=True)
 
-        text += 'Number of cache uses                     : '
-        text += f'{self.m_cache:-10.3e}\n'
+        return text + footer + '=' * 78 + '\n'
 
-        text += 'Average time of one request (sec)        : '
-        text += f'{self.time_call/self.m:-10.3e}\n'
+    def info_prefix(self):
+        text = '-' * 78 + '\n' + 'BM: '
+        text += self.name + ' ' * max(0, 36-len(self.name)) +  ' | '
+        text += f'DIMS = {self.d:-4d} | '
+        n = 0 if self.n is None else np.mean(self.n)
+        text += '<MODE SIZE> = ' + (f'{n:-7.1f}' if n<9999 else f'{n:-7.1e}')
+        return text + '\n'
 
-        text += 'Total requests time (sec)                : '
-        text += f'{self.time_call:-10.3e}\n'
+    def info_section(self, name):
+        text = '-' * 41 + '|             >'
+        text += ' ' * max(0, 22-len(name)) + name
+        return text + '\n'
 
-        text += 'Total work time (sec)                    : '
-        text += f'{self.time_full:-10.3e}\n'
+    def info_var(self, name, opt, with_name=False, skip_none=False):
+        if opt.get('skip_info'):
+            if isinstance(opt['skip_info'], bool) and not opt['skip_info']:
+                return ''
+            if isinstance(opt['skip_info'], str):
+                if getattr(self, opt['skip_info'], False):
+                    return ''
 
-        if self.y_min is not None and self.y_min_real is not None:
-            text += 'Minimum (found / real)                   : '
-            text += f'{self.y_min:-10.3e}   / {self.y_min_real:-10.3e}\n'
-        elif self.y_min is not None:
-            text += 'Minimum (found)                          : '
-            text += f'{self.y_min:-10.3e}\n'
+        if opt.get('skip_info_if_none'):
+            v = getattr(self, opt['skip_info_if_none'], None)
+            if v is None or isinstance(v, bool) and not v:
+                return ''
 
-        if len(self.y_list) > 0:
-            text += 'Average (found)                          : '
-            text += f'{np.mean(self.y_list):-10.3e}\n'
+        kind = opt.get('kind', 'str')
+        form = opt.get('form', None)
 
-        if self.y_max is not None and self.y_max_real is not None:
-            text += 'Maximum (found / real)                   : '
-            text += f'{self.y_max:-10.3e}   / {self.y_max_real:-10.3e}\n'
-        elif self.y_max is not None:
-            text += 'Maximum (found)                          : '
-            text += f'{self.y_max:-10.3e}\n'
+        v = getattr(self, name, None)
+        if opt.get('list') and not opt.get('skip_list_convert'):
+            v = self.list_convert(v, kind)
+        if skip_none and v is None:
+            return ''
 
-        if footer:
-            text += '-' * 41 + '|             '
-            text += '>               Options'
-            text += '\n'
-            text += footer
+        def build(v):
+            if v is None:
+                return 'NONE'
+            elif isinstance(v, (list, np.ndarray)):
+                if form:
+                    v = [('{:' + form + '}').format(v_) for v_ in v]
+                if self.d > 3:
+                    v = f'[{v[0]}, {v[1]}, <...>, {v[-1]}]'
+                return f'{v}'
+            elif form:
+                return ('{:' + form + '}').format(v)
+            elif kind == 'bool':
+                return 'YES' if v else 'no'
+            elif kind == 'int':
+                return f'{v}'
+            elif kind == 'float':
+                return f'{v:.6f}'
+            else:
+                return f'{v}'
 
-        text += '=' * 78 + '\n'
-        return text
+        text = opt['desc']
+        text += f' [{name}]' if with_name else ''
+        text += ' ' * max(0, 40-len(text)) + ' : '
+        text += build(v)
+
+        if opt.get('info_add'):
+            v = getattr(self, opt['info_add'], None)
+            if v is not None:
+                # TODO: do it more accurate
+                text += f'   [real: {build(v)}]'
+
+        return text + '\n'
 
     def init(self):
-        self.err = []
+        self.err_list = []
 
         self.i = None
         self.x = None
         self.y = None
 
-        self.is_y_max_new = False
         self.i_max = None
         self.x_max = None
         self.y_max = None
+        self.is_y_max_new = False
 
-        self.is_y_min_new = False
         self.i_min = None
         self.x_min = None
         self.y_min = None
+        self.is_y_min_new = False
 
         self.y_list = []
+        self.y_list_full = []
 
         self.m = 0
         self.m_cache = 0
@@ -687,14 +810,21 @@ class Bm:
         if x is None:
             return None
 
-        if kind == 'int':
+        if kind == 'str':
+            if isinstance(x, (int, float, str)):
+                return np.array([str(x)]*self.d, dtype=object)
+            for v in x:
+                if v != x[0]:
+                    return self.list_copy(x, 'str')
+            return str(x[0]) if len(x) > 0 else None
+
+        elif kind == 'int':
             if isinstance(x, (int, float)):
                 return np.array([x]*self.d, dtype=int)
-
-            if len(set(x)) == 1:
-                return int(x[0])
-            else:
-                return self.list_copy(x, 'int')
+            for v in x:
+                if np.abs(v - x[0]) > eps:
+                    return self.list_copy(x, 'int')
+            return int(x[0]) if len(x) > 0 else None
 
         elif kind == 'float':
             if isinstance(x, (int, float)):
@@ -702,25 +832,27 @@ class Bm:
             for v in x:
                 if np.abs(v - x[0]) > eps:
                     return self.list_copy(x, 'float')
-            return float(x[0])
+            return float(x[0]) if len(x) > 0 else None
 
         else:
-            raise ValueError('Unsupported kind for list conversion')
+            msg = 'Unsupported kind for list conversion'
+            raise ValueError(msg)
 
     def list_copy(self, x, kind=None):
         """Copy list or array and return the new array."""
         if x is None:
             return None
 
-        if kind:
-            if kind == 'int':
-                x = np.asanyarray(x, dtype=int)
-            elif kind == 'float':
-                x = np.asanyarray(x, dtype=float)
-            else:
-                raise ValueError('Unsupported kind for list copy')
-        else:
+        if not kind:
             x = np.asanyarray(x)
+        elif kind == 'str':
+            x = np.asanyarray(x, dtype=object)
+        elif kind == 'int':
+            x = np.asanyarray(x, dtype=int)
+        elif kind == 'float':
+            x = np.asanyarray(x, dtype=float)
+        else:
+            raise ValueError('Unsupported kind for list copy')
 
         return x.copy()
 
@@ -734,7 +866,7 @@ class Bm:
         if self.log_cond == 'max':
             return self.is_y_max_new
 
-        if self.log_cond == 'min-max':
+        if self.log_cond in ['min-max', 'max-min']:
             return self.is_y_min_new or self.is_y_max_new
 
         if self.log_cond == 'step':
@@ -742,7 +874,8 @@ class Bm:
 
     def parse_input(self, I=None, X=None):
         if I is None and X is None or I is not None and X is not None:
-            raise ValueError('Can`t parse input. Invalid case')
+            msg = 'Can`t parse input. Invalid case'
+            raise ValueError(msg)
 
         if X is not None and self.is_tens:
             msg = f'BM "{self.name}" is a tensor. '
@@ -786,8 +919,13 @@ class Bm:
 
     def prep(self):
         """A function with a specific benchmark preparation code."""
+        if self.is_prep:
+            msg = 'Benchmark is already prepared'
+            raise ValueError(msg)
+
         self.check_err()
         self.prep_bm()
+
         self.is_prep = True
         return self
 
@@ -795,14 +933,15 @@ class Bm:
         """A function with a specific benchmark preparation code (inner)."""
         return
 
-    def process(self, I, X, y, dm_cache, t, is_batch, skip=False):
+    def process(self, I, X, y, ind_new, t, is_batch, skip=False):
         if skip:
             return y if is_batch else y[0]
 
-        self.y_list.extend(list(y))
+        self.y_list.extend(list(y[ind_new]))
+        self.y_list_full.extend(list(y))
 
-        self.m += y.shape[0] - dm_cache
-        self.m_cache += dm_cache
+        self.m += len(ind_new)
+        self.m_cache += y.shape[0] - len(ind_new)
 
         self.time_call += tpc() - t
 
@@ -810,24 +949,22 @@ class Bm:
         self.x = X[-1, :].copy() if X is not None else None
         self.y = y[-1]
 
+        self.is_y_max_new = False
+        self.is_y_min_new = False
+
         ind = np.argmax(y)
         if self.y_max is None or self.y_max < y[ind]:
-            self.is_y_max_new = True
             self.i_max = I[ind, :].copy() if I is not None else None
             self.x_max = X[ind, :].copy() if X is not None else None
             self.y_max = y[ind]
-        else:
-            self.is_y_max_new = False
-
+            self.is_y_max_new = True
 
         ind = np.argmin(y)
         if self.y_min is None or self.y_min > y[ind]:
-            self.is_y_min_new = True
             self.i_min = I[ind, :].copy() if I is not None else None
             self.x_min = X[ind, :].copy() if X is not None else None
             self.y_min = y[ind]
-        else:
-            self.is_y_min_new = False
+            self.is_y_min_new = True
 
         if self.log_check():
             self.log(self.info_current())
@@ -844,17 +981,15 @@ class Bm:
 
     def recover(self, i=None, best=True):
         """Restores some benchmark-specific values."""
+        # TODO: check the role of this function
         raise NotImplementedError
-        i, y = self.get_solution(i, best)
 
     def render(self, fpath=None, i=None, best=True):
         """Render the solution for benchmark."""
         raise NotImplementedError
-        i, y = self.get_solution(i, best)
-        fpath = self.path_build(fpath)
 
     def set_budget(self, m=None, m_cache=None, is_strict=True):
-        """Set computation buget."""
+        """Set computation budget."""
         self.budget_m = int(m) if m else None
         self.budget_m_cache = int(m_cache) if m_cache else None
         self.budget_is_strict = is_strict
@@ -888,9 +1023,10 @@ class Bm:
 
     def set_err(self, err=''):
         """Set the error text (can not import external module, etc.)."""
-        self.err.append(err)
+        if err:
+            self.err_list.append(err)
 
-    def set_grid(self, a=None, b=None):
+    def set_grid(self, a=None, b=None, sh_sc=100., sh=False, sh_out=False):
         """Set grid lower (a) and upper (b) limits for the function-like BM."""
         if (a is not None or b is not None) and not self.d:
             raise ValueError('Please, set dimension "d" before')
@@ -898,29 +1034,35 @@ class Bm:
         self.a = teneva.grid_prep_opt(a, self.d)
         self.b = teneva.grid_prep_opt(b, self.d)
 
-        if self.a is not None and self.b is not None:
-            for k in range(self.d):
-                if self.a[k] >= self.b[k]:
-                    raise ValueError('Invalid grid limits (a >= b)')
+        if self.a is None and self.b is None:
+            return
+
+        if self.a is None or self.b is None:
+            raise ValueError('Please, set both "a" and "b"')
+
+        if sh:
+            # Note that we use "constant" noise:
+            rand = np.random.default_rng(42)
+            a_sh = rand.uniform(0, (self.b-self.a) / sh_sc, size=self.d)
+            b_sh = rand.uniform(0, (self.b-self.a) / sh_sc, size=self.d)
+
+            self.a = self.a + a_sh * (-1. if sh_out else +1.)
+            self.b = self.b - b_sh * (-1. if sh_out else +1.)
+
+        for k in range(self.d):
+            if self.a[k] >= self.b[k]:
+                raise ValueError('Invalid grid limits (a >= b)')
 
     def set_grid_kind(self, kind='cheb'):
-        """Set the kind of the grid ('cheb' or 'uni').
-
-        Note:
-            In some benchmarks, when setting the exact global optimum, it is
-            used that the central multi-index for a grid with an odd number of
-            nodes lies at the origin. When new types of grids appear, it should
-            be taken into account.
-
-        """
+        """Set the kind of the grid ('cheb' or 'uni')."""
         if not kind in ['uni', 'cheb']:
             msg = f'Invalid kind of the grid (should be "uni" or "cheb")'
             raise ValueError(msg)
 
         self.grid_kind = kind
 
-    def set_log(self, log=False, cond='min-max', step=1000, prefix='bm',
-                with_min=True, with_max=True, log_wrn=None):
+    def set_log(self, log=False, cond='max-min', step=1000, prec=3, prefix='bm',
+                with_max=True, with_min=True, log_wrn=None):
         """Set the log options. The "log" may be bool or print-like function."""
         if log:
             self.with_log = True
@@ -934,14 +1076,15 @@ class Bm:
         else:
             self.log_wrn = print
 
-        if not cond in ['min', 'max', 'min-max', 'step']:
-            raise ValueError(f'Invalid "log_cond" argument "{cond}"')
+        if not cond in ['min', 'max', 'min-max', 'max-min', 'step']:
+            raise ValueError(f'Invalid "cond" argument "{cond}"')
 
         self.log_cond = cond
         self.log_step = int(step) if step else None
+        self.log_prec = int(prec)
         self.log_prefix = prefix
-        self.log_with_min = with_min
         self.log_with_max = with_max
+        self.log_with_min = with_min
 
     def set_max(self, i=None, x=None, y=None):
         """Set exact (real) global maximum (index, point and related value)."""
@@ -1021,14 +1164,21 @@ class Bm:
         """Set display name for the benchmark."""
         self.name = name
 
-    def set_opts(self):
-        """Set options specific to the benchmark."""
-        return
+    def set_opts(self, **kwargs):
+        """Set values for some of options specific to the benchmark."""
+        for name, value in kwargs.items():
+            if not name in self.opts_info.keys():
+                raise ValueError(f'Option "{name}" does not exist')
+            setattr(self, name, value)
 
-    def set_seed(self, seed=42):
-        """Set random seed and inner generator of random numbers."""
-        self.seed = seed
-        self.rand = np.random.default_rng(self.seed)
+    def set_opts_dflt(self):
+        """Set default values for options specific to the benchmark."""
+        for name, opt in self.opts_info.items():
+            if not 'dflt' in opt:
+                raise ValueError(f'Option "{name}" has not default value')
+            if hasattr(self, name):
+                raise ValueError(f'Invalid option name "{name}" (conflict)')
+            setattr(self, name, opt['dflt'])
 
     def set_size(self, n=None):
         """Set sizes for all d-modes (n should be int or list)."""
@@ -1037,24 +1187,9 @@ class Bm:
 
         self.n = teneva.grid_prep_opt(n, self.d, int)
 
-    def shift_grid(self, scale=100., sign=1):
-        """Apply random shift for the grid limits."""
-        if self.a is None or self.b is None:
-            raise ValueError('Please, set grid before')
-
-        rand = np.random.default_rng(42)
-
-        a_shift = rand.uniform(0, (self.b-self.a) / scale, size=self.d)
-        b_shift = rand.uniform(0, (self.b-self.a) / scale, size=self.d)
-
-        self.a = self.a + a_shift * sign
-        self.b = self.b - b_shift * sign
-
     def show(self, fpath=None, i=None, best=True):
         """Present the state of the benchmark (image, graph, etc.)."""
         raise NotImplementedError
-        i, y = self.get_solution(i, best)
-        fpath = self.path_build(fpath)
 
     def target(self, x):
         """Function that computes value for a given point/index."""
