@@ -46,6 +46,7 @@
     ```bash
     clear && python test_all.py && python test_ref.py
     ```
+    > Note that, unfortunately, for some benchmarks, the calculation result depends on the computing device used, so tests for checking the match in the reference value, i.e. `test_ref.py`, may fail.
 
 10. Optionally delete virtual environment at the end of the work:
     ```bash
@@ -64,7 +65,9 @@
     - We should necessarily rewrite the property `ref`, which returns the reference (random) multi-index and related value of the benchmark;
     - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for the property `with_constr`;
     - Method `cores` can be specified to generate an exact tensor train (TT) representation of the benchmark, in which case the property `with_cores` should be set to `True`;
-    - If the benchmark has auxiliary options, then they can be described using property `opts_info`. Please see benchmark `BmFuncAckley` as an example.
+    - If the benchmark has auxiliary options, then they can be described using property `opts_info`. Please see benchmark `BmFuncAckley` as an example;
+    - If the benchmark is for a maximization (rather than minimization) problem, then please rewrite property `is_opti_max` with a return value of `True`;
+    - Also, if necessary, rewrite property `identity`, which returns a list of argument names (from among those used when initializing the class) that fully define the benchmark (by default, this is the dimension `d` and mode size `n`; for agents, this is the number of agent steps, the type of policy used, etc.). P.). The corresponding values will be used when saving the calculation results to a file, etc.
 
 3. Add import line of the new benchmark into `__init__.py` file in the collection's folder and also append it into the function `teneva_bm_get_<Subfolder>` in this file (additions are recommended to be done in alphabetical order).
 
@@ -93,18 +96,23 @@ Modifying this class may break the functionality of all benchmarks, so please do
     pip uninstall teneva_bm -y && python setup.py install && clear && python test_all.py && python test_ref.py
     ```
 
-2. Update the package version (like `0.7.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion minor number (if major number changes, then update it also here and in the next point);
+2. Reinstall the package locally and run the demo scripts:
+    ```bash
+    pip uninstall teneva_bm -y && python setup.py install && clear && python demo/base_func.py && python demo/base_agent.py && python demo/opti_base.py
+    ```
 
-3. Do commit like `Update version (0.7.X)` and push;
+3. Update the package version (like `0.7.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion minor number (if major number changes, then update it also here and in the next point);
 
-4. Upload the new version to `pypi` (login: AndreiChertkov):
+4. Do commit like `Update version (0.7.X)` and push;
+
+5. Upload the new version to `pypi` (login: AndreiChertkov):
     ```bash
     rm -r ./dist && python setup.py sdist bdist_wheel && twine upload dist/*
     ```
 
-5. Reinstall the package from `pypi` and check that the installed version is new:
+6. Reinstall the package from `pypi` and check that the installed version is new:
     ```bash
     pip uninstall teneva_bm -y && pip install --no-cache-dir --upgrade teneva_bm
     ```
 
-6. Update the version in [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing) and run all its cells.
+7. Update the version in [colab notebook](https://colab.research.google.com/drive/1z8LgqEARJziKub2dVB65CHkhcboc-fCH?usp=sharing) and run all its cells.
