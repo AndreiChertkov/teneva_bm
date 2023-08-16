@@ -3,8 +3,8 @@ from .bm_odeoc_simple_constr import BmOdeocSimpleConstr
 
 
 def teneva_bm_get_odeoc():
-    bms = []
-    bms.append(BmOdeocSimple)
-    bms.append(BmOdeocSimpleConstr)
+    Bms = []
+    Bms.append(BmOdeocSimple)
+    Bms.append(BmOdeocSimpleConstr)
 
-    return bms
+    return Bms

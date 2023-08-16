@@ -13,18 +13,18 @@ from .bm_func_schwefel import BmFuncSchwefel
 
 
 def teneva_bm_get_func():
-    bms = []
-    bms.append(BmFuncAckley)
-    bms.append(BmFuncAlpine)
-    bms.append(BmFuncDixon)
-    bms.append(BmFuncExp)
-    bms.append(BmFuncGriewank)
-    bms.append(BmFuncMichalewicz)
-    bms.append(BmFuncPiston)
-    bms.append(BmFuncQing)
-    bms.append(BmFuncRastrigin)
-    bms.append(BmFuncRosenbrock)
-    bms.append(BmFuncSchaffer)
-    bms.append(BmFuncSchwefel)
+    Bms = []
+    Bms.append(BmFuncAckley)
+    Bms.append(BmFuncAlpine)
+    Bms.append(BmFuncDixon)
+    Bms.append(BmFuncExp)
+    Bms.append(BmFuncGriewank)
+    Bms.append(BmFuncMichalewicz)
+    Bms.append(BmFuncPiston)
+    Bms.append(BmFuncQing)
+    Bms.append(BmFuncRastrigin)
+    Bms.append(BmFuncRosenbrock)
+    Bms.append(BmFuncSchaffer)
+    Bms.append(BmFuncSchwefel)
 
-    return bms
+    return Bms

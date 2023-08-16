@@ -5,10 +5,10 @@ from .bm_qubo_mvc import BmQuboMvc
 
 
 def teneva_bm_get_qubo():
-    bms = []
-    bms.append(BmQuboKnapDet)
-    bms.append(BmQuboKnapQuad)
-    bms.append(BmQuboMaxcut)
-    bms.append(BmQuboMvc)
+    Bms = []
+    Bms.append(BmQuboKnapDet)
+    Bms.append(BmQuboKnapQuad)
+    Bms.append(BmQuboMaxcut)
+    Bms.append(BmQuboMvc)
 
-    return bms
+    return Bms

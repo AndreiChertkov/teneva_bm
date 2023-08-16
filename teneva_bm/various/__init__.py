@@ -4,9 +4,9 @@ from .bm_wall_simple import BmWallSimple
 
 
 def teneva_bm_get_various():
-    bms = []
-    bms.append(BmMatmul)
-    bms.append(BmTopopt)
-    bms.append(BmWallSimple)
+    Bms = []
+    Bms.append(BmMatmul)
+    Bms.append(BmTopopt)
+    Bms.append(BmWallSimple)
 
-    return bms
+    return Bms

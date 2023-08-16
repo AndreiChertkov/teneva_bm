@@ -11,16 +11,16 @@ from .bm_agent_swimmer import BmAgentSwimmer
 
 
 def teneva_bm_get_agent():
-    bms = []
-    bms.append(BmAgentAnt)
-    bms.append(BmAgentCheetah)
-    bms.append(BmAgentHuman)
-    bms.append(BmAgentHumanStand)
-    bms.append(BmAgentLake)
-    bms.append(BmAgentLander)
-    bms.append(BmAgentPendInv)
-    bms.append(BmAgentPendInvDouble)
-    bms.append(BmAgentReacher)
-    bms.append(BmAgentSwimmer)
+    Bms = []
+    Bms.append(BmAgentAnt)
+    Bms.append(BmAgentCheetah)
+    Bms.append(BmAgentHuman)
+    Bms.append(BmAgentHumanStand)
+    Bms.append(BmAgentLake)
+    Bms.append(BmAgentLander)
+    Bms.append(BmAgentPendInv)
+    Bms.append(BmAgentPendInvDouble)
+    Bms.append(BmAgentReacher)
+    Bms.append(BmAgentSwimmer)
 
-    return bms
+    return Bms
