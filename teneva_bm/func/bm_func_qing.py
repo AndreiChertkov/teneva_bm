@@ -1,37 +1,38 @@
 import numpy as np
 import teneva
-
-
 from teneva_bm import Bm
 
 
-DESC = """
-    Analytical Qing function (continuous).
-    The dimension and mode size may be any (default are d=7, n=16).
-    Default grid limits are [0, 500] (with small random shift; note
-    also that we limit this function to this domain instead of often
-    used [-500, 500] to make sure it has a single global minimum);
-    the exact global minimum is known: x_i = \sqrt{i}, y = 0.
-    See the work Momin Jamil, Xin-She Yang. "A literature survey of
-    benchmark functions for global optimization problems". Journal of
-    Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
-    ("98. Qing Function"; Continuous, Differentiable, Separable
-    Scalable, Multimodal).
-"""
-
-
 class BmFuncQing(Bm):
-    def __init__(self, d=7, n=16, name='FuncQing', desc=DESC):
-        super().__init__(d, n, name, desc)
+    def __init__(self, d=7, n=16, seed=42):
+        super().__init__(d, n, seed)
 
-        self.set_grid(0., +500.)
-        self.shift_grid(sign=-1)
+        self.set_desc("""
+            Analytical Qing function (continuous).
+            The dimension and mode size may be any (default are d=7, n=16).
+            Default grid limits are [0, 500] (with small random shift; note
+            also that we limit this function to this domain instead of often
+            used [-500, 500] to make sure it has a single global minimum);
+            the exact global minimum is known: x_i = \sqrt{i}, y = 0.
+            See the work Momin Jamil, Xin-She Yang. "A literature survey of
+            benchmark functions for global optimization problems". Journal of
+            Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
+            ("98. Qing Function"; Continuous, Differentiable, Separable
+            Scalable, Multimodal).
+        """)
+
+        self.set_grid(0., +500., sh=True, sh_out=True)
 
         self.set_min(x=np.sqrt(np.arange(1, self.d+1)), y=0.)
 
     @property
     def is_func(self):
         return True
+
+    @property
+    def ref(self):
+        i = [5, 3, 9, 11, 14, 3, 10]
+        return np.array(i, dtype=int), 106030804604.16588
 
     @property
     def with_cores(self):
@@ -48,40 +49,3 @@ class BmFuncQing(Bm):
         d = torch.tensor(self.d)
 
         return torch.sum((x**2 - torch.arange(1, d+1))**2)
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmFuncQing().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+4)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Value at 3 random multi-indices          :  '
-    i1 = [np.random.choice(k) for k in bm.n]
-    i2 = [np.random.choice(k) for k in bm.n]
-    i3 = [np.random.choice(k) for k in bm.n]
-    I = [i1, i2, i3]
-    y = bm[I]
-    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
-    print(text)
-
-    text = 'TT-cores accuracy on train data          :  '
-    Y = bm.build_cores()
-    e = teneva.accuracy_on_data(Y, I_trn, y_trn)
-    text += f'{e:-10.1e}'
-    print(text)
-
-    text = 'Value at the minimum (real vs calc)      :  '
-    y_real = bm.y_min_real
-    y_calc = bm(bm.x_min_real)
-    text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
-    print(text)

@@ -1,35 +1,36 @@
 import numpy as np
 import teneva
-
-
 from teneva_bm import Bm
 
 
-DESC = """
-    Analytical Piston function (continuous).
-    The dimension is 7 and the mode size may be any (default is n=16), each
-    mode has its own different limits (with small random shift).
-    See Vitaly Zankin, Gleb Ryzhakov, Ivan Oseledets. "Gradient descent
-    based D-optimal design for the least-squares polynomial approximation".
-    arXiv preprint arXiv:1806.06631 2018 for details.
-"""
-
-
 class BmFuncPiston(Bm):
-    def __init__(self, d=7, n=16, name='FuncPiston', desc=DESC):
-        super().__init__(d, n, name, desc)
+    def __init__(self, d=7, n=16, seed=42):
+        super().__init__(d, n, seed)
+
+        self.set_desc("""
+            Analytical Piston function (continuous).
+            The dimension is 7 and the mode size may be any (default is n=16),
+            each mode has its own different limits (with small random shift).
+            See Vitaly Zankin, Gleb Ryzhakov, Ivan Oseledets. "Gradient descent
+            based D-optimal design for the least-squares polynomial
+            approximation". arXiv:1806.06631 2018 for details.
+        """)
+
+        self.set_grid(
+            [30., 0.005, 0.002, 1000,  90000, 290, 340],
+            [60., 0.020, 0.010, 5000, 110000, 296, 360], sh=True)
 
         if self.d != 7:
             self.set_err('Dimension should be "7"')
 
-        self.set_grid(
-            [30., 0.005, 0.002, 1000,  90000, 290, 340],
-            [60., 0.020, 0.010, 5000, 110000, 296, 360])
-        self.shift_grid()
-
     @property
     def is_func(self):
         return True
+
+    @property
+    def ref(self):
+        i = [5, 3, 9, 11, 14, 3, 10]
+        return np.array(i, dtype=int), 0.3320429515579626
 
     def target_batch(self, X):
         _M  = X[:, 0]
@@ -65,28 +66,3 @@ class BmFuncPiston(Bm):
         _C = 2 * pi * torch.sqrt(_M / (_k + _S**2 * _Q * _Ta / _V**2))
 
         return _C
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmFuncPiston().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+4)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Value at 3 random multi-indices          :  '
-    i1 = [np.random.choice(k) for k in bm.n]
-    i2 = [np.random.choice(k) for k in bm.n]
-    i3 = [np.random.choice(k) for k in bm.n]
-    I = [i1, i2, i3]
-    y = bm[I]
-    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
-    print(text)

@@ -1,28 +1,24 @@
 import numpy as np
 import teneva
-
-
 from teneva_bm import Bm
 
 
-DESC = """
-    Analytical Rastrigin function (continuous).
-    The dimension and mode size may be any (default are d=7, n=16).
-    Default grid limits are [-5.12, 5.12] (with small random shift);
-    the exact global minimum is known: x = [0, ..., 0], y = 0.
-    See the work Johannes M Dieterich, Bernd Hartke. "Empirical review
-    of standard benchmark functions using evolutionary global optimization".
-    Applied Mathematics 2012; 3:1552-1564.
-    See also https://www.sfu.ca/~ssurjano/rastr.html for details.
-"""
-
-
 class BmFuncRastrigin(Bm):
-    def __init__(self, d=7, n=16, name='FuncRastrigin', desc=DESC):
-        super().__init__(d, n, name, desc)
+    def __init__(self, d=7, n=16, seed=42):
+        super().__init__(d, n, seed)
 
-        self.set_grid(-5.12, +5.12)
-        self.shift_grid()
+        self.set_desc("""
+            Analytical Rastrigin function (continuous).
+            The dimension and mode size may be any (default are d=7, n=16).
+            Default grid limits are [-5.12, 5.12] (with small random shift);
+            the exact global minimum is known: x = [0, ..., 0], y = 0.
+            See the work Johannes M Dieterich, Bernd Hartke. "Empirical review
+            of standard benchmark functions using evolutionary global
+            optimization". Applied Mathematics 2012; 3:1552-1564.
+            See also https://www.sfu.ca/~ssurjano/rastr.html for details.
+        """)
+
+        self.set_grid(-5.12, +5.12, sh=True)
 
         self.set_min(x=[0.]*self.d, y=0.)
 
@@ -31,33 +27,24 @@ class BmFuncRastrigin(Bm):
         return True
 
     @property
+    def opts_info(self):
+        return {**super().opts_info,
+            'opt_A': {
+                'desc': 'Param "a" for Rastrigin function',
+                'kind': 'float',
+                'form': '.2f',
+                'dflt': 10.
+            }
+        }
+
+    @property
+    def ref(self):
+        i = [5, 3, 9, 11, 14, 3, 10]
+        return np.array(i, dtype=int), 166.75702361466605
+
+    @property
     def with_cores(self):
         return True
-
-    def get_config(self):
-        conf = super().get_config()
-        conf['opt_A'] = self.opt_A
-        return conf
-
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Param A for Rastrigin function           : '
-        v = self.opt_A
-        text += f'{v:.6f}\n'
-
-        return super().info(text+footer)
-
-    def set_opts(self, opt_A=10.):
-        """Set options specific to this benchmark.
-
-        There are no plans to manually change the default values.
-
-        Args:
-            opt_A (float): parameter of the function.
-
-        """
-        self.opt_A = opt_A
 
     def cores(self, X):
         return self.cores_add(
@@ -79,40 +66,3 @@ class BmFuncRastrigin(Bm):
         y2 = torch.sum(x**2 - par_A * torch.cos(2. * pi * x))
 
         return y1 + y2
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmFuncRastrigin().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+4)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Value at 3 random multi-indices          :  '
-    i1 = [np.random.choice(k) for k in bm.n]
-    i2 = [np.random.choice(k) for k in bm.n]
-    i3 = [np.random.choice(k) for k in bm.n]
-    I = [i1, i2, i3]
-    y = bm[I]
-    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
-    print(text)
-
-    text = 'TT-cores accuracy on train data          :  '
-    Y = bm.build_cores()
-    e = teneva.accuracy_on_data(Y, I_trn, y_trn)
-    text += f'{e:-10.1e}'
-    print(text)
-
-    text = 'Value at the minimum (real vs calc)      :  '
-    y_real = bm.y_min_real
-    y_calc = bm(bm.x_min_real)
-    text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
-    print(text)
