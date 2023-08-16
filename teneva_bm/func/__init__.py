@@ -16,6 +16,7 @@ from .bm_func_schaffer import BmFuncSchaffer
 from .bm_func_schwefel import BmFuncSchwefel
 from .bm_func_salomon import BmFuncSalomon
 from .bm_func_sphere import BmFuncSphere
+from .bm_func_squares import BmFuncSquares
 
 
 def teneva_bm_get_func():
@@ -38,5 +39,6 @@ def teneva_bm_get_func():
     Bms.append(BmFuncSchwefel)
     Bms.append(BmFuncSalomon)
     Bms.append(BmFuncSphere)
+    Bms.append(BmFuncSquares)
 
     return Bms
