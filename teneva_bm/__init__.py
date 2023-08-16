@@ -10,6 +10,7 @@ from .func_fix import *
 from .hs import *
 from .odeoc import *
 from .qubo import *
+from .qubo_fix import *
 from .various import *
 
 
@@ -23,6 +24,7 @@ def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
     Bms += teneva_bm_get_hs()
     Bms += teneva_bm_get_odeoc()
     Bms += teneva_bm_get_qubo()
+    Bms += teneva_bm_get_qubo_fix()
     Bms += teneva_bm_get_various()
 
     Bms_out = []

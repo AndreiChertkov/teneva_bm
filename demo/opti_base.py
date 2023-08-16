@@ -1,6 +1,6 @@
 """Basic benchmark optimization example.
 
-We are looking for a global minimum for benchmark "BmQuboKnapDet" using a
+We are looking for a global minimum for benchmark "BmQuboFixKnapDet" using a
 gradient-free PROTES optimizer. The benchmark dimension ("d"; note that it may
 be 10, 20, 50, 80 and 100 for the selected benchark) and budget ("m") are given
 as function "demo" arguments. To run the code use the following command:
@@ -28,11 +28,11 @@ jax.default_device(jax.devices('cpu')[0])
 from protes import protes
 
 
-from teneva_bm import BmQuboKnapDet
+from teneva_bm import BmQuboFixKnapDet
 
 
 def demo(d=100, m=2.E+4):
-    bm = BmQuboKnapDet(d)
+    bm = BmQuboFixKnapDet(d)
     bm.set_budget(m, m_cache=m)
     bm.set_cache(True)
     bm.set_log(True, cond='min', prefix='protes', with_max=False)

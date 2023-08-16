@@ -2,7 +2,7 @@ import numpy as np
 from teneva_bm import Bm
 
 
-class BmQuboKnapDet(Bm):
+class BmQuboFixKnapDet(Bm):
     def __init__(self, d=100, n=2, seed=42):
         super().__init__(d, n, seed)
 
