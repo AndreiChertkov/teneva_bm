@@ -39,6 +39,6 @@ def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
         if with_render is not None and bm.with_render != with_render:
             continue
 
-        Bms_out.append(bm)
+        Bms_out.append(Bm)
 
     return Bms_out
