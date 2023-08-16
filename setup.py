@@ -16,7 +16,7 @@ def find_packages(package, basepath):
 here = os.path.abspath(os.path.dirname(__file__))
 
 
-desc = 'Benchmarks library, based on the software product teneva, for testing multivariate approximation and optimization methods'
+desc = 'Benchmarks library, based on the package teneva, for testing multivariate approximation and optimization methods'
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     desc_long = f.read()
 

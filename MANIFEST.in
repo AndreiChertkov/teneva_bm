@@ -1,4 +1,4 @@
 include LICENSE.txt
 include README.md
-include demo.py
+include install_all.py
 include requirements.txt

@@ -11,3 +11,5 @@ _tmp/
 build/
 dist/
 result/
+result_demo/
+result_test/

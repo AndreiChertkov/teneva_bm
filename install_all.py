@@ -213,11 +213,12 @@ def install_all_osx(env):
         res, out = _run(f'pip install {pack}', env=env)
         _log(f'Installed python package "{pack}"')
 
-    _log('Edit OpenGL lib to remove annoying warnings', 'PRC')
-    if _run_opengl_edit(env):
-        _log(f'OpenGL lib is edited')
-    else:
-        _log(f'OpenGL lib was not (!) edited', 'WRN')
+    if False:
+        _log('Edit OpenGL lib to remove annoying warnings', 'PRC')
+        if _run_opengl_edit(env):
+            _log(f'OpenGL lib is edited')
+        else:
+            _log(f'OpenGL lib was not (!) edited', 'WRN')
 
     _log('Edit GLFW lib to remove annoying warnings', 'PRC')
     if _run_glfw_edit(env):
