@@ -1,5 +1,6 @@
 from .bm_func_ackley import BmFuncAckley
 from .bm_func_alpine import BmFuncAlpine
+from .bm_func_chung import BmFuncChung
 from .bm_func_dixon import BmFuncDixon
 from .bm_func_exp import BmFuncExp
 from .bm_func_griewank import BmFuncGriewank
@@ -17,6 +18,7 @@ def teneva_bm_get_func():
     Bms = []
     Bms.append(BmFuncAckley)
     Bms.append(BmFuncAlpine)
+    Bms.append(BmFuncChung)
     Bms.append(BmFuncDixon)
     Bms.append(BmFuncExp)
     Bms.append(BmFuncGriewank)
