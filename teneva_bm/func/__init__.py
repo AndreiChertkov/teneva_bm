@@ -5,6 +5,8 @@ from .bm_func_dixon import BmFuncDixon
 from .bm_func_exp import BmFuncExp
 from .bm_func_griewank import BmFuncGriewank
 from .bm_func_michalewicz import BmFuncMichalewicz
+from .bm_func_pathological import BmFuncPathological
+from .bm_func_pinter import BmFuncPinter
 from .bm_func_piston import BmFuncPiston
 from .bm_func_qing import BmFuncQing
 from .bm_func_rastrigin import BmFuncRastrigin
@@ -23,6 +25,8 @@ def teneva_bm_get_func():
     Bms.append(BmFuncExp)
     Bms.append(BmFuncGriewank)
     Bms.append(BmFuncMichalewicz)
+    Bms.append(BmFuncPathological)
+    Bms.append(BmFuncPinter)
     Bms.append(BmFuncPiston)
     Bms.append(BmFuncQing)
     Bms.append(BmFuncRastrigin)
