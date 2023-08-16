@@ -2,21 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
-
-
 from teneva_bm import Bm
 
 
-DESC = """
-    DRAFT!!! Discrete Topology optimization task.
-    The dimension is defined from "nx" and "ny" parameters and mode size
-    should be 2.
-"""
-
-
 class BmTopopt(Bm):
-    def __init__(self, d=None, n=2, name='BmTopopt', desc=DESC, nx=128, ny=32):
-        super().__init__(int(nx*ny), n, name, desc)
+    def __init__(self, d=None, n=2, seed=42, nx=128, ny=32):
+        super().__init__(int(nx*ny), n, seed)
+
+        self.set_desc("""
+            DRAFT!!! Discrete Topology optimization task.
+            The dimension is defined from "nx" and "ny" parameters and mode size
+            should be 2.
+        """)
 
         if d is not None:
             self.set_err('Dimension number (d) should not be set manually')
@@ -28,6 +25,19 @@ class BmTopopt(Bm):
         self.ny = int(ny)
 
     @property
+    def args_info(self):
+        return {**super().args_info,
+            'nx': {
+                'desc': 'Grid x-size',
+                'kind': 'int'
+            },
+            'ny': {
+                'desc': 'Grid y-size',
+                'kind': 'int'
+            }
+        }
+
+    @property
     def identity(self):
         return ['nx', 'ny']
 
@@ -36,61 +46,35 @@ class BmTopopt(Bm):
         return True
 
     @property
+    def opts_info(self):
+        return {**super().opts_info,
+            'k_frac': {
+                'desc': 'Param k_frac for Topopt',
+                'kind': 'float',
+                'form': '.6f',
+                'dflt': 0.4
+            },
+            'penal': {
+                'desc': 'Param penal for Topopt',
+                'kind': 'float',
+                'form': '.6f',
+                'dflt': 3.
+            },
+            'rmin': {
+                'desc': 'Param rmin for Topopt',
+                'kind': 'float',
+                'form': '.6f',
+                'dflt': 5.4
+            }
+        }
+
+    @property
     def with_show(self):
         return True
-
-    def get_config(self):
-        conf = super().get_config()
-        conf['nx'] = self.nx
-        conf['ny'] = self.ny
-        conf['k_frac'] = self.k_frac
-        conf['penal'] = self.penal
-        conf['rmin'] = self.rmin
-        return conf
-
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Param nx (grid x-size)                   : '
-        v = self.nx
-        text += f'{v:.0f}\n'
-
-        text += 'Param ny (grid y-size)                   : '
-        v = self.ny
-        text += f'{v:.0f}\n'
-
-        text += 'Param k_frac for Topopt                  : '
-        v = self.k_frac
-        text += f'{v:.6f}\n'
-
-        text += 'Param penal for Topopt                   : '
-        v = self.penal
-        text += f'{v:.6f}\n'
-
-        text += 'Param rmin for Topopt                    : '
-        v = self.rmin
-        text += f'{v:.6f}\n'
-
-        return super().info(text+footer)
 
     def prep_bm(self):
         self._solver = _topopt_lite(self.nx, self.ny,
             self.k_frac, self.penal, self.rmin)
-
-    def set_opts(self, k_frac=0.4, penal=3., rmin=5.4):
-        """Setting options specific to this benchmark.
-
-        There are no plans to manually change the default values.
-
-        Args:
-            k_frac (float): ?.
-            penal (float): ?.
-            rmin (float): ?.
-
-        """
-        self.k_frac = k_frac
-        self.penal = penal
-        self.rmin = rmin
 
     def show(self, fpath=None, i=None, best=True):
         i, y = self.get_solution(i, best)
@@ -378,6 +362,7 @@ def _topopt_lite(nelx, nely, volfrac, penal, rmin, ft=1):
 
 
 if __name__ == '__main__':
+    # Service code just for test.
     np.random.seed(42)
 
     bm = BmTopopt().prep()
@@ -402,7 +387,7 @@ if __name__ == '__main__':
     print(text)
 
     text = 'Generate image for a random multi-index  :  '
-    fpath = f'result/{bm.name}/show'
+    fpath = f'result/topopt_show'
     bm.show(fpath)
     text += f' see {fpath}'
     print(text)

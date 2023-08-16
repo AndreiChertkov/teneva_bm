@@ -1,39 +1,37 @@
 import numpy as np
-
-
 from teneva_bm import Bm
 
 
-DESC = """
-    Problem for fast "size x size" matrix multiplication (like Strassen
-    algorithm in the case "size = 2") in terms of the tensor based
-    formulation (e.g., the search for the rank-7 CP decomposition is
-    performed in the case of the "size = 2"). The objective function is
-    the norm of the difference between the exact tensor and the result of
-    multiplication using the chosen operations (determined by CP factors).
-    The dimension is determined automatically, but the rank argument should
-    be set manually in the case if "size > 2" (e.g., for the "size = 3", the
-    best known rank is "23"). The default mode size is "3", which relates to
-    a standard matrix multiplication task; in this case, we are looking for a
-    decomposition with factor matrix entries "-1, 0, 1". A mode size of "5"
-    is also supported, which relates to the possible values "-2, -1, 0, 1, 2".
-    If the "only2" flag is set during initialization, then only two factor
-    matrices will be constructed, and the third matrix will be restored as a
-    solution to the corresponding system of linear equations. The benchmark
-    has also the method "recover", which returns the factor matrices for the
-    given multi-indices. For more details, see the work Fawzi, A., et al.
-    "Discovering faster matrix multiplication algorithms with reinforcement
-    learning." Nature 610.7930 (2022): 47-53.
-"""
-
-
 class BmMatmul(Bm):
-    def __init__(self, d=None, n=3, name='Matmul', desc=DESC, size=2, rank=7,
-                 only2=False):
+    def __init__(self, d=None, n=3, seed=42, size=2, rank=7, only2=False):
         T_real = _tensor_generate(size, size, size)
         d_real = (2 if only2 else 3) * size**2 * rank
 
-        super().__init__(d_real, n, name, desc)
+        super().__init__(d_real, n, seed)
+
+        self.set_desc("""
+            Problem for fast "size x size" matrix multiplication (like Strassen
+            algorithm in the case "size = 2") in terms of the tensor based
+            formulation (e.g., the search for the rank-7 CP decomposition is
+            performed in the case of the "size = 2"). The objective function is
+            the norm of the difference between the exact tensor and the result
+            of multiplication using the chosen operations (determined by CP
+            factors). The dimension is determined automatically, but the rank
+            argument should be set manually in the case if "size > 2" (e.g.,
+            for the "size = 3", the best known rank is "23"). The default mode
+            size is "3", which relates to a standard matrix multiplication
+            task; in this case, we are looking for a decomposition with factor
+            matrix entries "-1, 0, 1". A mode size of "5" is also supported,
+            which relates to the possible values "-2, -1, 0, 1, 2".
+            If the "only2" flag is set during initialization, then only two
+            factor matrices will be constructed, and the third matrix will be
+            restored as a solution to the corresponding system of linear
+            equations. The benchmark has also the method "recover", which
+            returns the factor matrices for the given multi-indices.
+            For more details, see the work Fawzi, A., et al. "Discovering
+            faster matrix multiplication algorithms with reinforcement
+            learning." Nature 610.7930 (2022): 47-53.
+        """)
 
         if d is not None:
             self.set_err('Dimension number (d) should not be set manually')
@@ -74,36 +72,29 @@ class BmMatmul(Bm):
         self.only2 = only2
 
     @property
+    def args_info(self):
+        return {**super().args_info,
+            'size': {
+                'desc': 'Sizes of the matrices',
+                'kind': 'int'
+            },
+            'rank': {
+                'desc': 'Search rank for CP-decomposition',
+                'kind': 'int'
+            },
+            'only2': {
+                'desc': 'Do we use only 2 CP-factors',
+                'kind': 'bool'
+            },
+        }
+
+    @property
     def identity(self):
         return ['size', 'rank', 'n', 'only2']
 
     @property
     def is_tens(self):
         return True
-
-    def get_config(self):
-        conf = super().get_config()
-        conf['size'] = self.size
-        conf['rank'] = self.rank
-        conf['only2'] = self.only2
-        return conf
-
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Param size (sizes of the matrices)       : '
-        v = self.size
-        text += f'{v:.0f}\n'
-
-        text += 'Param rank (search rank for CP-decomp.)  : '
-        v = self.rank
-        text += f'{v:.0f}\n'
-
-        text += 'Param only2 (if True, use 2 CP-factors)  : '
-        v = 'YES' if self.only2 else 'no'
-        text += f'{v}\n'
-
-        return super().info(text+footer)
 
     def prep_bm(self):
         self.loss = _loss_build(self._T, self._E, self.rank, self.only2)
@@ -207,6 +198,7 @@ def _tensor_generate(a, b, c):
 
 
 if __name__ == '__main__':
+    # Service code just for test.
     np.random.seed(42)
 
     bm = BmMatmul(size=2, rank=7).prep()
