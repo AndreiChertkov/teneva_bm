@@ -1,2 +1,5 @@
-matplotlib>=3.7.0
-teneva>=0.14.5
+matplotlib>=3.7.0,<3.7.1;python_version=="3.8"
+matplotlib>=3.7.0;python_version>="3.9"
+numpy>=1.22;python_version>="3.9"
+numpy>=1.22,<1.25;python_version=="3.8"
+teneva>=0.14.6
