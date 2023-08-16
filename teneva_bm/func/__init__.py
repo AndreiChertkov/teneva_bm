@@ -10,3 +10,21 @@ from .bm_func_rastrigin import BmFuncRastrigin
 from .bm_func_rosenbrock import BmFuncRosenbrock
 from .bm_func_schaffer import BmFuncSchaffer
 from .bm_func_schwefel import BmFuncSchwefel
+
+
+def teneva_bm_get_func():
+    bms = []
+    bms.append(BmFuncAckley)
+    bms.append(BmFuncAlpine)
+    bms.append(BmFuncDixon)
+    bms.append(BmFuncExp)
+    bms.append(BmFuncGriewank)
+    bms.append(BmFuncMichalewicz)
+    bms.append(BmFuncPiston)
+    bms.append(BmFuncQing)
+    bms.append(BmFuncRastrigin)
+    bms.append(BmFuncRosenbrock)
+    bms.append(BmFuncSchaffer)
+    bms.append(BmFuncSchwefel)
+
+    return bms
