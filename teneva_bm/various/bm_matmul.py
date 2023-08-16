@@ -96,6 +96,15 @@ class BmMatmul(Bm):
     def is_tens(self):
         return True
 
+    @property
+    def ref(self):
+        i = np.ones(84, dtype=int)
+        for k in [1, 10, 12, 40, 55]:
+            i[k] = 0
+        for k in [0, 33, 54, 72, 81]:
+            i[k] = 2
+        return np.array(i, dtype=int), 2.8284271247461903
+
     def prep_bm(self):
         self.loss = _loss_build(self._T, self._E, self.rank, self.only2)
 

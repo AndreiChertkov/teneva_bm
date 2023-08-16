@@ -30,5 +30,10 @@ class BmHsFunc001(Bm):
     def is_func(self):
         return True
 
+    @property
+    def ref(self):
+        i = [21, 42]
+        return np.array(i, dtype=int), 90015.99999999996
+
     def target_batch(self, X):
         return 100. * (X[:, 1] - X[:, 0]**2)**2 + (1. - X[:, 0])**2

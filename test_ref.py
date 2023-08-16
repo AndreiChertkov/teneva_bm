@@ -25,7 +25,7 @@ class TestRef(unittest.TestCase):
                 e = np.abs(y - z)
 
                 msg = '\n>>> Ref. value does not match for '
-                msg += f'"{Bm.__name__}" [y={y}]'
+                msg += f'"{Bm.__name__}" [d={bm.d}; y={y}]'
                 self.assertLess(e, self.eps, msg)
 
 

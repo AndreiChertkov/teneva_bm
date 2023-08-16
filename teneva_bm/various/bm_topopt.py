@@ -69,6 +69,13 @@ class BmTopopt(Bm):
         }
 
     @property
+    def ref(self):
+        i = np.ones(4096, dtype=int)
+        for k in [1, 10, 12, 40, 55, 100, 254, 999, 2044, 3046]:
+            i[k] = 0
+        return np.array(i, dtype=int), 283.8184626040463
+
+    @property
     def with_show(self):
         return True
 

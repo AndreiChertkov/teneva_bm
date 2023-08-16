@@ -23,6 +23,15 @@ class BmWallSimple(Bm):
     def is_tens(self):
         return True
 
+    @property
+    def ref(self):
+        i = np.ones(10, dtype=int)
+        for k in [1, 3, 6]:
+            i[k] = 10
+        for k in [0, 2, 4, 9]:
+            i[k] = 5
+        return np.array(i, dtype=int), 5.
+
     def target(self, i):
         if len(np.where(i == self.i_min_real)[0]) == self.d:
             return 0.

@@ -36,6 +36,11 @@ class BmHsFunc006(Bm):
         return True
 
     @property
+    def ref(self):
+        i = [10, 12]
+        return np.array(i, dtype=int), 688649.2545012803
+
+    @property
     def with_constr(self):
         return True
 
