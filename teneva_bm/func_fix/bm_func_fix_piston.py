@@ -20,7 +20,7 @@ class BmFuncFixPiston(FuncFix):
             [30., 0.005, 0.002, 1000,  90000, 290, 340],
             [60., 0.020, 0.010, 5000, 110000, 296, 360], sh=True)
 
-        if self.d != None:
+        if d != None:
             self.set_err('Dimension should not be set manually')
 
     @property
