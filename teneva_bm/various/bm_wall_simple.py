@@ -36,6 +36,6 @@ class BmWallSimple(Bm):
         if len(np.where(i == self.i_min_real)[0]) == self.d:
             return 0.
         elif len(np.where(i == self.i_min_real)[0]) > 0:
-            return self.d * 10
+            return self.d * 10.
         else:
-            return i[0]
+            return i[0] * 1.

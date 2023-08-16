@@ -13,7 +13,8 @@ from .various import *
 
 
 def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
-                  with_cores=None, with_show=None, with_render=None):
+                  with_cores=None, with_show=None, with_render=None,
+                  with_max=None, with_min=None):
     Bms = []
     Bms += teneva_bm_get_agent()
     Bms += teneva_bm_get_func()
@@ -37,6 +38,10 @@ def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
         if with_show is not None and bm.with_show != with_show:
             continue
         if with_render is not None and bm.with_render != with_render:
+            continue
+        if with_max is not None and (bm.y_max_real is None) == with_max:
+            continue
+        if with_min is not None and (bm.y_min_real is None) == with_min:
             continue
 
         Bms_out.append(Bm)

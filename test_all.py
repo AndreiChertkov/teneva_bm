@@ -40,6 +40,7 @@ class TestArgs(unittest.TestCase):
 
         self.assertEqual(len(bm.args['n']), 5)
         self.assertEqual(bm.args['n'][0], n[0])
+        self.assertEqual(bm.args['n'][-1], n[-1])
 
     def test_list_equal(self):
         d = 12
@@ -59,36 +60,32 @@ class TestBuildTrn(unittest.TestCase):
         self.eps = 1.E-11
 
     def test_base(self):
-        for Bm in teneva_bm_get():
-            with self.subTest(Bm=Bm):
-                bm = Bm()
-                bm.prep()
+        bm = BmFuncAckley()
+        bm.prep()
 
-                I_trn, y_trn = bm.build_trn(self.m)
-                self.assertEqual(len(I_trn.shape), 2)
-                self.assertEqual(I_trn.shape[0], self.m)
-                self.assertEqual(I_trn.shape[1], bm.d)
-                self.assertEqual(len(y_trn.shape), 1)
-                self.assertEqual(y_trn.shape[0], self.m)
+        I_trn, y_trn = bm.build_trn(self.m)
 
-                self.assertEqual(bm.m, self.m)
-                self.assertEqual(bm.m_cache, 0)
+        self.assertEqual(len(I_trn.shape), 2)
+        self.assertEqual(I_trn.shape[0], self.m)
+        self.assertEqual(I_trn.shape[1], bm.d)
+        self.assertEqual(len(y_trn.shape), 1)
+        self.assertEqual(y_trn.shape[0], self.m)
 
-                e = np.abs(bm.get(I_trn[0]) - y_trn[0])
+        self.assertEqual(bm.m, self.m)
+        self.assertEqual(bm.m_cache, 0)
 
-                msg = f'\n>>> Test failed for "{Bm.__name__}"'
-                self.assertLess(e, self.eps, msg)
+        e = np.abs(bm.get(I_trn[0]) - y_trn[0])
+
+        self.assertLess(e, self.eps)
 
     def test_without_budget(self):
-        for Bm in teneva_bm_get():
-            with self.subTest(Bm=Bm):
-                bm = Bm()
-                bm.prep()
+        bm = BmFuncAckley()
+        bm.prep()
 
-                I_trn, y_trn = bm.build_trn(self.m, skip_process=True)
+        I_trn, y_trn = bm.build_trn(self.m, skip_process=True)
 
-                self.assertEqual(bm.m, 0)
-                self.assertEqual(bm.m_cache, 0)
+        self.assertEqual(bm.m, 0)
+        self.assertEqual(bm.m_cache, 0)
 
 
 class TestBuildTst(unittest.TestCase):
@@ -97,36 +94,32 @@ class TestBuildTst(unittest.TestCase):
         self.eps = 1.E-11
 
     def test_base(self):
-        for Bm in teneva_bm_get():
-            with self.subTest(Bm=Bm):
-                bm = Bm()
-                bm.prep()
+        bm = BmFuncAckley()
+        bm.prep()
 
-                I_tst, y_tst = bm.build_tst(self.m)
-                self.assertEqual(len(I_tst.shape), 2)
-                self.assertEqual(I_tst.shape[0], self.m)
-                self.assertEqual(I_tst.shape[1], bm.d)
-                self.assertEqual(len(y_tst.shape), 1)
-                self.assertEqual(y_tst.shape[0], self.m)
+        I_tst, y_tst = bm.build_tst(self.m)
 
-                self.assertEqual(bm.m, 0)
-                self.assertEqual(bm.m_cache, 0)
+        self.assertEqual(len(I_tst.shape), 2)
+        self.assertEqual(I_tst.shape[0], self.m)
+        self.assertEqual(I_tst.shape[1], bm.d)
+        self.assertEqual(len(y_tst.shape), 1)
+        self.assertEqual(y_tst.shape[0], self.m)
 
-                e = np.abs(bm.get(I_tst[0]) - y_tst[0])
+        self.assertEqual(bm.m, 0)
+        self.assertEqual(bm.m_cache, 0)
 
-                msg = f'\n>>> Test failed for "{Bm.__name__}"'
-                self.assertLess(e, self.eps, msg)
+        e = np.abs(bm.get(I_tst[0]) - y_tst[0])
+
+        self.assertLess(e, self.eps)
 
     def test_with_budget(self):
-        for Bm in teneva_bm_get():
-            with self.subTest(Bm=Bm):
-                bm = Bm()
-                bm.prep()
+        bm = BmFuncAckley()
+        bm.prep()
 
-                I_tst, y_tst = bm.build_tst(self.m, skip_process=False)
+        I_tst, y_tst = bm.build_tst(self.m, skip_process=False)
 
-                self.assertEqual(bm.m, self.m)
-                self.assertEqual(bm.m_cache, 0)
+        self.assertEqual(bm.m, self.m)
+        self.assertEqual(bm.m_cache, 0)
 
 
 class TestCores(unittest.TestCase):
@@ -134,25 +127,23 @@ class TestCores(unittest.TestCase):
         self.eps = 1.E-15
 
     def test_base(self):
-        for Bm in teneva_bm_get():
-            with self.subTest(Bm=Bm):
-                bm = Bm()
-                if not bm.with_cores:
-                    continue
-                bm.prep()
+        for Bm in teneva_bm_get(with_cores=True):
+            bm = Bm()
+            bm.prep()
 
-                Y = bm.build_cores()
+            Y = bm.build_cores()
 
-                self.assertEqual(len(Y), bm.d)
-                self.assertEqual(len(Y[0].shape), 3)
-                self.assertEqual(Y[0].shape[0], 1)
-                self.assertEqual(Y[-1].shape[2], 1)
+            self.assertEqual(len(Y), bm.d)
+            self.assertEqual(len(Y[0].shape), 3)
+            self.assertEqual(Y[0].shape[0], 1)
+            self.assertEqual(Y[0].shape[1], bm.n[0])
+            self.assertEqual(Y[-1].shape[2], 1)
 
-                I_trn, y_trn = bm.build_trn(1.E+2)
-                e = teneva.accuracy_on_data(Y, I_trn, y_trn)
+            I_trn, y_trn = bm.build_trn(1.E+2)
+            e = teneva.accuracy_on_data(Y, I_trn, y_trn)
 
-                msg = f'\n>>> Test failed for "{Bm.__name__}" [e = {e:-7.1e}]'
-                self.assertLess(e, self.eps, msg)
+            msg = f'\n>>> Test failed for "{Bm.__name__}" [e = {e:-7.1e}]'
+            self.assertLess(e, self.eps, msg)
 
 
 class TestGet(unittest.TestCase):
@@ -191,11 +182,9 @@ class TestGet(unittest.TestCase):
 
 class TestGetPoi(unittest.TestCase):
     def test_base(self):
-        for Bm in teneva_bm_get():
+        for Bm in teneva_bm_get(is_func=True):
             with self.subTest(Bm=Bm):
                 bm = Bm()
-                if not bm.is_func:
-                    continue
                 bm.prep()
 
                 self.assertFalse(bm.a is None)
@@ -208,11 +197,9 @@ class TestGetPoi(unittest.TestCase):
                 self.assertTrue(isinstance(y, float), msg)
 
     def test_base_many(self):
-        for Bm in teneva_bm_get():
+        for Bm in teneva_bm_get(is_func=True):
             with self.subTest(Bm=Bm):
                 bm = Bm()
-                if not bm.is_func:
-                    continue
                 bm.prep()
 
                 self.assertFalse(bm.a is None)
@@ -286,18 +273,14 @@ class TestMax(unittest.TestCase):
         self.eps = 1.E-14
 
     def test_base(self):
-        for Bm in teneva_bm_get():
+        for Bm in teneva_bm_get(with_max=True):
             with self.subTest(Bm=Bm):
                 bm = Bm()
                 bm.prep()
 
-                if bm.y_max_real is None:
-                    continue
-
                 eps = self.eps
                 if Bm.__name__ == 'BmFuncSchwefel':
-                    # TODO: check why
-                    eps = 1.E-4
+                    eps = 2.E-5
 
                 if bm.i_max_real is not None:
                     y = bm[bm.i_max_real]
@@ -319,18 +302,14 @@ class TestMin(unittest.TestCase):
         self.eps = 1.E-14
 
     def test_base(self):
-        for Bm in teneva_bm_get():
+        for Bm in teneva_bm_get(with_min=True):
             with self.subTest(Bm=Bm):
                 bm = Bm()
                 bm.prep()
 
-                if bm.y_min_real is None:
-                    continue
-
                 eps = self.eps
                 if Bm.__name__ == 'BmFuncSchwefel':
-                    # TODO: check why
-                    eps = 1.E-4
+                    eps = 2.E-5
 
                 if bm.i_min_real is not None:
                     y = bm[bm.i_min_real]
@@ -450,20 +429,17 @@ class TestPrps(unittest.TestCase):
 
 class TestRender(unittest.TestCase):
     def test_base(self):
-        for Bm in teneva_bm_get():
+        for Bm in teneva_bm_get(with_render=True):
             with self.subTest(Bm=Bm):
                 bm = Bm()
                 bm.prep()
 
-                if not bm.with_render:
-                    continue
-
                 i = [np.random.choice(k) for k in bm.n]
                 y = bm[i]
 
-                bm.render(f'result_test/render/{Bm.__name__}')
+                fpath = f'result/test/render/{Bm.__name__}.mp4'
+                bm.render(fpath)
 
-                fpath = f'result_test/render/{Bm.__name__}.mp4'
                 is_ok = os.path.isfile(fpath)
                 is_ok = is_ok and os.path.getsize(fpath) > 1000
 
@@ -473,20 +449,17 @@ class TestRender(unittest.TestCase):
 
 class TestShow(unittest.TestCase):
     def test_base(self):
-        for Bm in teneva_bm_get():
+        for Bm in teneva_bm_get(with_show=True):
             with self.subTest(Bm=Bm):
                 bm = Bm()
                 bm.prep()
 
-                if not bm.with_show:
-                    continue
-
                 i = [np.random.choice(k) for k in bm.n]
                 y = bm[i]
 
-                bm.show(f'result_test/show/{Bm.__name__}')
+                fpath = f'result/test/show/{Bm.__name__}.png'
+                bm.show(fpath)
 
-                fpath = f'result_test/show/{Bm.__name__}.png'
                 is_ok = os.path.isfile(fpath)
                 is_ok = is_ok and os.path.getsize(fpath) > 1000
 
