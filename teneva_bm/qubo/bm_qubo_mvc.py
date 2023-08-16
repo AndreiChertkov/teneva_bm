@@ -1,4 +1,5 @@
 import numpy as np
+from teneva_bm import Bm
 
 
 try:
@@ -15,22 +16,18 @@ except Exception as e:
     with_qubogen = False
 
 
-from teneva_bm import Bm
-
-
-DESC = """
-    Quadratic unconstrained binary optimization (QUBO) Minimum Vertex Cover
-    (MVC) problem represented as a discrete function. The dimension may be
-    any (default is 100), and the mode size should be 2. The default value
-    of the probability of the connection in the graph if 0.5 (pcon=5).
-    The benchmark needs "networkx==3.0" and "qubogen==0.1.1" libraries.
-    TODO: fix inner bm name from "QuboMVC" to "QuboMvc".
-"""
-
-
 class BmQuboMvc(Bm):
-    def __init__(self, d=100, n=2, name='QuboMVC', desc=DESC, pcon=5):
-        super().__init__(d, n, name, desc)
+    def __init__(self, d=100, n=2, seed=42, pcon=5):
+        super().__init__(d, n, seed)
+
+        self.set_desc("""
+            Quadratic unconstrained binary optimization (QUBO) Minimum Vertex
+            Cover (MVC) problem represented as a discrete function. The
+            dimension may be any (default is 100), and the mode size should be
+            2. The default value of the probability of the connection in the
+            graph if 0.5 (pcon=5). The benchmark needs "networkx==3.0" and
+            "qubogen==0.1.1" libraries.
+        """)
 
         if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
@@ -52,6 +49,15 @@ class BmQuboMvc(Bm):
         self.pcon = pcon
 
     @property
+    def args_info(self):
+        return {**super().args_info,
+            'pcon': {
+                'desc': 'Connection probability',
+                'kind': 'int'
+            }
+        }
+
+    @property
     def identity(self):
         return ['d', 'pcon', 'seed']
 
@@ -59,19 +65,12 @@ class BmQuboMvc(Bm):
     def is_tens(self):
         return True
 
-    def get_config(self):
-        conf = super().get_config()
-        conf['pcon'] = self.pcon
-        return conf
-
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Param pcon (connection probability)      : '
-        v = 0.1 * self.pcon
-        text += f'{v:.6f}\n'
-
-        return super().info(text+footer)
+    @property
+    def ref(self):
+        i = np.zeros(100, dtype=int)
+        for k in [0, 12, 34, 44, 53, 65, 99]:
+            i[k] = 1
+        return np.array(i, dtype=int), -3583.0
 
     def prep_bm(self):
         d = self.d
@@ -85,28 +84,3 @@ class BmQuboMvc(Bm):
 
     def target_batch(self, I):
         return ((I @ self._Q) * I).sum(axis=1)
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmQuboMvc().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+4)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Value at 3 random multi-indices          :  '
-    i1 = [np.random.choice(k) for k in bm.n]
-    i2 = [np.random.choice(k) for k in bm.n]
-    i3 = [np.random.choice(k) for k in bm.n]
-    I = [i1, i2, i3]
-    y = bm[I]
-    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
-    print(text)

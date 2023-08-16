@@ -1,25 +1,24 @@
 import numpy as np
-
-
 from teneva_bm import Bm
 
 
-DESC = """
-    Binary knapsack problem -1 * sum p_i x_i -> min s.t. sum w_i x_i < C with
-    fixed weights w, profits p and the capacity C. The exact minimum is known
-    (d=10: -295, d=20: -1024, d=50: -3103, d=80: -5183, d=100: -15170).
-    We use the values of parameters from the work Dong et al. 2021 (problems
-    k1-k5), where phase angle modulated bat algorithm (P-AMBA) was proposed
-    for high dimensional binary optimization problems with application to
-    antenna topology optimization. The dimension should be in 10, 20, 50, 80,
-    100 (the default value is 100), and the mode size should be 2. Note that
-    the default penalty for the constraint is "0".
-"""
-
-
 class BmQuboKnapDet(Bm):
-    def __init__(self, d=100, n=2, name='QuboKnapDet', desc=DESC):
-        super().__init__(d, n, name, desc)
+    def __init__(self, d=100, n=2, seed=42):
+        super().__init__(d, n, seed)
+
+        self.set_desc("""
+            Binary knapsack problem
+            -1 * sum p_i x_i -> min s.t. sum w_i x_i < C
+            with fixed weights w, profits p and the capacity C.
+            The exact minimum is known (d=10: -295, d=20: -1024, d=50: -3103,
+            d=80: -5183, d=100: -15170). We use the values of parameters from
+            the work Dong et al. 2021 (problems k1-k5), where phase angle
+            modulated bat algorithm (P-AMBA) was proposed for high dimensional
+            binary optimization problems with application to antenna topology
+            optimization. The dimension should be in 10, 20, 50, 80, 100 (the
+            default value is 100), and the mode size should be 2. Note that
+            the default penalty for the constraint is "0".
+        """)
 
         if not self.is_n_equal or self.n0 != 2:
             self.set_err('Mode size (n) should be "2"')
@@ -65,6 +64,13 @@ class BmQuboKnapDet(Bm):
     @property
     def is_tens(self):
         return True
+
+    @property
+    def ref(self):
+        i = np.zeros(100, dtype=int)
+        for k in [0, 12, 34, 44, 53, 65, 99]:
+            i[k] = 1
+        return np.array(i, dtype=int), -1249.0
 
     @property
     def with_constr(self):
@@ -163,36 +169,3 @@ class BmQuboKnapDet(Bm):
             11, 6, 5]
 
         self._C = 3818
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmQuboKnapDet().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+4)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Value at 3 random multi-indices          :  '
-    i1 = [np.random.choice(k) for k in bm.n]
-    i2 = [np.random.choice(k) for k in bm.n]
-    i3 = [np.random.choice(k) for k in bm.n]
-    I = [i1, i2, i3]
-    y = bm[I]
-    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
-    print(text)
-
-    for d in [10, 20, 50, 80, 100]:
-        text = f'Value at the minimum for d={d:-3d}           :  '
-        bm = BmQuboKnapDet(d).prep()
-        y_real = bm.y_min_real
-        y_calc = bm[bm.i_min_real]
-        text += f'{y_real:-10.3e}       /      {y_calc:-10.3e}'
-        print(text)
