@@ -19,6 +19,7 @@ from .bm_func_sphere import BmFuncSphere
 from .bm_func_squares import BmFuncSquares
 from .bm_func_trid import BmFuncTrid
 from .bm_func_trigonometric import BmFuncTrigonometric
+from .bm_func_wavy import BmFuncWavy
 
 def teneva_bm_get_func():
     Bms = []
@@ -43,5 +44,6 @@ def teneva_bm_get_func():
     Bms.append(BmFuncSquares)
     Bms.append(BmFuncTrid)
     Bms.append(BmFuncTrigonometric)
+    Bms.append(BmFuncWavy)
 
     return Bms
