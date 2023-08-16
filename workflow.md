@@ -58,21 +58,25 @@
 1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_det`).
     > Note that we do not use the `<subfolder>` in the name of benchmarks (only) for collection `various`.
 
-2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file and then write a demo example of its usage (initialization, get method, training dataset generation, etc.; please, do it by analogy with other benchmarks) in the bottom section after `if __name__ == '__main__':`. Please, note:
+2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file. Please, note:
     - We should necessarily rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark's value for a given multidimensional index or point);
     - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function);
+    - We should necessarily rewrite the property `ref`, which returns the reference (random) multi-index and related value of the benchmark;
     - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for the property `with_constr`;
-    - Method `cores` can be specified to generate an exact tensor train (TT) representation of the benchmark, in which case the property `with_cores` should be set to `True`.
+    - Method `cores` can be specified to generate an exact tensor train (TT) representation of the benchmark, in which case the property `with_cores` should be set to `True`;
+    - If the benchmark has auxiliary options, then they can be described using property `opts_info`. Please see benchmark `BmFuncAckley` as an example.
 
-3. Run the demo example for the new benchmark (note that we should reinstall our library from the source to try the new benchmark):
+3. Add import line of the new benchmark into `__init__.py` file in the collection's folder and also append it into the function `teneva_bm_get_<Subfolder>` in this file (additions are recommended to be done in alphabetical order).
+
+4. Run tests for all benchmarks (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
-    pip uninstall teneva_bm -y && python setup.py install && clear && python demo.py bm_<subfolder>_<name>
+    pip uninstall teneva_bm -y && python setup.py install && clear && python test_all.py && python test_ref.py
     ```
-    > This script will run the demo (from the section `if __name__ == '__main__':`) for the benchmark specified as an argument. If the argument is not provided, then the examples for all benchmarks from all collections will be run sequentially. Note that if you have not changed the core of the library, then you can run the new benchmark as a normal python file, i.e., `python bm_<subfolder>_<name>.py` (without reinstalling the library).
+    > Note that if you have not changed the core of the library, then you can also run (try) the new benchmark as a normal python file, i.e., `python bm_<subfolder>_<name>.py` (without reinstalling the library).
 
-4. Add a description of the new benchmark to the section `Available benchmarks`  of the `README.md` file.
+5. Add a description of the new benchmark to the section `Available benchmarks` of the `README.md` file (additions are recommended to be done in alphabetical order).
 
-5. Use the new benchmark locally until the next library version update on pypi.
+6. Use the new benchmark locally until the next library version update on pypi.
 
 > Please use underscore prefixes for all new class instance variables and functions (e.g., `_env`) to avoid the name conflict with the base class `Bm`. However, underscores do not need to be used for the benchmarks' arguments and options, i.e., the parameters in `__init__` and `bm.set_opts` method (please make sure their names do not conflict with the base class variable names).
 
