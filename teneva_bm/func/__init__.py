@@ -10,6 +10,7 @@ from .bm_func_rastrigin import BmFuncRastrigin
 from .bm_func_rosenbrock import BmFuncRosenbrock
 from .bm_func_schaffer import BmFuncSchaffer
 from .bm_func_schwefel import BmFuncSchwefel
+from .bm_func_sphere import BmFuncSphere
 
 
 def teneva_bm_get_func():
@@ -26,5 +27,6 @@ def teneva_bm_get_func():
     Bms.append(BmFuncRosenbrock)
     Bms.append(BmFuncSchaffer)
     Bms.append(BmFuncSchwefel)
+    Bms.append(BmFuncSphere)
 
     return Bms
