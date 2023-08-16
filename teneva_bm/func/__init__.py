@@ -8,6 +8,7 @@ from .bm_func_michalewicz import BmFuncMichalewicz
 from .bm_func_pathological import BmFuncPathological
 from .bm_func_pinter import BmFuncPinter
 from .bm_func_piston import BmFuncPiston
+from .bm_func_powell import BmFuncPowell
 from .bm_func_qing import BmFuncQing
 from .bm_func_rastrigin import BmFuncRastrigin
 from .bm_func_rosenbrock import BmFuncRosenbrock
@@ -28,6 +29,7 @@ def teneva_bm_get_func():
     Bms.append(BmFuncPathological)
     Bms.append(BmFuncPinter)
     Bms.append(BmFuncPiston)
+    Bms.append(BmFuncPowell)
     Bms.append(BmFuncQing)
     Bms.append(BmFuncRastrigin)
     Bms.append(BmFuncRosenbrock)
