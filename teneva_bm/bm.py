@@ -72,6 +72,15 @@ class Bm:
         return self.b[0] if self.b is not None else None
 
     @property
+    def dict(self):
+        return {
+            'args': self.args,
+            'opts': self.opts,
+            'prps': self.prps,
+            'hist': self.hist
+        }
+
+    @property
     def err(self):
         """Errors (text) while benchmark usage."""
         return '; '.join(self.err_list) if len(self.err_list) else ''
@@ -219,6 +228,11 @@ class Bm:
         return False
 
     @property
+    def is_opti_min(self):
+        """If the benchmark relates to minimization task (auto computed)."""
+        return not self.is_opti_max
+
+    @property
     def is_tens(self):
         """Check if BM relates to tensor (i.e., discrete function)."""
         return not self.is_func
@@ -277,24 +291,32 @@ class Bm:
             },
             'is_opti_max': {
                 'desc': 'Benchmark with maximization task',
-                'kind': 'bool'
+                'kind': 'bool',
+                'skip_info': 'is_opti_min'
+            },
+            'is_opti_min': {
+                'desc': 'Benchmark with minimization task',
+                'kind': 'bool',
+                'skip_info': 'is_opti_max'
             },
             'a': {
                 'desc': 'Lower grid limit',
                 'kind': 'float',
                 'list': True,
-                'form': '.2f'
+                'form': '.2f',
+                'skip_info_if_none': 'is_func'
             },
             'b': {
                 'desc': 'Upper grid limit',
                 'kind': 'float',
                 'list': True,
-                'form': '.2f'
+                'form': '.2f',
+                'skip_info_if_none': 'is_func'
             },
             'grid_kind': {
                 'desc': 'Grid kind',
                 'kind': 'str',
-                'skip_info_if_none': 'a'
+                'skip_info_if_none': 'is_func'
             },
             'with_cores': {
                 'desc': 'With TT-cores',
@@ -594,7 +616,7 @@ class Bm:
             y = np.array([self.cache[tuple(i)] for i in I])
 
         else:
-            ind_new = np.arange(len(I))
+            ind_new = None
 
             Z = X if self.is_func else I
             y = self.compute(Z, skip_process)
@@ -626,13 +648,11 @@ class Bm:
 
         I, X, is_batch = self.parse_input(X=X)
 
-        ind_new = np.arange(len(X))
-
         y = self.compute(X, skip_process)
         if y is None:
             return self.process_last()
 
-        return self.process(I, X, y, ind_new, t, is_batch, skip_process)
+        return self.process(I, X, y, None, t, is_batch, skip_process)
 
     def info(self, footer=''):
         """Returns a detailed description of the benchmark as text."""
@@ -660,7 +680,7 @@ class Bm:
 
     def info_current(self, footer=''):
         text = ''
-        form = '{:-' + str(8 + self.log_prec) + '.' + str(self.log_prec) + '}'
+        form = '{:-' + str(8 + self.log_prec) + '.' + str(self.log_prec) + 'e}'
 
         if self.log_prefix:
             text += self.log_prefix + ' > '
@@ -722,7 +742,7 @@ class Bm:
 
     def info_var(self, name, opt, with_name=False, skip_none=False):
         if opt.get('skip_info'):
-            if isinstance(opt['skip_info'], bool) and not opt['skip_info']:
+            if isinstance(opt['skip_info'], bool) and opt['skip_info']:
                 return ''
             if isinstance(opt['skip_info'], str):
                 if getattr(self, opt['skip_info'], False):
@@ -766,6 +786,8 @@ class Bm:
         text += f' [{name}]' if with_name else ''
         text += ' ' * max(0, 40-len(text)) + ' : '
         text += build(v)
+        if opt.get('list') and isinstance(v, (int, float, str)):
+            text += f' x {self.d}'
 
         if opt.get('info_add'):
             v = getattr(self, opt['info_add'], None)
@@ -937,11 +959,11 @@ class Bm:
         if skip:
             return y if is_batch else y[0]
 
-        self.y_list.extend(list(y[ind_new]))
+        self.y_list.extend(list(y if ind_new is None else y[ind_new]))
         self.y_list_full.extend(list(y))
 
-        self.m += len(ind_new)
-        self.m_cache += y.shape[0] - len(ind_new)
+        self.m += len(y) if ind_new is None else len(ind_new)
+        self.m_cache += 0 if ind_new is None else y.shape[0] - len(ind_new)
 
         self.time_call += tpc() - t
 
@@ -1200,4 +1222,4 @@ class Bm:
         return np.array([self.target(x) for x in X])
 
     def wrn(self, text):
-        self.log_wrn('!!! BM-WARNING | ' + text)
+        self.log_wrn('!!! BM-WARNING : ' + text)
