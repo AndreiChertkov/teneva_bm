@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncPiston(Bm):
+class BmFuncPiston(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -22,10 +22,6 @@ class BmFuncPiston(Bm):
 
         if self.d != 7:
             self.set_err('Dimension should be "7"')
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def ref(self):

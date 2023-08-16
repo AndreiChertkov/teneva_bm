@@ -1,8 +1,8 @@
 import numpy as np
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncDixon(Bm):
+class BmFuncDixon(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -27,10 +27,6 @@ class BmFuncDixon(Bm):
         for _ in range(d-1):
             x_min.append(np.sqrt(x_min[-1]/2.))
         self.set_min(x=np.array(x_min), y=0.)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def ref(self):

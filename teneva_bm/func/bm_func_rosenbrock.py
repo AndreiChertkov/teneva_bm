@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncRosenbrock(Bm):
+class BmFuncRosenbrock(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -24,10 +24,6 @@ class BmFuncRosenbrock(Bm):
         self.set_grid(-2.048, +2.048, sh=True, sh_out=True)
 
         self.set_min(x=[1.]*self.d, y=0.)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def ref(self):

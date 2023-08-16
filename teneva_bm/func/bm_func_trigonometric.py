@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncTrigonometric(Bm):
+class BmFuncTrigonometric(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -22,10 +22,6 @@ class BmFuncTrigonometric(Bm):
         self.set_grid(0., np.pi, sh=True, sh_out=True)
 
         self.set_min(x=[0.]*self.d, y=0.)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def ref(self):

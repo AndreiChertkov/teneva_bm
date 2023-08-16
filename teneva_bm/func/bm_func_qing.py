@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncQing(Bm):
+class BmFuncQing(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -24,10 +24,6 @@ class BmFuncQing(Bm):
         self.set_grid(0., +500., sh=True, sh_out=True)
 
         self.set_min(x=np.sqrt(np.arange(1, self.d+1)), y=0.)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def ref(self):

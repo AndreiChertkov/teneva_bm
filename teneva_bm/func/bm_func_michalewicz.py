@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncMichalewicz(Bm):
+class BmFuncMichalewicz(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -29,10 +29,6 @@ class BmFuncMichalewicz(Bm):
             self.set_min(y=-4.687658)
         if self.d == 10:
             self.set_min(y=-9.66015)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def opts_info(self):

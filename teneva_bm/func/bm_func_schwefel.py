@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncSchwefel(Bm):
+class BmFuncSchwefel(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -24,10 +24,6 @@ class BmFuncSchwefel(Bm):
         self.set_grid(0., +500., sh=True)
 
         self.set_min(x=[420.9687]*self.d, y=-418.9829)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def ref(self):

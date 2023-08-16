@@ -1,9 +1,9 @@
 import numpy as np
 import teneva
-from teneva_bm import Bm
+from teneva_bm.func.func import Func
 
 
-class BmFuncRastrigin(Bm):
+class BmFuncRastrigin(Func):
     def __init__(self, d=7, n=16, seed=42):
         super().__init__(d, n, seed)
 
@@ -21,10 +21,6 @@ class BmFuncRastrigin(Bm):
         self.set_grid(-5.12, +5.12, sh=True)
 
         self.set_min(x=[0.]*self.d, y=0.)
-
-    @property
-    def is_func(self):
-        return True
 
     @property
     def opts_info(self):
