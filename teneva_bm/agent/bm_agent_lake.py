@@ -1,20 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-
 from teneva_bm.agent.agent import Agent
-
-
-DESC = """
-    Agent "FrozenLake" from gym environment. For details, see
-    https://www.gymlibrary.dev/environments/toy_text/frozen_lake/
-    By default, the direct optimization of agent's actions is performed
-    (i.e., "policy='direct'"). You can also set own policy class instance
-    (see "agent/policy.py" with a description of the interface design
-    details). The dimension is determined automatically according to the
-    properties of the agent and the used policy; the mode size should be 4.
-    Note that agent actions mean: 0: LEFT, 1: DOWN, 2: RIGHT, 3: UP.
-"""
 
 
 class BmAgentLake(Agent):
@@ -54,9 +40,21 @@ class BmAgentLake(Agent):
 
         return [''.join(x) for x in map]
 
-    def __init__(self, d=None, n=4, name='AgentLake', desc=DESC,
+    def __init__(self, d=None, n=4, seed=42,
                  policy='direct', size=10, holes=10, with_state_ext=False):
-        super().__init__(d, n, name, desc, size*size, policy)
+        super().__init__(d, n, seed, size*size, policy)
+
+        self.set_desc("""
+            Agent "FrozenLake" from gym environment. For details, see
+            https://www.gymlibrary.dev/environments/toy_text/frozen_lake/
+            By default, the direct optimization of agent's actions is performed
+            (i.e., "policy='direct'"). You can also set own policy class
+            instance (see "agent/policy.py" with a description of the interface
+            design details). The dimension is determined automatically
+            according to the properties of the agent and the used policy; the
+            mode size should be 4. Note that agent actions mean: 0: LEFT, 1:
+            DOWN, 2: RIGHT, 3: UP.
+        """)
 
         self.size = size
         self.holes = holes
@@ -72,12 +70,36 @@ class BmAgentLake(Agent):
                 self.set_err(msg)
 
     @property
+    def args_info(self):
+        return {**super().args_info,
+            'size': {
+                'desc': 'Size of the lake',
+                'kind': 'int'
+            },
+            'holes': {
+                'desc': 'Number of the holes',
+                'kind': 'int'
+            },
+            'with_state_ext': {
+                'desc': 'State is extended',
+                'kind': 'bool'
+            },
+        }
+
+    @property
     def identity(self):
-        return ['size', 'holes', 'policy', 'n', 'with_state_ext']
+        return ['size', 'holes', 'policy', 'n', 'seed', 'with_state_ext']
 
     @property
     def is_func(self):
         return False if self.policy == 'direct' else True
+
+    @property
+    def ref(self):
+        i = np.zeros(100, dtype=int)
+        for k in [0, 6, 12, 20, 34, 44, 53, 88, 91]:
+            i[k] = 1
+        return np.array(i, dtype=int), 0.08304479020429478
 
     @property
     def _a_ac(self):
@@ -158,30 +180,6 @@ class BmAgentLake(Agent):
         else:
             return self._states[-2]
 
-    def get_config(self):
-        conf = super().get_config()
-        conf['size'] = self.size
-        conf['holes'] = self.holes
-        conf['with_state_ext'] = self.with_state_ext
-        return conf
-
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Size of the lake                         : '
-        v = self.size
-        text += f'{v}x{v}\n'
-
-        text += 'Number of the holes                      : '
-        v = self.holes
-        text += f'{v}\n'
-
-        text += 'State is extended                        : '
-        v = 'YES' if self.with_state_ext else 'no'
-        text += f'{v}\n'
-
-        return super().info(text+footer)
-
     def prep_bm(self, policy=None):
         self._map = BmAgentLake.map(self.size, self.holes, self.rand)
         self._holes = BmAgentLake.holes(self._map)
@@ -224,34 +222,3 @@ class BmAgentLake(Agent):
         # reward -= 10 if self._is_state_same(state) else 0
         # reward -= self._step
         return reward
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmAgentLake().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+1)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Render for "direct" policy               :  '
-    bm = BmAgentLake(size=10, holes=50).prep()
-    fpath = f'result/{bm.name}/render_direct'
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    bm.render(fpath)
-    text += f' see {fpath}'
-    print(text)
-
-    text = 'Generate image for a random multi-index  :  '
-    fpath = f'result/{bm.name}/show'
-    bm.show(fpath)
-    text += f' see {fpath}'
-    print(text)

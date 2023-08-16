@@ -1,5 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from teneva_bm import Bm
+from teneva_bm.agent.policy import Policy
+from teneva_bm.agent.policy import PolicyToeplitz
+import warnings
+
+
+warnings.filterwarnings('ignore', category=DeprecationWarning,
+    module=r'importlib\.')
+warnings.filterwarnings('ignore', category=DeprecationWarning,
+    module=r'ipkernel')
 
 
 try:
@@ -19,18 +29,6 @@ except Exception as e:
     with_gym = False
 
 
-import warnings
-warnings.filterwarnings('ignore', category=DeprecationWarning,
-    module=r"importlib\.")
-warnings.filterwarnings('ignore', category=DeprecationWarning,
-    module=r"ipkernel")
-
-
-from teneva_bm import Bm
-from teneva_bm.agent.policy import Policy
-from teneva_bm.agent.policy import PolicyToeplitz
-
-
 class Agent(Bm):
     frozen_lake = gym_frozen_lake if with_gym else None
 
@@ -38,9 +36,8 @@ class Agent(Bm):
         if with_gym:
             return gym.make(name, render_mode='rgb_array', **args)
 
-    def __init__(self, d=None, n=3, name='Agent-abstract-class', desc='',
-                 steps=1000, policy='toeplitz'):
-        super().__init__(None, None, name, desc)
+    def __init__(self, d=None, n=3, seed=42, steps=1000, policy='toeplitz'):
+        super().__init__(None, None, seed)
         self._n_raw = n # We'll set it later in "prep_bm" method
 
         if not with_cv2:
@@ -76,8 +73,21 @@ class Agent(Bm):
         self._with_render = False
 
     @property
+    def args_info(self):
+        return {**super().args_info,
+            'steps': {
+                'desc': 'Number of agent steps',
+                'kind': 'int'
+            },
+            'policy': {
+                'desc': 'Name of the used policy',
+                'kind': 'str'
+            }
+        }
+
+    @property
     def identity(self):
-        return ['steps', 'policy', 'n']
+        return ['steps', 'policy', 'n', 'seed']
 
     @property
     def is_func(self):
@@ -86,6 +96,19 @@ class Agent(Bm):
     @property
     def is_opti_max(self):
         return True
+
+    @property
+    def prps_info(self):
+        return {**super().prps_info,
+            '_d_st': {
+                'desc': 'Dimension of state space for agent',
+                'kind': 'int'
+            },
+            '_d_ac': {
+                'desc': 'Dimension of action space for agent',
+                'kind': 'int'
+            }
+        }
 
     @property
     def with_render(self):
@@ -139,35 +162,6 @@ class Agent(Bm):
     def _state(self):
         return self._states[-1] if len(self._states) else self._state0
 
-    def get_config(self):
-        conf = super().get_config()
-        conf['steps'] = self.steps
-        conf['policy'] = self.policy
-        conf['_d_st'] = self._d_st
-        conf['_d_ac'] = self._d_ac
-        return conf
-
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Number of agent steps                    : '
-        v = self.steps
-        text += f'{v}\n'
-
-        text += 'Used policy                              : '
-        v = self.policy
-        text += f'{v}\n'
-
-        text += 'Dimension of state space for agent       : '
-        v = self._d_st
-        text += f'{v}\n'
-
-        text += 'Dimension of action space for agent      : '
-        v = self._d_ac
-        text += f'{v}\n'
-
-        return super().info(text+footer)
-
     def prep_bm(self, env):
         if env is None:
             raise ValueError('Environment is not set')
@@ -183,7 +177,7 @@ class Agent(Bm):
             self.set_grid(self._policy.a, self._policy.b)
         self._reset()
 
-    def render(self, fpath=None, i=None, best=True, fps=20., sz=None):
+    def render(self, fpath, i=None, best=True, fps=20., sz=None):
         self._with_render = True
         i, y = self.get_solution(i, best)
 
@@ -210,6 +204,20 @@ class Agent(Bm):
         for frame in frames:
             out.write(frame)
         out.release()
+
+    def set_desc_agent(self, name, link):
+        self.set_desc("""
+            Agent "#NAME" from myjoco environment. See
+            #LINK
+            By default, the Toeplitz policy ("policy='toeplitz'") is used
+            (https://github.com/jparkerholder/ASEBO/blob/master/asebo/policies.py).
+            You can also set "direct" policy (direct optimization of agent's
+            actions) or own policy class instance (see "agent/policy.py" with a
+            description of the interface design details). The dimension is
+            determined automatically according to the properties of the agent
+            and the used policy; the default mode size is 3 and the number of
+            agent's steps is 1000.
+        """.replace('#NAME', name).replace('#LINK', link))
 
     def show(self, fpath=None, i=None, best=True):
         i, y = self.get_solution(i, best)

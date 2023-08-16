@@ -1,68 +1,20 @@
 import numpy as np
-
-
 from teneva_bm.agent.agent import Agent
 
 
-
-DESC = """
-    Agent "Reacher" from myjoco environment. For details, see
-    https://www.gymlibrary.dev/environments/mujoco/reacher/
-    By default, the Toeplitz policy ("policy='toeplitz'") is used
-    (https://github.com/jparkerholder/ASEBO/blob/master/asebo/policies.py).
-    You can also set "direct" policy (direct optimization of agent's actions)
-    or own policy class instance (see "agent/policy.py" with a description of
-    the interface design details). The dimension is determined automatically
-    according to the properties of the agent and the used policy; the default
-    mode size is 3 and the number of agent's steps is 1000.
-"""
-
-
 class BmAgentReacher(Agent):
-    def __init__(self, d=None, n=3, name='AgentReacher', desc=DESC,
-                 steps=1000, policy='toeplitz'):
-        super().__init__(d, n, name, desc, steps, policy)
+    def __init__(self, d=None, n=3, seed=42, steps=1000, policy='toeplitz'):
+        super().__init__(d, n, seed, steps, policy)
+        self.set_desc_agent('Reacher',
+            'https://www.gymlibrary.dev/environments/mujoco/reacher')
+
+    @property
+    def ref(self):
+        i = np.zeros(58, dtype=int)
+        for k in [0, 6, 12, 20, 34, 44, 53]:
+            i[k] = 1
+        return np.array(i, dtype=int), -2155.341270305704
 
     def prep_bm(self):
         env = Agent.make('Reacher-v4')
         return super().prep_bm(env)
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmAgentReacher(steps=250).prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+1)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index            :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Render for "direct" policy               :  '
-    bm = BmAgentReacher(steps=250, policy='direct').prep()
-    fpath = f'result/{bm.name}/render_direct'
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    bm.render(fpath)
-    text += f' see {fpath}'
-    print(text)
-
-    text = 'Render for "toeplitz" policy             :  '
-    bm = BmAgentReacher(steps=250, policy='toeplitz').prep()
-    fpath = f'result/{bm.name}/render_toeplitz'
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    bm.render(fpath)
-    text += f' see {fpath}'
-    print(text)
-
-    text = 'Generate image for a random multi-index  :  '
-    fpath = f'result/{bm.name}/show'
-    bm.show(fpath)
-    text += f' see {fpath}'
-    print(text)
