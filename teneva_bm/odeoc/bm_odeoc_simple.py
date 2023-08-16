@@ -1,4 +1,5 @@
 import numpy as np
+from teneva_bm import Bm
 
 
 try:
@@ -8,26 +9,9 @@ except Exception as e:
     with_gekko = False
 
 
-from teneva_bm import Bm
-
-
-DESC = """
-    Discrete optimal control (OC) problem with simple 1D ODE "x**3 - i",
-    where "x = x(t)" is a state variable, "x(0) = x_ini" and "i" is a
-    binary control variable. The loss function for the optimal control
-    problem is "0.5 * (x-x_ref)^2", where "x_ref" is a target value, and
-    the maximum time value is "t_max". Note that for some control values
-    the solver (gekko) fails, in this case we return the value "y_err".
-    By default (see parameters of the "set_opts" function), "x_ini = 0.8",
-    "x_ref = 0.7", "t_max = 1" and "y_err = 1.E+50". The dimension may be
-    any (default is 100), and the mode size should be 2. The benchmark
-    needs "gekko==1.0.6" library (it is used for ODE solution).
-"""
-
-
 class BmOdeocSimple(Bm):
-    def __init__(self, d=100, n=2, name='OdeocSimple', desc=DESC):
-        super().__init__(d, n, name, desc)
+    def __init__(self, d=100, n=2, seed=42):
+        super().__init__(d, n, seed)
 
         if not self.is_n_equal or self.n[0] != 2:
             self.set_err('Mode size (n) should be "2"')
@@ -37,6 +21,19 @@ class BmOdeocSimple(Bm):
             msg += '"pip install gekko==1.0.6"'
             self.set_err(msg)
 
+        self.set_desc("""
+            Discrete optimal control (OC) problem with simple 1D ODE "x**3 - i",
+            where "x = x(t)" is a state variable, "x(0) = x_ini" and "i" is a
+            binary control variable. The loss function for the optimal control
+            problem is "0.5 * (x-x_ref)^2", where "x_ref" is a target value, and
+            the maximum time value is "t_max". Note that for some control values
+            the solver (gekko) fails, in this case we return the value "y_err".
+            By default (see parameters of the "set_opts" function), "x_ini =
+            0.8", "x_ref = 0.7", "t_max = 1" and "y_err = 1.E+50". The
+            dimension may be any (default is 100), and mode size should be 2.
+            The benchmark needs "gekko==1.0.6" (it is used for ODE solution).
+        """)
+
     @property
     def identity(self):
         return ['d']
@@ -45,58 +42,46 @@ class BmOdeocSimple(Bm):
     def is_tens(self):
         return True
 
-    def get_config(self):
-        conf = super().get_config()
-        conf['x_ini'] = self.x_ini
-        conf['x_ref'] = self.x_ref
-        conf['t_max'] = self.t_max
-        conf['y_err'] = self.y_err
-        return conf
+    @property
+    def opts_info(self):
+        return {**super().opts_info,
+            'x_ini': {
+                'desc': 'Initial condition for the ODE',
+                'kind': 'float',
+                'form': '.6f',
+                'dflt': 0.8
+            },
+            'x_ref': {
+                'desc': 'Target (reference) value',
+                'kind': 'float',
+                'form': '.6f',
+                'dflt': 0.7
+            },
+            't_max': {
+                'desc': 'Upper limit for time variable',
+                'kind': 'float',
+                'form': '.6f',
+                'dflt': 1.
+            },
+            'y_err': {
+                'desc': 'Returned value if error in ODE solver',
+                'kind': 'float',
+                'form': '7.1e',
+                'dflt': 1.E+50
+            }
+        }
 
-    def info(self, footer=''):
-        text = ''
-
-        text += 'Param x_ini (initial condition)          : '
-        v = self.x_ini
-        text += f'{v:.6f}\n'
-
-        text += 'Param x_ref (target value)               : '
-        v = self.x_ref
-        text += f'{v:.6f}\n'
-
-        text += 'Param t_max (upper limit for time)       : '
-        v = self.t_max
-        text += f'{v:.6f}\n'
-
-        text += 'Param y_err (returned value if error)    : '
-        v = self.y_err
-        text += f'{v:-7.1e}\n'
-
-        return super().info(text+footer)
-
-    def set_opts(self, x_ini=0.8, x_ref=0.7, t_max=1., y_err=1.E+50):
-        """Set options specific to the benchmark.
-
-        There are no plans to manually change the default values.
-
-        Args:
-            x_ini (float): initial condition for the ODE.
-            x_ref (float): target (reference) value for solution of the ODE.
-            t_max (float): upper limit for time variable in the ODE.
-            y_err (float): returned value if GEKKO solver ends with error.
-
-        """
-        self.x_ini = x_ini
-        self.x_ref = x_ref
-        self.t_max = t_max
-        self.y_err = y_err
-
-        self._times = np.linspace(0, t_max, self.d)
+    @property
+    def ref(self):
+        i = np.ones(100, dtype=int)
+        for k in [0, 1, 2, 44, 53, 65, 33]:
+            i[k] = 0
+        return np.array(i, dtype=int), 5.184363677330866
 
     def target(self, i):
         solver = GEKKO(remote=False)
         solver.options.IMODE = 4
-        solver.time = self._times
+        solver.time = np.linspace(0, self.t_max, self.d)
 
         x = solver.Var(value=self.x_ini, name='x')
         c = solver.Param(list(i), name='i')
@@ -120,28 +105,3 @@ class BmOdeocSimple(Bm):
     def _obj(self, x, i):
         """Objective function for ODE solution."""
         return 0.5 * (x - self.x_ref)**2
-
-
-if __name__ == '__main__':
-    np.random.seed(42)
-
-    bm = BmOdeocSimple().prep()
-    print(bm.info())
-
-    I_trn, y_trn = bm.build_trn(1.E+2)
-    print(bm.info_history())
-
-    text = 'Value at a random multi-index     :  '
-    i = [np.random.choice(k) for k in bm.n]
-    y = bm[i]
-    text += f'{y:-10.3e}'
-    print(text)
-
-    text = 'Value at 3 random multi-indices   :  '
-    i1 = [np.random.choice(k) for k in bm.n]
-    i2 = [np.random.choice(k) for k in bm.n]
-    i3 = [np.random.choice(k) for k in bm.n]
-    I = [i1, i2, i3]
-    y = bm[I]
-    text += '; '.join([f'{y_cur:-10.3e}' for y_cur in y])
-    print(text)
