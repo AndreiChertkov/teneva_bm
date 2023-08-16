@@ -1,11 +1,11 @@
 import numpy as np
 import teneva
-from teneva_bm.func.func import Func
+from teneva_bm.func_fix.func_fix import FuncFix
 
 
-class BmFuncPiston(Func):
-    def __init__(self, d=7, n=16, seed=42):
-        super().__init__(d, n, seed)
+class BmFuncFixPiston(FuncFix):
+    def __init__(self, d=None, n=16, seed=42):
+        super().__init__(7, n, seed)
 
         self.set_desc("""
             Analytical Piston function (continuous).
@@ -20,8 +20,8 @@ class BmFuncPiston(Func):
             [30., 0.005, 0.002, 1000,  90000, 290, 340],
             [60., 0.020, 0.010, 5000, 110000, 296, 360], sh=True)
 
-        if self.d != 7:
-            self.set_err('Dimension should be "7"')
+        if self.d != None:
+            self.set_err('Dimension should not be set manually')
 
     @property
     def ref(self):
