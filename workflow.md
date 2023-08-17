@@ -46,7 +46,7 @@
     ```bash
     clear && python test_all.py && python test_ref.py
     ```
-    > Note that, unfortunately, for some benchmarks, the calculation result depends on the computing device used, so tests for checking the match in the reference value, i.e. `test_ref.py`, may fail.
+    > Note that, unfortunately, for some benchmarks (especially for the `agent` collection), the calculation result depends on the computing device used, so tests for checking the match in the reference value, i.e. `test_ref.py`, may fail.
 
 10. Optionally delete virtual environment at the end of the work:
     ```bash
@@ -56,18 +56,18 @@
 
 ## How to add a new benchmark
 
-1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `knap_det`).
+1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `mvc`).
     > Note that we do not use the `<subfolder>` in the name of benchmarks (only) for collection `various`.
 
 2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file. Please, note:
-    - We should necessarily rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark's value for a given multidimensional index or point);
-    - We should necessarily rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function);
-    - We should necessarily rewrite the property `ref`, which returns the reference (random) multi-index and related value of the benchmark;
+    - We **should** rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark's value for a given multidimensional index or point);
+    - We **should** rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function);
+    - We **should** rewrite the property `ref`, which returns the reference (random) multi-index and related value of the benchmark;
     - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for the property `with_constr`;
     - Method `cores` can be specified to generate an exact tensor train (TT) representation of the benchmark, in which case the property `with_cores` should be set to `True`;
     - If the benchmark has auxiliary options, then they can be described using property `opts_info`. Please see benchmark `BmFuncAckley` as an example;
     - If the benchmark is for a maximization (rather than minimization) problem, then please rewrite property `is_opti_max` with a return value of `True`;
-    - Also, if necessary, rewrite property `identity`, which returns a list of argument names (from among those used when initializing the class) that fully define the benchmark (by default, this is the dimension `d` and mode size `n`; for agents, this is the number of agent steps, the type of policy used, etc.). P.). The corresponding values will be used when saving the calculation results to a file, etc.
+    - Also, if necessary, rewrite property `identity`, which returns a list of argument names (from among those used when initializing the class) that fully define the benchmark (by default, this is the dimension `d` and mode size `n`; for agents, this is the number of agent steps, the type of policy used, etc.). The corresponding values will be used when saving the calculation results to a file, etc.
 
 3. Add import line of the new benchmark into `__init__.py` file in the collection's folder and also append it into the function `teneva_bm_get_<Subfolder>` in this file (additions are recommended to be done in alphabetical order).
 
