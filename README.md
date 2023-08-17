@@ -46,6 +46,8 @@ We prepare some demo scripts with benchmark usage and optimization examples in t
 - `agent` - a collection of problems from [gym](https://www.gymlibrary.dev/) framework, including [mujoco agents](https://www.gymlibrary.dev/environments/mujoco/index.html) based on the physics engine [mujoco](https://mujoco.org/) for faciliatating research and development in robotics, biomechanics, graphics and animation. The collection includes the following benchmarks: `BmAgentAnt`, `BmAgentCheetah`, `BmAgentHuman`, `BmAgentHumanStand`, `BmAgentLake`, `BmAgentLander`, `BmAgentPendInv`, `BmAgentPendInvDouble`, `BmAgentReacher`, `BmAgentSwimmer`.
     > Within the framework of this collection, explicit optimization of the entire set of actions (discrete or continuous) may be performed (if `direct` policy name is set) or discrete Toeplitz policy may be used (if `toeplitz` policy name is set; it is the default value for almost all agents); you can also pass your own custom policy as an instance of the correct class (see `teneva_bm/agent/policy.py` for details).
 
+- `decomp` - a collection of low-rank tensor networks. The collection includes the following benchmarks: `BmDecompPeps`.
+
 - `func` - a collection of analytic functions of a real multidimensional argument having an arbitrary dimension (default is `7`). The collection includes the following benchmarks: `BmFuncAckley`, `BmFuncAlpine`, `BmFuncChung`, `BmFuncDixon`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncPathological`, `BmFuncPinter`, `BmFuncPowell`, `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchaffer`, `BmFuncSchwefel`, `BmFuncSalomon`, `BmFuncSphere`, `BmFuncSquares`, `BmFuncTrid`, `BmFuncTrigonometric`, `BmFuncWavy`, `BmFuncYang`.
     > For almost all functions, the exact global minimum ("continuous x point", not multi-index) is known (see `bm.x_min_real` and `bm.y_min_real`). For a number of functions (`BmFuncAlpine`, `BmFuncExp`, `BmFuncGriewank`, `BmFuncMichalewicz`, `BmFuncQing`, `BmFuncRastrigin`, `BmFuncRosenbrock`, `BmFuncSchwefel`), a `bm.build_cores()` method is available that returns an exact representation of the function on the discrete grid in the tensor train (TT) format as a list of 3D TT-cores. Note also that we apply small shift of the grid limits for all functions, to make the optimization problem more difficult (because many functions have a minimum at the center point of the domain).
 
@@ -63,6 +65,7 @@ We prepare some demo scripts with benchmark usage and optimization examples in t
 - `various` - a collection of heterogeneous benchmarks that are not suitable for any other collection (note that in this case, we do not use the name of the collection in the name of the benchmarks, unlike all other sets). The collection includes the following benchmarks: `BmMatmul`, `BmTopopt` (draft!), `BmWallSimple`.
 
 > Note that you can use the function `teneva_bm_get` to obtain a list of all benchmark classes. Also, this function supports various filters (for example, call `teneva_bm_get(is_func=True, is_opti_max=False)` will return all benchmarks that are continuous functions and relates to minimization task).
+
 
 ## Usage
 

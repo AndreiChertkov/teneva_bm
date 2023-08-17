@@ -5,6 +5,7 @@ from .bm import Bm
 
 
 from .agent import *
+from .decomp import *
 from .func import *
 from .func_fix import *
 from .hs import *
@@ -19,6 +20,7 @@ def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
                   with_max=None, with_min=None):
     Bms = []
     Bms += teneva_bm_get_agent()
+    Bms += teneva_bm_get_decomp()
     Bms += teneva_bm_get_func()
     Bms += teneva_bm_get_func_fix()
     Bms += teneva_bm_get_hs()
