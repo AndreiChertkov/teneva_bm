@@ -208,6 +208,7 @@ For various purposes, including saving calculation results to a file, the follow
 ## Contributors
 
 - [Anastasia Batsheva](https://github.com/anabatsh)
+- [Artem Basharin](https://github.com/a-wernon)
 
 We are happy to invite you to become a contributor, especially if you have interesting benchmarks ;) Please see detailed instructions for developers in [workflow.md](https://github.com/AndreiChertkov/teneva_bm/blob/main/workflow.md) file.
 
