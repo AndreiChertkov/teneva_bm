@@ -101,7 +101,6 @@ class BmDecompPeps(Bm):
         return jnp.einsum(*a, optimize=self._path_full[0])
 
     def target(self, i):
-        print(self._c_idx)
         k = 0
         a = []
         for x in range(self.d_x):
