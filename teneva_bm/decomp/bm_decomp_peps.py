@@ -32,6 +32,9 @@ class BmDecompPeps(Bm):
         if not self.is_n_equal:
             self.set_err('Mode size (n) should be constant')
 
+        if r_x != r_y:
+            self.set_err('It works only for equal ranks now')
+
         self.d_x = d_x
         self.d_y = d_y
 
