@@ -20,13 +20,14 @@ class BmQuboKnapQuad(Bm):
             "qubogen==0.1.1" library.
         """)
 
-        if not self.is_n_equal or self.n0 != 2:
-            self.set_err('Mode size (n) should be "2"')
-
         if not with_qubogen:
             msg = 'Need "qubogen" module. For installation please run '
             msg += '"pip install qubogen==0.1.1"'
             self.set_err(msg)
+
+    @property
+    def args_constr(self):
+        return {'n': 2}
 
     @property
     def identity(self):

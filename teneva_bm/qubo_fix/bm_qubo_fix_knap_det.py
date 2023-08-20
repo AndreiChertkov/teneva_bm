@@ -20,9 +20,6 @@ class BmQuboFixKnapDet(Bm):
             the default penalty for the constraint is "0".
         """)
 
-        if not self.is_n_equal or self.n0 != 2:
-            self.set_err('Mode size (n) should be "2"')
-
         if self.d == 10:
             i = [0, 1, 1, 1, 0, 0, 0, 1, 1, 1]
             self.set_min(i=i, y=-295)
@@ -56,6 +53,10 @@ class BmQuboFixKnapDet(Bm):
             self.set_err('Dimension should be in 10, 20, 50, 80, 100')
 
         self.set_constr(penalty=0.)
+
+    @property
+    def args_constr(self):
+        return {'n': 2}
 
     @property
     def identity(self):

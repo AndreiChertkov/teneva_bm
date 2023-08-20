@@ -28,9 +28,6 @@ class BmQuboMaxcut(Bm):
             The benchmark needs "networkx==3.0" and "qubogen==0.1.1" libraries.
         """)
 
-        if not self.is_n_equal or self.n0 != 2:
-            self.set_err('Mode size (n) should be "2"')
-
         if not with_networkx:
             msg = 'Need "networkx" module. For installation please run '
             msg += '"pip install networkx==3.0"'
@@ -46,6 +43,10 @@ class BmQuboMaxcut(Bm):
             self.set_err(msg)
 
         self.pcon = pcon
+
+    @property
+    def args_constr(self):
+        return {'n': 2}
 
     @property
     def args_info(self):
