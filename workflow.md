@@ -59,17 +59,18 @@
 1. Create python script in the appropriate subfolder of `teneva_bm` folder with the name like `bm_<subfolder>_<name>.py`, where `<subfolder>` is a name of the collection (e.g., `func`, `qubo`) and `<name>` is a lowercase name of the benchmark (e.g., `ackley`, `mvc`).
     > Note that we do not use the `<subfolder>` in the name of benchmarks (only) for collection `various`.
 
-2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) in the created python file. Please, note:
+2. Prepare a benchmark class `Bm<Subfolder><Name>` (class names should be in the camel case notation) inheriting from base class `Bm` in the created python file. Please, note:
     - We **should** rewrite the method `target` and / or `target_batch` of the parent class (calculating a benchmark's value for a given multidimensional index or point);
     - We **should** rewrite the property `is_func` or `is_tens` (flag indicating whether the benchmark is a continuous or discrete function);
     - We **should** rewrite the property `ref`, which returns the reference (random) multi-index and related value of the benchmark;
-    - If the objective function has constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for the property `with_constr`;
+    - If the objective function has a constraint, we should specify the function `constr` and / or `constr_batch`, also we should specify the value `True` for the property `with_constr`;
     - Method `cores` can be specified to generate an exact tensor train (TT) representation of the benchmark, in which case the property `with_cores` should be set to `True`;
+    - If the benchmark has auxiliary main arguments (which are specified when the class is initialized), then they should be described using property `args_info`. Please see the base class `Bm` as an example (note that the default arguments are dimension `d`, mode size `n` and random seed `seed`);
     - If the benchmark has auxiliary options, then they can be described using property `opts_info`. Please see benchmark `BmFuncAckley` as an example;
     - If the benchmark is for a maximization (rather than minimization) problem, then please rewrite property `is_opti_max` with a return value of `True`;
-    - Also, if necessary, rewrite property `identity`, which returns a list of argument names (from among those used when initializing the class) that fully define the benchmark (by default, this is the dimension `d` and mode size `n`; for agents, this is the number of agent steps, the type of policy used, etc.). The corresponding values will be used when saving the calculation results to a file, etc.
+    - Also, if necessary, rewrite property `identity`, which returns a list of argument names (from among those used when initializing the class) that fully define the benchmark (by default, this is the dimension `d` and the mode size `n`; for agents, this is the number of agent steps, the type of policy used, etc.). The corresponding values will be used when saving the calculation results to a file, etc.
 
-3. Add import line of the new benchmark into `__init__.py` file in the collection's folder and also append it into the function `teneva_bm_get_<Subfolder>` in this file (additions are recommended to be done in alphabetical order).
+3. Add import line of the new benchmark into `__init__.py` file in the collection's folder and also append it into the function `teneva_bm_get_<subfolder>` in this file (additions are recommended to be done in alphabetical order).
 
 4. Run tests for all benchmarks (note that we should reinstall our library from the source to try the new benchmark):
     ```bash
@@ -81,7 +82,7 @@
 
 6. Use the new benchmark locally until the next library version update on pypi.
 
-> Please use underscore prefixes for all new class instance variables and functions (e.g., `_env`) to avoid the name conflict with the base class `Bm`. However, underscores do not need to be used for the benchmarks' arguments and options, i.e., the parameters in `__init__` and `bm.set_opts` method (please make sure their names do not conflict with the base class variable names).
+> Please use underscore prefixes for all new class instance variables and functions (e.g., `_env`) to avoid the name conflict with the base class `Bm`. However, underscores do not need to be used for the benchmarks' arguments and options, i.e., the parameters in `__init__` (see also `args_info`) and `bm.set_opts` (see also `opts_info`) method, but please make sure their names do not conflict with the base class variable names.
 
 
 ## How to update the base class Bm
