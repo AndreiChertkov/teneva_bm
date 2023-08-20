@@ -38,15 +38,11 @@ class BmQuboMaxcut(Bm):
             msg += '"pip install qubogen==0.1.1"'
             self.set_err(msg)
 
-        if not isinstance(pcon, int) or pcon < 1 or pcon > 9:
-            msg = 'Param "pcon" should be of int type and in range 1...9'
-            self.set_err(msg)
-
         self.pcon = pcon
 
     @property
     def args_constr(self):
-        return {'n': 2}
+        return {'n': 2, 'pcon': [1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
     @property
     def args_info(self):
