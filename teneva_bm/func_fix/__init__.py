@@ -1,3 +1,4 @@
+from .bm_func_fix_biggs import BmFuncFixBiggs
 from .bm_func_fix_piston import BmFuncFixPiston
 
 
