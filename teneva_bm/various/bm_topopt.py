@@ -18,11 +18,12 @@ class BmTopopt(Bm):
         if d is not None:
             self.set_err('Dimension number (d) should not be set manually')
 
-        if not self.is_n_equal or self.n0 != 2:
-            self.set_err('Mode size (n) should be "2"')
-
         self.nx = int(nx)
         self.ny = int(ny)
+
+    @property
+    def args_constr(self):
+        return {'n': 2}
 
     @property
     def args_info(self):

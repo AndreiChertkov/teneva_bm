@@ -17,7 +17,7 @@ class BmWallSimple(Bm):
             d=10, n=50).
         """)
 
-        self.set_min(i=[0]*self.d, y=0.)
+        self.set_min(i=0, y=0.)
 
     @property
     def is_tens(self):
