@@ -102,9 +102,9 @@ Modifying this class may break the functionality of all benchmarks, so please do
     pip uninstall teneva_bm -y && python setup.py install && clear && python demo/base_func.py && python demo/base_agent.py && python demo/opti_base.py
     ```
 
-3. Update the package version (like `0.7.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion minor number (if major number changes, then update it also here and in the next point);
+3. Update the package version (like `0.8.X`) in `teneva_bm/__init__.py` and `README.md` files, where `X` is a new subversion minor number (if major number changes, then update it also here and in the next point);
 
-4. Do commit like `Update version (0.7.X)` and push;
+4. Do commit like `Update version (0.8.X)` and push;
 
 5. Upload the new version to `pypi` (login: AndreiChertkov):
     ```bash
