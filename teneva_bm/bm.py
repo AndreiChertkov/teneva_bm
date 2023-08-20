@@ -46,6 +46,12 @@ class Bm:
         return self.build_dict(self.args_info)
 
     @property
+    def args_constr(self):
+        """Dict with constraints on the benchmark's arguments."""
+        # Note that constraints should be number, list (enum)  or "equal".
+        return {}
+
+    @property
     def args_info(self):
         """Dict with info about benchmark's arguments."""
         return {
@@ -73,16 +79,16 @@ class Bm:
 
     @property
     def dict(self):
+        """Return the dict with full benchmark info and history of requests."""
         return {
             'args': self.args,
             'opts': self.opts,
             'prps': self.prps,
-            'hist': self.hist
-        }
+            'hist': self.hist}
 
     @property
     def err(self):
-        """Errors (text) while benchmark usage."""
+        """Errors while benchmark usage in the text format."""
         return '; '.join(self.err_list) if len(self.err_list) else ''
 
     @property
@@ -96,7 +102,8 @@ class Bm:
         return {
             'err': {
                 'desc': 'Error message',
-                'kind': 'str'
+                'kind': 'str',
+                'info_skip_if_none': True
             },
             'm': {
                 'desc': 'Number of requests',
@@ -139,43 +146,43 @@ class Bm:
                 'desc': 'Multi-index for found maximum',
                 'kind': 'int',
                 'list': True,
-                'skip_list_convert': True
+                'list_skip_convert': True
             },
             'i_min': {
                 'desc': 'Multi-index for found minimum',
                 'kind': 'int',
                 'list': True,
-                'skip_list_convert': True
+                'list_skip_convert': True
             },
             'x_max': {
                 'desc': 'Point for found maximum',
                 'kind': 'float',
                 'list': True,
                 'form': '.3f',
-                'skip_list_convert': True
+                'list_skip_convert': True
             },
             'x_min': {
                 'desc': 'Point for found minimum',
                 'kind': 'float',
                 'list': True,
                 'form': '.3f',
-                'skip_list_convert': True
+                'list_skip_convert': True
             },
             'y_list': {
                 'desc': 'List of requested values',
                 'kind': 'float',
                 'list': True,
                 'form': '.2f',
-                'skip_info': True,
-                'skip_list_convert': True
+                'info_skip': True,
+                'list_skip_convert': True
             },
             'y_list_full': {
                 'desc': 'List of requested values (with cache)',
                 'kind': 'float',
                 'list': True,
                 'form': '.2f',
-                'skip_info': True,
-                'skip_list_convert': True
+                'info_skip': True,
+                'list_skip_convert': True
             },
         }
 
@@ -282,70 +289,90 @@ class Bm:
             'is_tens': {
                 'desc': 'Benchmark is discrete',
                 'kind': 'bool',
-                'skip_info': 'is_func'
+                'info_skip': 'is_func'
             },
             'is_func': {
                 'desc': 'Benchmark is continuous',
                 'kind': 'bool',
-                'skip_info': 'is_tens'
+                'info_skip': 'is_tens'
             },
             'is_opti_max': {
                 'desc': 'Benchmark with maximization task',
                 'kind': 'bool',
-                'skip_info': 'is_opti_min'
+                'info_skip': 'is_opti_min'
+                # TODO: see below
             },
             'is_opti_min': {
                 'desc': 'Benchmark with minimization task',
                 'kind': 'bool',
-                'skip_info': 'is_opti_max'
+                'info_skip': 'is_opti_max'
+                # TODO: In the rare case where the benchmark matches the mix of
+                # minimization and maximization, the "info_skip" flag should be
+                # removed from here manually in the child class.
             },
             'a': {
                 'desc': 'Lower grid limit',
                 'kind': 'float',
                 'list': True,
                 'form': '.2f',
-                'skip_info_if_none': 'is_func'
+                'info_skip_if_none': 'is_func'
             },
             'b': {
                 'desc': 'Upper grid limit',
                 'kind': 'float',
                 'list': True,
                 'form': '.2f',
-                'skip_info_if_none': 'is_func'
+                'info_skip_if_none': 'is_func'
             },
             'grid_kind': {
                 'desc': 'Grid kind',
                 'kind': 'str',
-                'skip_info_if_none': 'is_func'
+                'info_skip_if_none': 'is_func'
+            },
+            'with_plot': {
+                'desc': 'The "plot" is available',
+                'kind': 'bool',
+                'info_skip_if_none': True
+            },
+            'with_show': {
+                'desc': 'The "show" is available',
+                'kind': 'bool',
+                'info_skip_if_none': True
+            },
+            'with_render': {
+                'desc': 'The "render" is available',
+                'kind': 'bool',
+                'info_skip_if_none': True
             },
             'with_cores': {
-                'desc': 'With TT-cores',
-                'kind': 'bool'
+                'desc': 'TT-cores are available',
+                'kind': 'bool',
+                'info_skip_if_none': True
             },
             'with_cache': {
-                'desc': 'With cache',
+                'desc': 'Use cache',
                 'kind': 'bool'
             },
             'with_constr': {
-                'desc': 'With constraint',
+                'desc': 'Has constraint',
                 'kind': 'bool'
             },
             'constr_with_amplitude': {
                 'desc': 'Constraint with amplitude',
                 'kind': 'bool',
-                'skip_info_if_none': 'with_constr'
+                'info_skip_if_none': 'with_constr'
             },
             'constr_penalty': {
                 'desc': 'Constraint penalty',
                 'kind': 'float',
                 'form': '.2e',
-                'skip_info_if_none': 'with_constr'
+                'info_skip_if_none': 'with_constr'
             },
             'constr_eps': {
                 'desc': 'Constraint epsilon',
                 'kind': 'float',
                 'form': '.2e',
-                'skip_info_if_none': 'with_constr'
+                'info_skip_if_none': 'with_constr'
             },
             'budget_m': {
                 'desc': 'Computation budget',
@@ -360,7 +387,7 @@ class Bm:
             'budget_is_strict': {
                 'desc': 'Computation budget is strict',
                 'kind': 'bool',
-                'skip_info_if_none': 'budget_m'
+                'info_skip_if_none': 'budget_m'
             },
             'y_max_real': {
                 'desc': 'Exact max (value)',
@@ -393,7 +420,7 @@ class Bm:
                 'kind': 'float',
                 'list': True,
                 'form': '.2f'
-            },
+            }
         }
 
     @property
@@ -403,6 +430,7 @@ class Bm:
 
     @property
     def time_call_one(self):
+        """Average time for one value request from benchmark."""
         return self.time_call / self.m if self.m else 0.
 
     @property
@@ -412,6 +440,7 @@ class Bm:
 
     @property
     def version(self):
+        """The version of the package."""
         return __version__
 
     @property
@@ -425,13 +454,18 @@ class Bm:
         return False
 
     @property
+    def with_plot(self):
+        """Return True if benchmark supports "plot" method."""
+        return False
+
+    @property
     def with_render(self):
-        """Return True if benchmark supports rendering."""
+        """Return True if benchmark supports "render" method."""
         return False
 
     @property
     def with_show(self):
-        """Return True if benchmark supports "show"."""
+        """Return True if benchmark supports "show" method."""
         return False
 
     def build_cores(self):
@@ -457,7 +491,7 @@ class Bm:
             if not hasattr(self, name):
                 raise ValueError(f'Variable "{name}" does not exist')
             res[name] = getattr(self, name, None)
-            if opts.get('list') and not opts.get('skip_list_convert'):
+            if opts.get('list') and not opts.get('list_skip_convert'):
                 res[name] = self.list_convert(res[name], opts['kind'])
         return res
 
@@ -517,13 +551,66 @@ class Bm:
 
         return self.check_err()
 
+    def check_args(self, **kwargs):
+        """Check that benchmark has valid arguments."""
+        is_valid = True
+
+        for name, constr in self.args_constr.items():
+            if not hasattr(self, name):
+                raise ValueError(f'Invalid name "{name}" in args_constr')
+
+            opts = self.args_info.get(name)
+            if opts is None:
+                raise ValueError(f'Name "{name}" is not in args')
+
+            v = kwargs.get(name, getattr(self, name, None))
+
+            if isinstance(constr, str): # List of equal values
+                if constr != 'equal':
+                    raise ValueError(f'Invalid constraint for "{name}"')
+                if not opts.get('list'):
+                    raise ValueError(f'Invalid constraint for "{name}"')
+
+                v = self.list_convert(v, opts['kind'])
+                if v is not None and not isinstance(v, (int, float, str)):
+                    msg = f'Arg "{name}" should be list '
+                    msg += 'of equal values'
+                    self.set_err(msg)
+                    is_valid = False
+
+            elif isinstance(constr, (int, float)): # Exact value
+                if opts.get('list'):
+                    v = self.list_convert(v, opts['kind'])
+                    if v is not None and not isinstance(v, (int, float, str)):
+                        msg = f'Arg "{name}" should be list of '
+                        msg += f'values equal to "{constr}"'
+                        self.set_err(msg)
+                        is_valid = False
+                        continue
+
+                if v != constr:
+                    msg = f'Arg "{name}" should be "{constr}"'
+                    self.set_err(msg)
+                    is_valid = False
+
+            else: # Enum
+                if opts.get('list'):
+                    raise NotImplementedError
+                if not v in constr:
+                    msg = f'Arg "{name}" should be from {constr}'
+                    self.set_err(msg)
+                    is_valid = False
+
+        return is_valid
+
     def check_err(self):
         """Check that benchmark has not errors."""
         if len(self.err_list):
-            msg = f'BM "{self.name}" has errors'
+            msg = f'BM "{self.name}" has errors:'
+            msg = '\n\n' + '-' * len(msg) + '\n' + msg
             for err in self.err_list:
                 msg += f'\n    Error > {err}'
-            raise ValueError(msg)
+            raise ValueError(msg + '\n\n')
 
         return True
 
@@ -533,7 +620,7 @@ class Bm:
         m_max = self.budget_m
 
         if not skip_process and m_max:
-            if (m >= m_max) or (m + m_cur > m_max and self.budget_is_strict):
+            if (m >= m_max) or (self.budget_is_strict and m + m_cur > m_max):
                 return None
 
         if not self.with_constr:
@@ -561,7 +648,7 @@ class Bm:
         """Return the exact TT-cores for the provided points."""
         raise NotImplementedError()
 
-    def cores_add(self, X, a0=0):
+    def cores_add(self, X, a0=0.):
         """Helper function for the construction of the TT-cores."""
         Y = []
 
@@ -741,26 +828,43 @@ class Bm:
         return text + '\n'
 
     def info_var(self, name, opt, with_name=False, skip_none=False):
-        if opt.get('skip_info'):
-            if isinstance(opt['skip_info'], bool) and opt['skip_info']:
-                return ''
-            if isinstance(opt['skip_info'], str):
-                if getattr(self, opt['skip_info'], False):
-                    return ''
-
-        if opt.get('skip_info_if_none'):
-            v = getattr(self, opt['skip_info_if_none'], None)
-            if v is None or isinstance(v, bool) and not v:
-                return ''
-
         kind = opt.get('kind', 'str')
         form = opt.get('form', None)
 
+        def is_none(v, with_bool=False):
+            if v is None:
+                return True
+            if isinstance(v, str) and v == '':
+                return True
+            if isinstance(v, bool) and not v and with_bool:
+                return True
+            return False
+
         v = getattr(self, name, None)
-        if opt.get('list') and not opt.get('skip_list_convert'):
+        if opt.get('list') and not opt.get('list_skip_convert'):
             v = self.list_convert(v, kind)
-        if skip_none and v is None:
+
+        if skip_none and is_none(v):
             return ''
+
+        cond = opt.get('info_skip')
+        if cond:
+            if cond is True:
+                return ''
+            elif isinstance(cond, str):
+                v_ref = getattr(self, opt['info_skip'], False)
+                if not is_none(v_ref, with_bool=True):
+                    return ''
+
+        cond = opt.get('info_skip_if_none')
+        if cond:
+            if cond is True:
+                if v is None or v == '' or v == False:
+                    return ''
+            elif isinstance(cond, str):
+                v_ref = getattr(self, cond, None)
+                if is_none(v_ref, with_bool=True):
+                    return ''
 
         def build(v):
             if v is None:
@@ -787,7 +891,7 @@ class Bm:
         text += ' ' * max(0, 40-len(text)) + ' : '
         text += build(v)
         if opt.get('list') and isinstance(v, (int, float, str)):
-            text += f' x {self.d}'
+            text += f', ..., ' + build(v)
 
         if opt.get('info_add'):
             v = getattr(self, opt['info_add'], None)
@@ -827,8 +931,11 @@ class Bm:
 
         self.cache = {}
 
+        self.check_args()
+        self.check_err()
+
     def list_convert(self, x, kind='float', eps=1.E-16):
-        """Convert list of equal values to one number and back."""
+        """Convert list of (equal) values to one number and back."""
         if x is None:
             return None
 
@@ -857,8 +964,7 @@ class Bm:
             return float(x[0]) if len(x) > 0 else None
 
         else:
-            msg = 'Unsupported kind for list conversion'
-            raise ValueError(msg)
+            raise ValueError('Unsupported kind for list conversion')
 
     def list_copy(self, x, kind=None):
         """Copy list or array and return the new array."""
@@ -939,12 +1045,16 @@ class Bm:
 
         return fpath
 
+    def plot(self, fpath=None):
+        """Build the plot for benchmark."""
+        raise NotImplementedError
+
     def prep(self):
         """A function with a specific benchmark preparation code."""
         if self.is_prep:
-            msg = 'Benchmark is already prepared'
-            raise ValueError(msg)
+            raise ValueError('Benchmark is already prepared')
 
+        self.check_args()
         self.check_err()
         self.prep_bm()
 
@@ -955,7 +1065,7 @@ class Bm:
         """A function with a specific benchmark preparation code (inner)."""
         return
 
-    def process(self, I, X, y, ind_new, t, is_batch, skip=False):
+    def process(self, I, X, y, ind_new=None, t=0., is_batch=False, skip=False):
         if skip:
             return y if is_batch else y[0]
 
@@ -963,7 +1073,7 @@ class Bm:
         self.y_list_full.extend(list(y))
 
         self.m += len(y) if ind_new is None else len(ind_new)
-        self.m_cache += 0 if ind_new is None else y.shape[0] - len(ind_new)
+        self.m_cache += 0 if ind_new is None else len(y) - len(ind_new)
 
         self.time_call += tpc() - t
 
@@ -1062,6 +1172,12 @@ class Bm:
         if self.a is None or self.b is None:
             raise ValueError('Please, set both "a" and "b"')
 
+        if len(self.a) != self.d:
+            raise ValueError('Arg "a" has invalid length')
+
+        if len(self.b) != self.d:
+            raise ValueError('Arg "b" has invalid length')
+
         if sh:
             # Note that we use "constant" noise:
             rand = np.random.default_rng(42)
@@ -1115,9 +1231,15 @@ class Bm:
         self.y_max_real = y
 
         if self.i_max_real is not None:
-            self.i_max_real = self.list_copy(self.i_max_real, 'int')
+            if isinstance(self.i_max_real, (int, float)):
+                self.i_max_real = self.list_convert(self.i_max_real, 'int')
+            else:
+                self.i_max_real = self.list_copy(self.i_max_real, 'int')
         if self.x_max_real is not None:
-            self.x_max_real = self.list_copy(self.x_max_real, 'float')
+            if isinstance(self.x_max_real, (int, float)):
+                self.x_max_real = self.list_convert(self.x_max_real, 'float')
+            else:
+                self.x_max_real = self.list_copy(self.x_max_real, 'float')
         if self.y_max_real is not None:
             self.y_max_real = float(self.y_max_real)
 
@@ -1152,9 +1274,15 @@ class Bm:
         self.y_min_real = y
 
         if self.i_min_real is not None:
-            self.i_min_real = self.list_copy(self.i_min_real, 'int')
+            if isinstance(self.i_min_real, (int, float)):
+                self.i_min_real = self.list_convert(self.i_min_real, 'int')
+            else:
+                self.i_min_real = self.list_copy(self.i_min_real, 'int')
         if self.x_min_real is not None:
-            self.x_min_real = self.list_copy(self.x_min_real, 'float')
+            if isinstance(self.x_min_real, (int, float)):
+                self.x_min_real = self.list_convert(self.x_min_real, 'float')
+            else:
+                self.x_min_real = self.list_copy(self.x_min_real, 'float')
         if self.y_min_real is not None:
             self.y_min_real = float(self.y_min_real)
 
@@ -1208,6 +1336,9 @@ class Bm:
             raise ValueError('Please, set dimension "d" before')
 
         self.n = teneva.grid_prep_opt(n, self.d, int)
+
+        if self.n is not None and len(self.n) != self.d:
+            raise ValueError('Arg "n" has invalid length')
 
     def show(self, fpath=None, i=None, best=True):
         """Present the state of the benchmark (image, graph, etc.)."""
