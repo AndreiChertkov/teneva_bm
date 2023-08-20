@@ -13,14 +13,6 @@ class BmOdeocSimple(Bm):
     def __init__(self, d=100, n=2, seed=42):
         super().__init__(d, n, seed)
 
-        if not self.is_n_equal or self.n[0] != 2:
-            self.set_err('Mode size (n) should be "2"')
-
-        if not with_gekko:
-            msg = 'Need "gekko" module. For installation please run '
-            msg += '"pip install gekko==1.0.6"'
-            self.set_err(msg)
-
         self.set_desc("""
             Discrete optimal control (OC) problem with simple 1D ODE "x**3 - i",
             where "x = x(t)" is a state variable, "x(0) = x_ini" and "i" is a
@@ -33,6 +25,15 @@ class BmOdeocSimple(Bm):
             dimension may be any (default is 100), and mode size should be 2.
             The benchmark needs "gekko==1.0.6" (it is used for ODE solution).
         """)
+
+        if not with_gekko:
+            msg = 'Need "gekko" module. For installation please run '
+            msg += '"pip install gekko==1.0.6"'
+            self.set_err(msg)
+
+    @property
+    def args_constr(self):
+        return {'n': 2}
 
     @property
     def identity(self):
