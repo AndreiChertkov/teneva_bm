@@ -22,19 +22,18 @@ class BmFuncGriewank(Func):
 
         self.set_grid(-100., +100., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 9.13373807946276
+        return self.ref_i, 9.13373807946276
 
     @property
     def with_cores(self):
         return True
 
     def cores(self, X):
-        Y = self.cores_mul([np.cos(x/np.sqrt(i)) for i,x in enumerate(X.T,1)])
+        Y = self.cores_mul([np.cos(x/np.sqrt(i)) for i,x in enumerate(X.T, 1)])
         Y[-1] *= -1
         return teneva.add(Y, self.cores_add([x**2 / 4000. for x in X.T], a0=1))
 

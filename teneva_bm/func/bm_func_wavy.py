@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -21,7 +20,7 @@ class BmFuncWavy(Func):
 
         self.set_grid(-np.pi, +np.pi, sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
 
     @property
     def opts_info(self):
@@ -35,9 +34,12 @@ class BmFuncWavy(Func):
         }
 
     @property
+    def opts_plot(self):
+        return {'dy_min': 2., 'dy_max': 1.}
+
+    @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 1.1671695279181264
+        return self.ref_i, 1.1671695279181264
 
     def target_batch(self, X):
         Y = np.cos(self.opt_k * X) * np.exp(-X**2 / 2)

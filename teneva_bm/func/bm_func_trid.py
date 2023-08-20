@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -18,20 +17,24 @@ class BmFuncTrid(Func):
             Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
             ("149. Trid Function 6"; Continuous, Differentiable,
             Non-separable, Non-scalable, Multimodal).
-            See also https://www.sfu.ca/~ssurjano/trid.html for details.
+            See also https://www.sfu.ca/~ssurjano/trid.html for details (note
+            that we use global minimum and grid limits from this link).
         """)
 
         self.set_grid(-self.d**2, +self.d**2, sh=True, sh_out=True)
 
         i = np.arange(1, self.d+1)
         x = i * (self.d + 1 - i)
-        y = -self.d * (self.d + 4) * (self.d - 1) / 6.
+        y = -self.d * (self.d + 4.) * (self.d - 1.) / 6.
         self.set_min(x=x, y=y)
 
     @property
+    def opts_plot(self):
+        return {'dy_min': 15., 'dy_max': 0.}
+
+    @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 8556.719852394492
+        return self.ref_i, 8556.719852394492
 
     def target_batch(self, X):
         y1 = np.sum((X-1)**2, axis=1)

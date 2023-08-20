@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -15,18 +14,21 @@ class BmFuncAlpine(Func):
             See the work Momin Jamil, Xin-She Yang. "A literature survey of
             benchmark functions for global optimization problems". Journal of
             Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
-            ("6. Alpine 1 Function"; Continuous, Non-Differentiable, Separable,
-            Non-Scalable, Multimodal).
+            ("6. Alpine Function 1"; Continuous, Non-Differentiable, Separable,
+            Non-scalable, Multimodal).
         """)
 
         self.set_grid(-10., +10., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 25., 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 32.67394403036597
+        return self.ref_i, 32.67394403036597
 
     @property
     def with_cores(self):

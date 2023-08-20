@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -21,12 +20,11 @@ class BmFuncSalomon(Func):
 
         self.set_grid(-100., +100., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 19.77395062827738
+        return self.ref_i, 19.77395062827738
 
     def target_batch(self, X):
         z = np.sqrt(np.sum(X**2, axis=1))

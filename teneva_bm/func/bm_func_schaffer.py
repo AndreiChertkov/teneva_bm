@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -15,18 +14,25 @@ class BmFuncSchaffer(Func):
             See the work Momin Jamil, Xin-She Yang. "A literature survey of
             benchmark functions for global optimization problems". Journal of
             Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
-            ("135. Schaffer F6 Function"; Continuous, Differentiable,
+            ("135. Schaffer Function F6"; Continuous, Differentiable,
             Non-Separable, Scalable, Multimodal).
+            Note that in some sources (see, e.g., "Hybrid genetic deflated
+            Newton method for global optimisation") this function has a
+            different form (term "x_{i+1}" is missing), but we use the
+            analytical formula from the above work.
         """)
 
         self.set_grid(-100., +100., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 3., 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 2.9876312490738646
+        return self.ref_i, 2.9876312490738646
 
     def target_batch(self, X):
         Z = X[:, :-1]**2 + X[:, 1:]**2

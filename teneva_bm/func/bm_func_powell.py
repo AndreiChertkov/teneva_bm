@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -21,13 +20,16 @@ class BmFuncPowell(Func):
 
         self.set_grid(-1., +1., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 2., 'dy_max': 1.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 1.979712122400335
+        return self.ref_i, 1.979712122400335
 
     def target_batch(self, X):
-        i = np.arange(2, self.d+2)
-        return np.sum(np.abs(X)**i, axis=1)
+        i = np.arange(1, self.d+1)
+        return np.sum(np.abs(X)**(i+1), axis=1)

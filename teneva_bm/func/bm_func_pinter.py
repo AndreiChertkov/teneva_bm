@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -21,12 +20,15 @@ class BmFuncPinter(Func):
 
         self.set_grid(-10., +10., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 100., 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 1844.09462695079
+        return self.ref_i, 1844.09462695079
 
     def target_batch(self, X):
         Xm1 = np.hstack([X[:, -1].reshape(-1, 1), X[:, :-1]])

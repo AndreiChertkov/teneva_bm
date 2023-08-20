@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -20,13 +19,13 @@ class BmFuncRastrigin(Func):
 
         self.set_grid(-5.12, +5.12, sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
 
     @property
     def opts_info(self):
         return {**super().opts_info,
             'opt_A': {
-                'desc': 'Param "a" for Rastrigin function',
+                'desc': 'Param "A" for Rastrigin function',
                 'kind': 'float',
                 'form': '.2f',
                 'dflt': 10.
@@ -34,9 +33,12 @@ class BmFuncRastrigin(Func):
         }
 
     @property
+    def opts_plot(self):
+        return {'dy_min': 25., 'dy_max': 0.}
+
+    @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 166.75702361466605
+        return self.ref_i, 166.75702361466605
 
     @property
     def with_cores(self):
@@ -55,10 +57,10 @@ class BmFuncRastrigin(Func):
     def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
-        par_A = torch.tensor(self.opt_A)
+        opt_A = torch.tensor(self.opt_A)
         pi = torch.tensor(np.pi)
 
-        y1 = par_A * d
-        y2 = torch.sum(x**2 - par_A * torch.cos(2. * pi * x))
+        y1 = opt_A * d
+        y2 = torch.sum(x**2 - opt_A * torch.cos(2. * pi * x))
 
         return y1 + y2

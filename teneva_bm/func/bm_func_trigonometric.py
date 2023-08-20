@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -21,12 +20,15 @@ class BmFuncTrigonometric(Func):
 
         self.set_grid(0., np.pi, sh=True, sh_out=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 25., 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 543.0253567898842
+        return self.ref_i, 543.0253567898842
 
     def target_batch(self, X):
         i = np.arange(1, self.d+1)

@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -15,7 +14,7 @@ class BmFuncRosenbrock(Func):
             See the work Momin Jamil, Xin-She Yang. "A literature survey of
             benchmark functions for global optimization problems". Journal of
             Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
-            ("105. Rosenbrock Function"; Continuous, Differentiable,
+            ("105. Rosenbrock Function 1"; Continuous, Differentiable,
             Non-Separable, Scalable, Unimodal).
             See also https://www.sfu.ca/~ssurjano/rosen.html for details (note
             that we use grid limits from this link).
@@ -23,12 +22,15 @@ class BmFuncRosenbrock(Func):
 
         self.set_grid(-2.048, +2.048, sh=True, sh_out=True)
 
-        self.set_min(x=[1.]*self.d, y=0.)
+        self.set_min(x=1., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 2.E+3, 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 5130.1430415221985
+        return self.ref_i, 5130.1430415221985
 
     @property
     def with_cores(self):
@@ -59,9 +61,9 @@ class BmFuncRosenbrock(Func):
         return Y
 
     def target_batch(self, X):
-        y1 = 100. * (X[:, 1:] - X[:, :-1]**2)**2
-        y2 = (X[:, :-1] - 1.)**2
-        return np.sum(y1 + y2, axis=1)
+        Y1 = 100. * (X[:, 1:] - X[:, :-1]**2)**2
+        Y2 = (X[:, :-1] - 1.)**2
+        return np.sum(Y1 + Y2, axis=1)
 
     def _target_pt(self, x):
         """Draft."""

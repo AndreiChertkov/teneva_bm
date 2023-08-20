@@ -23,15 +23,18 @@ class BmFuncDixon(Func):
 
         self.set_grid(-10., +10., sh=True)
 
-        x_min = [1.]
+        x = [1.]
         for _ in range(d-1):
-            x_min.append(np.sqrt(x_min[-1]/2.))
-        self.set_min(x=np.array(x_min), y=0.)
+            x.append(np.sqrt(x[-1] / 2.))
+        self.set_min(x=x, y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 1.E+5, 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 383674.42504801514
+        return self.ref_i, 383674.42504801514
 
     def target_batch(self, X):
         y1 = (X[:, 0] - 1)**2
@@ -46,6 +49,8 @@ class BmFuncDixon(Func):
         d = torch.tensor(self.d)
 
         y1 = (x[0] - 1)**2
+
         y2 = torch.arange(2, d+1) * (2. * x[1:]**2 - x[:-1])**2
         y2 = torch.sum(y2)
+
         return y1 + y2

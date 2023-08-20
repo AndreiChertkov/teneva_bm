@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -8,7 +7,7 @@ class BmFuncYang(Func):
         super().__init__(d, n, seed)
 
         self.set_desc("""
-            Analytical Wavy function (continuous).
+            Analytical Yang function (continuous).
             The dimension and mode size may be any (default are d=7, n=16).
             Default grid limits are [-2 pi, 2 pi] (with small random shift);
             the exact global minimum is known: x = [0, ..., 0], y = 0.
@@ -21,12 +20,15 @@ class BmFuncYang(Func):
 
         self.set_grid(-2.*np.pi, +2.*np.pi, sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 125., 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 85.15511376128357
+        return self.ref_i, 85.15511376128357
 
     def target_batch(self, X):
         y1 = np.sum(np.abs(X), axis=1)

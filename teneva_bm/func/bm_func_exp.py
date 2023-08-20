@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -16,17 +15,20 @@ class BmFuncExp(Func):
             benchmark functions for global optimization problems". Journal of
             Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
             ("54. Exponential Function"; Continuous, Differentiable,
-            Non-Separable, Scalable, Multimodal).
+            Non-separable, Scalable, Multimodal).
         """)
 
         self.set_grid(-1., +1., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=-1.)
+        self.set_min(x=0., y=-1.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 0.5, 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), -0.19654261789623134
+        return self.ref_i, -0.19654261789623134
 
     @property
     def with_cores(self):

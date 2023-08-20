@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -16,17 +15,21 @@ class BmFuncSquares(Func):
             benchmark functions for global optimization problems". Journal of
             Mathematical Modelling and Numerical Optimisation 2013; 4:150-194
             ("142. Sum Squares Function"; Continuous, Differentiable,
-            Non-separable, Scalable, Multimodal).
+            Separable, Scalable, Unimodal).
+            See also https://www.sfu.ca/~ssurjano/sumsqu.html for details.
         """)
 
         self.set_grid(-10., +10., sh=True)
 
-        self.set_min(x=[0.]*self.d, y=0.)
+        self.set_min(x=0., y=0.)
+
+    @property
+    def opts_plot(self):
+        return {'dy_min': 100., 'dy_max': 0.}
 
     @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 1385.313752586807
+        return self.ref_i, 1385.313752586807
 
     def target_batch(self, X):
         i = np.arange(1, self.d+1)

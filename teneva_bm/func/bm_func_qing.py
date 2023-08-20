@@ -1,5 +1,4 @@
 import numpy as np
-import teneva
 from teneva_bm.func.func import Func
 
 
@@ -26,9 +25,12 @@ class BmFuncQing(Func):
         self.set_min(x=np.sqrt(np.arange(1, self.d+1)), y=0.)
 
     @property
+    def opts_plot(self):
+        return {'dy_min': 1.E+10, 'dy_max': 0.}
+
+    @property
     def ref(self):
-        i = [5, 3, 9, 11, 14, 3, 10]
-        return np.array(i, dtype=int), 106030804604.16588
+        return self.ref_i, 106030804604.16588
 
     @property
     def with_cores(self):
@@ -38,10 +40,11 @@ class BmFuncQing(Func):
         return self.cores_add([(x**2 - i)**2 for i, x in enumerate(X.T, 1)])
 
     def target_batch(self, X):
-        return np.sum((X**2 - np.arange(1, self.d+1))**2, axis=1)
+        i = np.arange(1, self.d+1)
+        return np.sum((X**2 - i)**2, axis=1)
 
     def _target_pt(self, x):
         """Draft."""
         d = torch.tensor(self.d)
-
-        return torch.sum((x**2 - torch.arange(1, d+1))**2)
+        i = torch.arange(1, d+1)
+        return torch.sum((x**2 - i)**2)
