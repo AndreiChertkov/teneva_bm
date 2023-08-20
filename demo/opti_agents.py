@@ -33,14 +33,14 @@ AGENTS = [
 ]
 
 
-def demo(Agent, steps=500, m=1.E+2):
-    bm = Agent(steps=steps)
+def demo(Agent, m=1.E+2):
+    bm = Agent()
     bm.set_budget(m, m_cache=m)
     bm.set_cache(True)
-    bm.set_log(False, cond='max', prefix='protes', with_min=False)
+    bm.set_log(True, cond='max', prefix='protes', with_min=False)
     bm.prep()
 
-    protes(bm.get, bm.d, bm.n0, is_max=True)
+    protes(bm.get, bm.d, bm.n0, k=10, k_top=2, is_max=True)
     print(bm.info_current(bm.name))
 
     bm.render(f'result/demo/opti_agents/{bm.name}')
