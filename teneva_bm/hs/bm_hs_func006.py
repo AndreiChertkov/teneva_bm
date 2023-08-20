@@ -15,17 +15,17 @@ class BmHsFunc006(Bm):
             is "1.E+3" and the amplitude of the constraint is used.
         """)
 
-        if self.d != 2:
-            self.set_err('Dimension should be 2')
-
         self.set_grid(-10., +10.)
-        # self.shift_grid()
         # TODO: do we need the shift as in "func" collection???
 
-        self.set_min(x=[1.]*self.d, y=0.)
+        self.set_min(x=1., y=0.)
 
         # TODO: is it ok, to set such constraint by default???
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
+
+    @property
+    def args_constr(self):
+        return {'d': 2}
 
     @property
     def identity(self):

@@ -13,14 +13,14 @@ class BmHsFunc001(Bm):
             The exact global minimum is known: x = [1, 1], y = 0.
         """)
 
-        if self.d != 2:
-            self.set_err('Dimension should be 2')
-
         self.set_grid(-10., +10.)
-        # self.shift_grid()
         # TODO: do we need the shift as in "func" collection???
 
-        self.set_min(x=[1.]*self.d, y=0.)
+        self.set_min(x=1., y=0.)
+
+    @property
+    def args_constr(self):
+        return {'d': 2}
 
     @property
     def identity(self):
