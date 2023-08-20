@@ -28,11 +28,11 @@ jax.default_device(jax.devices('cpu')[0])
 from protes import protes
 
 
-from teneva_bm import BmQuboFixKnapDet
+from teneva_bm import BmQuboFixKnap100
 
 
-def demo(d=100, m=2.E+4):
-    bm = BmQuboFixKnapDet(d)
+def demo(m=2.E+4):
+    bm = BmQuboFixKnap100()
     bm.set_budget(m, m_cache=m)
     bm.set_cache(True)
     bm.set_log(True, cond='min', prefix='protes', with_max=False)
@@ -44,7 +44,7 @@ def demo(d=100, m=2.E+4):
 
     # Just to show the useful bm's variables:
     print(f'\nOptimization result:\n')
-    print(f'Dimension    = {d:-11.0f}')
+    print(f'Dimension    = {bm.d:-11.0f}')
     print(f'Budget       = {bm.m:-11.1e}')
     print(f'Time (sec)   = {bm.time_full:-11.4f}')
     print(f'Last request = {bm.y_list[-1]:-11.4f}')

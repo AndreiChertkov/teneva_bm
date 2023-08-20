@@ -59,8 +59,7 @@ We prepare some demo scripts with benchmark usage and optimization examples in t
 
 - `qubo` - a collection of quadratic unconstrained binary optimization (QUBO) problems having an arbitrary dimension (default is `100`); all benchmarks are discrete and have a mode size equals `2`. The collection includes the following benchmarks: `BmQuboKnapQuad`, `BmQuboMaxcut`, `BmQuboMvc`.
 
-- `qubo_fix` - a collection of quadratic unconstrained binary optimization (QUBO) problems having the fixed dimension. The collection includes the following benchmarks: `BmQuboKnapDet` (`d=10`, `d=20`, `d=50`, `d=80` or `100`).
-    > The exact global minimum is known only for `BmQuboKnapDet` benchmark.
+- `qubo_fix` - a collection of quadratic unconstrained binary optimization (QUBO) problems having the fixed dimension. The collection includes the following benchmarks: `BmQuboKnap10` (`d=10`), `BmQuboKnap20` (`d=20`), `BmQuboKnap50` (`d=50`), `BmQuboKnap80` (`d=80`), `BmQuboKnap100` (`d=100`).
 
 - `various` - a collection of heterogeneous benchmarks that are not suitable for any other collection (note that in this case, we do not use the name of the collection in the name of the benchmarks, unlike all other sets). The collection includes the following benchmarks: `BmMatmul`, `BmTopopt` (draft!), `BmWallSimple`.
 
