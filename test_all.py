@@ -331,18 +331,18 @@ class TestOpts(unittest.TestCase):
         bm = BmFuncAckley()
         bm.prep()
 
-        self.assertTrue('opt_a' in bm.opts)
-        self.assertEqual(bm.opts['opt_a'], bm.opts_info['opt_a']['dflt'])
+        self.assertTrue('opt_A' in bm.opts)
+        self.assertEqual(bm.opts['opt_A'], bm.opts_info['opt_A']['dflt'])
 
     def test_custom(self):
-        opt_a = 42.
+        opt_A = 42.
 
         bm = BmFuncAckley()
-        bm.set_opts(opt_a=opt_a)
+        bm.set_opts(opt_A=opt_A)
         bm.prep()
 
-        self.assertTrue('opt_a' in bm.opts)
-        self.assertEqual(bm.opts['opt_a'], opt_a)
+        self.assertTrue('opt_A' in bm.opts)
+        self.assertEqual(bm.opts['opt_A'], opt_A)
 
 
 class TestProcess(unittest.TestCase):

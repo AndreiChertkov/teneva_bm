@@ -931,9 +931,6 @@ class Bm:
 
         self.cache = {}
 
-        self.check_args()
-        self.check_err()
-
     def list_convert(self, x, kind='float', eps=1.E-16):
         """Convert list of (equal) values to one number and back."""
         if x is None:

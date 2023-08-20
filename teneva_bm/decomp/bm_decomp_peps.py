@@ -70,6 +70,11 @@ class BmDecompPeps(Bm):
     def is_tens(self):
         return True
 
+    @property
+    def ref(self):
+        i = [11, 2, 5, 9, 5, 4, 7, 8, 2, 3, 11, 8, 13, 4, 15, 8]
+        return np.array(i, dtype=int), 185516.484375
+
     def prep_bm(self):
         rng = jax.random.PRNGKey(self.seed)
 
@@ -112,7 +117,7 @@ class BmDecompPeps(Bm):
         if self._path is None:
             self._path = opt_einsum.contract_path(*a)
 
-        return jnp.einsum(*a, optimize=self._path[0])
+        return float(jnp.einsum(*a, optimize=self._path[0]))
 
 
 def _make_contract_idx(d_x, d_y, big_num_x=1000, big_num_y=2000):
@@ -130,6 +135,7 @@ if __name__ == "__main__":
 
     bm = BmDecompPeps().prep()
     print(bm.info())
+    print(bm[bm.ref[0]])
 
     I_trn, y_trn = bm.build_trn(1.E+2)
     print(bm.info_history())
