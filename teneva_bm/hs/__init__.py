@@ -6,5 +6,4 @@ def teneva_bm_get_hs():
     Bms = []
     Bms.append(BmHsFunc001)
     Bms.append(BmHsFunc006)
-
     return Bms

@@ -6,5 +6,4 @@ def teneva_bm_get_odeoc():
     Bms = []
     Bms.append(BmOdeocSimple)
     Bms.append(BmOdeocSimpleConstr)
-
     return Bms

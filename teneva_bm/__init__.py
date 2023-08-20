@@ -15,7 +15,7 @@ from .qubo_fix import *
 from .various import *
 
 
-def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
+def teneva_bm_get(d=None, is_func=None, is_opti_max=None, with_constr=None,
                   with_cores=None, with_show=None, with_render=None,
                   with_max=None, with_min=None):
     Bms = []
@@ -33,6 +33,8 @@ def teneva_bm_get(is_func=None, is_opti_max=None, with_constr=None,
     for Bm in Bms:
         bm = Bm()
 
+        if d is not None and not bm.check_args(d=d):
+            continue
         if is_func is not None and bm.is_func != is_func:
             continue
         if is_opti_max is not None and bm.is_opti_max != is_opti_max:

@@ -11,9 +11,9 @@ from .bm_func_powell import BmFuncPowell
 from .bm_func_qing import BmFuncQing
 from .bm_func_rastrigin import BmFuncRastrigin
 from .bm_func_rosenbrock import BmFuncRosenbrock
+from .bm_func_salomon import BmFuncSalomon
 from .bm_func_schaffer import BmFuncSchaffer
 from .bm_func_schwefel import BmFuncSchwefel
-from .bm_func_salomon import BmFuncSalomon
 from .bm_func_sphere import BmFuncSphere
 from .bm_func_squares import BmFuncSquares
 from .bm_func_trid import BmFuncTrid
@@ -37,14 +37,13 @@ def teneva_bm_get_func():
     Bms.append(BmFuncQing)
     Bms.append(BmFuncRastrigin)
     Bms.append(BmFuncRosenbrock)
+    Bms.append(BmFuncSalomon)
     Bms.append(BmFuncSchaffer)
     Bms.append(BmFuncSchwefel)
-    Bms.append(BmFuncSalomon)
     Bms.append(BmFuncSphere)
     Bms.append(BmFuncSquares)
     Bms.append(BmFuncTrid)
     Bms.append(BmFuncTrigonometric)
     Bms.append(BmFuncWavy)
     Bms.append(BmFuncYang)
-
     return Bms

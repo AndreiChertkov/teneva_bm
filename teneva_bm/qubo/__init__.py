@@ -8,5 +8,4 @@ def teneva_bm_get_qubo():
     Bms.append(BmQuboKnapQuad)
     Bms.append(BmQuboMaxcut)
     Bms.append(BmQuboMvc)
-
     return Bms

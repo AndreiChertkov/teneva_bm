@@ -8,5 +8,4 @@ def teneva_bm_get_various():
     Bms.append(BmMatmul)
     Bms.append(BmTopopt)
     Bms.append(BmWallSimple)
-
     return Bms

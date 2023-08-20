@@ -22,5 +22,4 @@ def teneva_bm_get_agent():
     Bms.append(BmAgentPendInvDouble)
     Bms.append(BmAgentReacher)
     Bms.append(BmAgentSwimmer)
-
     return Bms
