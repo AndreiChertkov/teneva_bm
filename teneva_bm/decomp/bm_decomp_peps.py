@@ -6,7 +6,6 @@ from teneva_bm import Bm
 try:
     import jax
     import jax.numpy as jnp
-
     with_jax = True
 except Exception as e:
     with_jax = False
@@ -33,7 +32,8 @@ class BmDecompPeps(Bm):
             self.set_err("Dimension should not be set manually")
 
         if not self.is_n_equal:
-            self.set_err("Mode size (n) should be constant")
+            self.set_err('Mode size (n) should be constant')
+
 
         self.d_x = d_x
         self.d_y = d_y
@@ -74,18 +74,12 @@ class BmDecompPeps(Bm):
         for x in range(self.d_x):
             for y in range(self.d_y):
                 rng, key = jax.random.split(rng)
-                self._cores.append(
-                    jax.random.uniform(
-                        key,
-                        (
-                            self.n0,
-                            self.r_x if x > 0 else 1,
-                            self.r_y if y > 0 else 1,
-                            self.r_x if x < self.d_x - 1 else 1,
-                            self.r_y if y < self.d_y - 1 else 1,
-                        ),
-                    )
-                )
+                self._cores.append(jax.random.uniform(key, (
+                    self.n0,
+                    self.r_x if x > 0 else 1,
+                    self.r_y if y > 0 else 1,
+                    self.r_x if x < self.d_x - 1 else 1,
+                    self.r_y if y < self.d_y - 1 else 1)))
 
         self._c_idx = _make_contract_idx(self.d_x, self.d_y)
 
@@ -117,7 +111,7 @@ class BmDecompPeps(Bm):
 
         return float(jnp.einsum(*a, optimize=self._path[0]))
 
-
+    
 def _make_contract_idx(d_x, d_y, big_num_y=2000):
     # to each vertex belong upper edge and left edge
     # idx of vertex with coordinates x and y is (d_x * x + y)
@@ -142,7 +136,7 @@ if __name__ == "__main__":
     print(bm.info())
     print(bm[bm.ref[0]])
 
-    I_trn, y_trn = bm.build_trn(1.0e2)
+    I_trn, y_trn = bm.build_trn(1.E+2)
     print(bm.info_history())
 
     text = "Value at a random multi-index     :  "
