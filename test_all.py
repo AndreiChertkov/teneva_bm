@@ -54,6 +54,45 @@ class TestArgs(unittest.TestCase):
         self.assertEqual(bm.args['n'], n[0])
 
 
+class TestBmBudgetOverException(unittest.TestCase):
+    def setUp(self):
+        self.m = 100
+
+    def test_base(self):
+        bm = BmFuncAckley()
+        bm.set_opts(budget_raise=True)
+        bm.set_budget(m=self.m)
+        bm.prep()
+
+        for k in range(self.m):
+            bm.get([0]*bm.d)
+
+        with self.assertRaises(BmBudgetOverException) as cm:
+            bm.get([0]*bm.d)
+
+        text = f'Computation budget (m={self.m}) exceeded'
+        self.assertEqual(str(cm.exception), text)
+        self.assertEqual(bm.m, self.m)
+
+    def test_cache(self):
+        bm = BmFuncAckley()
+        bm.set_opts(budget_raise=True)
+        bm.set_budget(m=self.m, m_cache=self.m)
+        bm.set_cache(True)
+        bm.prep()
+
+        for k in range(self.m+1):
+            bm.get([0]*bm.d)
+
+        with self.assertRaises(BmBudgetOverException) as cm:
+            bm.get([0]*bm.d)
+
+        text = f'Computation budget for cache (m={self.m}) exceeded'
+        self.assertEqual(str(cm.exception), text)
+        self.assertEqual(bm.m, 1)
+        self.assertEqual(bm.m_cache, self.m)
+
+
 class TestBuildTrn(unittest.TestCase):
     def setUp(self):
         self.m = 5

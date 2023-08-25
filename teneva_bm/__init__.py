@@ -2,6 +2,7 @@ __version__ = '0.8.1'
 
 
 from .bm import Bm
+from .bm import BmBudgetOverException
 
 
 from .agent import *

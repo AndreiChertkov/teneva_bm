@@ -267,7 +267,14 @@ class Bm:
     @property
     def opts_info(self):
         """Dict with info about benchmark's options."""
-        return {}
+        return {
+            'budget_raise': {
+                'desc': 'Raise then out of budget',
+                'kind': 'bool',
+                'dflt': False,
+                'info_skip_if_none': True
+            },
+        }
 
     @property
     def prps(self):
@@ -686,10 +693,10 @@ class Bm:
             if self.budget_m_cache:
                 if self.budget_is_strict:
                     if self.m_cache + dm_cache > self.budget_m_cache:
-                        return self.process_last()
+                        return self.process_last(is_cache=True)
                 else:
                     if self.m_cache > self.budget_m_cache:
-                        return self.process_last()
+                        return self.process_last(is_cache=True)
 
             if m_new > 0:
                 Z = X[ind_new] if self.is_func else I[ind_new]
@@ -748,20 +755,23 @@ class Bm:
         text += self.info_section('Description')
         text += self.info_desc()
 
-        if len(self.args_info):
-            text += self.info_section('Arguments')
-            for name, opt in self.args_info.items():
-                text += self.info_var(name, opt, with_name=True)
+        text_section = ''
+        for name, opt in self.args_info.items():
+            text_section += self.info_var(name, opt, with_name=True)
+        if text_section:
+            text += self.info_section('Arguments') + text_section
 
-        if len(self.opts_info):
-            text += self.info_section('Options')
-            for name, opt in self.opts_info.items():
-                text += self.info_var(name, opt, with_name=True)
+        text_section = ''
+        for name, opt in self.opts_info.items():
+            text_section += self.info_var(name, opt, with_name=True)
+        if text_section:
+            text += self.info_section('Options') + text_section
 
-        if len(self.prps_info):
-            text += self.info_section('Properties')
-            for name, opt in self.prps_info.items():
-                text += self.info_var(name, opt, skip_none=True)
+        text_section = ''
+        for name, opt in self.prps_info.items():
+            text_section += self.info_var(name, opt, skip_none=True)
+        if text_section:
+            text += self.info_section('Properties') + text_section
 
         return text + footer + '=' * 78 + '\n'
 
@@ -808,7 +818,7 @@ class Bm:
         if self.m == 0:
             text += '        ... history is empty ...\n'
 
-        elif len(self.hist_info):
+        else:
             for name, opt in self.hist_info.items():
                 text += self.info_var(name, opt, skip_none=True)
 
@@ -1104,9 +1114,13 @@ class Bm:
 
         return y if is_batch else y[0]
 
-    def process_last(self):
+    def process_last(self, is_cache=False):
         if self.with_log:
             self.log(self.info_current('<<< DONE\n'))
+
+        if self.budget_raise:
+            m = self.budget_m_cache if is_cache else self.budget_m
+            raise BmBudgetOverException(m, is_cache)
 
     def recover(self, i=None, best=True):
         """Restores some benchmark-specific values."""
@@ -1351,3 +1365,16 @@ class Bm:
 
     def wrn(self, text):
         self.log_wrn('!!! BM-WARNING : ' + text)
+
+
+class BmBudgetOverException(Exception):
+    def __init__(self, m, is_cache=False):
+        self.m = m
+        self.is_cache = is_cache
+
+        if self.is_cache:
+            self.message = f'Computation budget for cache (m={self.m}) exceeded'
+        else:
+            self.message = f'Computation budget (m={self.m}) exceeded'
+
+        super().__init__(self.message)
