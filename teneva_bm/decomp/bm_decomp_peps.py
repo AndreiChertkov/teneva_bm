@@ -18,7 +18,7 @@ class BmDecompPeps(Bm):
         self.set_desc("""
             Tensor network Pairwise-Entangled Paired States (PEPS).
             As part of this benchmark, a random PEPS network is generated, for
-            which the task of finding the minimum (default) or maximum value
+            which the task of finding the maximum (default) or minimum value
             can then be set.
         """)
 
@@ -46,15 +46,31 @@ class BmDecompPeps(Bm):
     def args_info(self):
         return {
             **super().args_info,
-            'd_x': {'desc': 'Internal "horizontal" dimension', 'kind': 'int'},
-            'd_y': {'desc': 'Internal "vertical" dimension', 'kind': 'int'},
-            'r_x': {'desc': 'Constant "horizontal" rank', 'kind': 'int'},
-            'r_y': {'desc': 'Constant "vertical" rank', 'kind': 'int'},
+            'd_x': {
+                'desc': 'Internal "horizontal" dimension',
+                'kind': 'int'
+            },
+            'd_y': {
+                'desc': 'Internal "vertical" dimension',
+                'kind': 'int'
+            },
+            'r_x': {
+                'desc': 'Constant "horizontal" rank',
+                'kind': 'int'
+            },
+            'r_y': {
+                'desc': 'Constant "vertical" rank',
+                'kind': 'int'
+            }
         }
 
     @property
     def identity(self):
         return ['d_x', 'd_y', 'r_x', 'r_y', 'seed']
+
+    @property
+    def is_opti_max(self):
+        return True
 
     @property
     def is_tens(self):
