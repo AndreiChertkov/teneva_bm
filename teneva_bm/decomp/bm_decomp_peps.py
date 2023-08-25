@@ -12,8 +12,9 @@ except Exception as e:
 
 
 class BmDecompPeps(Bm):
-    def __init__(self, d=None, n=16, seed=42, d_x=4, d_y=4, r_x=3, r_y=3):
-        super().__init__(d_x * d_y, n, seed)
+    def __init__(self, d=None, n=16, seed=42, name=None,
+                 d_x=4, d_y=4, r_x=3, r_y=3):
+        super().__init__(d_x * d_y, n, seed, name)
 
         self.set_desc("""
             Tensor network Pairwise-Entangled Paired States (PEPS).

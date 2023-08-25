@@ -10,8 +10,8 @@ except Exception as e:
 
 
 class BmOdeocSimple(Bm):
-    def __init__(self, d=100, n=2, seed=42):
-        super().__init__(d, n, seed)
+    def __init__(self, d=100, n=2, seed=42, name=None):
+        super().__init__(d, n, seed, name)
 
         self.set_desc("""
             Discrete optimal control (OC) problem with simple 1D ODE "x**3 - i",

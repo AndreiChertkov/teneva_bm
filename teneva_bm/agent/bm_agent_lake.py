@@ -40,9 +40,9 @@ class BmAgentLake(Agent):
 
         return [''.join(x) for x in map]
 
-    def __init__(self, d=None, n=4, seed=42,
+    def __init__(self, d=None, n=4, seed=42, name=None,
                  policy='direct', size=10, holes=10, with_state_ext=False):
-        super().__init__(d, n, seed, size*size, policy)
+        super().__init__(d, n, seed, name, size*size, policy)
 
         self.set_desc("""
             Agent "FrozenLake" from gym environment. For details, see

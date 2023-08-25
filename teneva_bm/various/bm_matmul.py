@@ -3,11 +3,12 @@ from teneva_bm import Bm
 
 
 class BmMatmul(Bm):
-    def __init__(self, d=None, n=3, seed=42, size=2, rank=7, only2=False):
+    def __init__(self, d=None, n=3, seed=42, name=None,
+                 size=2, rank=7, only2=False):
         T_real = _tensor_generate(size, size, size)
         d_real = (2 if only2 else 3) * size**2 * rank
 
-        super().__init__(d_real, n, seed)
+        super().__init__(d_real, n, seed, name)
 
         self.set_desc("""
             Problem for fast "size x size" matrix multiplication (like Strassen

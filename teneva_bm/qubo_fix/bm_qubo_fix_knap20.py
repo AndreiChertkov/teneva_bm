@@ -3,8 +3,8 @@ from teneva_bm import Bm
 
 
 class BmQuboFixKnap20(Bm):
-    def __init__(self, d=20, n=2, seed=42):
-        super().__init__(d, n, seed)
+    def __init__(self, d=20, n=2, seed=42, name=None):
+        super().__init__(d, n, seed, name)
 
         self.set_desc("""
             Binary 20-dimensional knapsack problem

@@ -5,8 +5,8 @@ from teneva_bm import Bm
 
 
 class Func(Bm):
-    def __init__(self, d=7, n=16, seed=42):
-        super().__init__(d, n, seed)
+    def __init__(self, d=7, n=16, seed=42, name=None):
+        super().__init__(d, n, seed, name)
 
     @property
     def is_func(self):

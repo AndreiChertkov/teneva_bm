@@ -3,8 +3,9 @@ from teneva_bm.agent.agent import Agent
 
 
 class BmAgentHumanStand(Agent):
-    def __init__(self, d=None, n=3, seed=42, steps=1000, policy='toeplitz'):
-        super().__init__(d, n, seed, steps, policy)
+    def __init__(self, d=None, n=3, seed=42, name=None,
+                 steps=1000, policy='toeplitz'):
+        super().__init__(d, n, seed, name, steps, policy)
         self.set_desc_agent('Humanoid Standup',
             'https://mgoulao.github.io/gym-docs/environments/mujoco/humanoid_standup/')
 

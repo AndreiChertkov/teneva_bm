@@ -36,8 +36,9 @@ class Agent(Bm):
         if with_gym:
             return gym.make(name, render_mode='rgb_array', **args)
 
-    def __init__(self, d=None, n=3, seed=42, steps=1000, policy='toeplitz'):
-        super().__init__(None, None, seed)
+    def __init__(self, d=None, n=3, seed=42, name=None,
+                 steps=1000, policy='toeplitz'):
+        super().__init__(None, None, seed, name)
         self._n_raw = n # We'll set it later in "prep_bm" method
 
         if not with_cv2:

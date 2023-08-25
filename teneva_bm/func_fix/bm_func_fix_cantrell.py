@@ -3,8 +3,8 @@ from teneva_bm.func_fix.func_fix import FuncFix
 
 
 class BmFuncFixCantrell(FuncFix):
-    def __init__(self, d=4, n=16, seed=42):
-        super().__init__(d, n, seed)
+    def __init__(self, d=4, n=16, seed=42, name=None):
+        super().__init__(d, n, seed, name)
 
         self.set_desc("""
             Analytical Cantrell function (continuous).

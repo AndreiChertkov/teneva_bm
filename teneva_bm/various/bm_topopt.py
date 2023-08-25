@@ -6,8 +6,8 @@ from teneva_bm import Bm
 
 
 class BmTopopt(Bm):
-    def __init__(self, d=None, n=2, seed=42, nx=128, ny=32):
-        super().__init__(int(nx*ny), n, seed)
+    def __init__(self, d=None, n=2, seed=42, name=None, nx=128, ny=32):
+        super().__init__(int(nx*ny), n, seed, name)
 
         self.set_desc("""
             DRAFT!!! Discrete Topology optimization task.

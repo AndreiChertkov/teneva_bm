@@ -17,8 +17,8 @@ except Exception as e:
 
 
 class BmQuboMaxcut(Bm):
-    def __init__(self, d=100, n=2, seed=42, pcon=5):
-        super().__init__(d, n, seed)
+    def __init__(self, d=100, n=2, seed=42, name=None, pcon=5):
+        super().__init__(d, n, seed, name)
 
         self.set_desc("""
             Quadratic unconstrained binary optimization (QUBO) Max-Cut problem

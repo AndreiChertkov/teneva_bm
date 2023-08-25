@@ -55,10 +55,6 @@ class Bm:
     def args_info(self):
         """Dict with info about benchmark's arguments."""
         return {
-            'name': {
-                'desc': 'Benchmark name',
-                'kind': 'str'
-            },
             'd': {
                 'desc': 'Dimension',
                 'kind': 'int'
@@ -71,6 +67,10 @@ class Bm:
             'seed': {
                 'desc': 'Random seed',
                 'kind': 'int'
+            },
+            'name': {
+                'desc': 'Benchmark name',
+                'kind': 'str'
             }
         }
 

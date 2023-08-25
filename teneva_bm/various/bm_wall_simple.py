@@ -3,8 +3,8 @@ from teneva_bm import Bm
 
 
 class BmWallSimple(Bm):
-    def __init__(self, d=10, n=50, seed=42):
-        super().__init__(d, n, seed)
+    def __init__(self, d=10, n=50, seed=42, name=None):
+        super().__init__(d, n, seed, name)
 
         self.set_desc("""
             Simple example of the special discrete function ("wall"), which is

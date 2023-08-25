@@ -3,8 +3,8 @@ from teneva_bm.func.func import Func
 
 
 class BmFuncSphere(Func):
-    def __init__(self, d=7, n=16, seed=42):
-        super().__init__(d, n, seed)
+    def __init__(self, d=7, n=16, seed=42, name=None):
+        super().__init__(d, n, seed, name)
 
         self.set_desc("""
             Analytical Sphere function (continuous).
