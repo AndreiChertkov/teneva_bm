@@ -67,7 +67,7 @@ class BmDecompPeps(Bm):
 
     @property
     def identity(self):
-        return ['d_x', 'd_y', 'r_x', 'r_y', 'seed']
+        return ['d_x', 'd_y', 'n', 'r_x', 'r_y', 'seed']
 
     @property
     def is_opti_max(self):
