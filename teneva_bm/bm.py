@@ -6,13 +6,13 @@ from time import perf_counter as tpc
 
 
 class Bm:
-    def __init__(self, d=None, n=None, seed=42):
+    def __init__(self, d=None, n=None, seed=42, name=None):
         self.is_prep = False
         self.set_dimension(d)
         self.set_size(n)
         self.seed = seed
         self.rand = np.random.default_rng(self.seed)
-        self.set_name(self.name_class[2:])
+        self.set_name(name or self.name_class[2:])
         self.set_desc('benchmark_description')
         self.set_opts_dflt()
         self.set_grid()
@@ -55,6 +55,10 @@ class Bm:
     def args_info(self):
         """Dict with info about benchmark's arguments."""
         return {
+            'name': {
+                'desc': 'Benchmark name',
+                'kind': 'str'
+            },
             'd': {
                 'desc': 'Dimension',
                 'kind': 'int'
@@ -280,10 +284,6 @@ class Bm:
             },
             'name_class': {
                 'desc': 'Benchmark class name',
-                'kind': 'str'
-            },
-            'name': {
-                'desc': 'Benchmark name',
                 'kind': 'str'
             },
             'is_tens': {
