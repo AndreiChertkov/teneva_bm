@@ -75,19 +75,20 @@ class BmDecompTt(Bm):
     def ref(self):
         i = [11, 2, 5, 9, 5, 4, 7, 8, 2, 3, 11, 8, 13, 4, 15, 8]
         i += [10] * (self.d - len(i))
-        return np.array(i, dtype=int), -764965060.0
+        return np.array(i, dtype=int), -764965056.0
 
     def prep_bm(self):
         rng = jax.random.PRNGKey(self.seed)
         rng, key = jax.random.split(rng)
         self._Y = _rand(self.d, self.n0, self.r, key,
             a=self.rand_a, b=self.rand_b)
+        self._get_many = jax.jit(_get_many)
 
     def full(self):
         return np.array(_full(self._Y))
 
     def target_batch(self, I):
-        return np.array(_get_many(self._Y, I))
+        return np.array(self._get_many(self._Y, I), dtype=float)
 
 
 def _full(Y):

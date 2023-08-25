@@ -75,7 +75,7 @@ class BmDecompHt(Bm):
     def ref(self):
         i = [11, 2, 5, 9, 5, 4, 7, 8, 2, 3, 11, 8, 13, 4, 15, 8]
         i += [10] * (self.d - len(i))
-        return np.array(i, dtype=int), -7.7318746e+18
+        return np.array(i, dtype=int), -7.731874618171982e+18
 
     def prep_bm(self):
         rng = jax.random.PRNGKey(self.seed)
@@ -85,7 +85,7 @@ class BmDecompHt(Bm):
         self._get_many = jax.jit(jax.vmap(_get, (None, 0)))
 
     def target_batch(self, I):
-        return np.array(self._get_many(self._Y, I))
+        return np.array(self._get_many(self._Y, I), dtype=float)
 
 
 def _get(Y, i):
