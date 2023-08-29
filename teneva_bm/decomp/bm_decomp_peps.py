@@ -89,7 +89,7 @@ class BmDecompPeps(Bm):
         for x in range(self.d_x):
             for y in range(self.d_y):
                 rng, key = jax.random.split(rng)
-                self._cores.append(jax.random.uniform(key, (
+                self._cores.append(jax.random.normal(key, (
                     self.n0,
                     self.r_x if x > 0 else 1,
                     self.r_y if y > 0 else 1,
