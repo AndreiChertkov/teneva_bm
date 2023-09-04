@@ -11,6 +11,13 @@ except Exception as e:
     with_jax = False
 
 
+def prepare_array(key, dims):
+    ones = jnp.array(dims)
+    ones = jnp.fill_diagonal(ones, 1)
+    noise = jax.random.normal(key, dims) * 1e-3
+    return ones + noise
+
+
 class BmDecompPeps(Bm):
     def __init__(self, d=None, n=16, seed=42, name=None,
                  d_x=4, d_y=4, r_x=3, r_y=3):
@@ -82,6 +89,7 @@ class BmDecompPeps(Bm):
         i = [11, 2, 5, 9, 5, 4, 7, 8, 2, 3, 11, 8, 13, 4, 15, 8]
         return np.array(i, dtype=int), 4142783.25
 
+
     def prep_bm(self):
         rng = jax.random.PRNGKey(self.seed)
 
@@ -89,7 +97,7 @@ class BmDecompPeps(Bm):
         for x in range(self.d_x):
             for y in range(self.d_y):
                 rng, key = jax.random.split(rng)
-                self._cores.append(jax.random.normal(key, (
+                self._cores.append(prepare_array(key, (
                     self.n0,
                     self.r_x if x > 0 else 1,
                     self.r_y if y > 0 else 1,
