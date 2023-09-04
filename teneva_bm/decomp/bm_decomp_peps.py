@@ -11,9 +11,14 @@ except Exception as e:
     with_jax = False
 
 
+def fill_diagonal(a, val):
+  assert a.ndim >= 2
+  i, j = jnp.diag_indices(min(a.shape[-2:]))
+  return a.at[..., i, j].set(val)
+
 def prepare_array(key, dims):
     ones = jnp.array(dims)
-    ones = jnp.fill_diagonal(ones, 1)
+    ones = fill_diagonal(ones, 1)
     noise = jax.random.normal(key, dims) * 1e-3
     return ones + noise
 
