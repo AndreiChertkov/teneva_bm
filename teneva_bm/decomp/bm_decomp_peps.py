@@ -11,18 +11,6 @@ except Exception as e:
     with_jax = False
 
 
-def fill_diagonal(a, val):
-    assert a.ndim >= 2
-    i, j = jnp.diag_indices(min(a.shape[-2:]))
-    return a.at[..., i, j].set(val)
-    
-def prepare_array(key, dims):
-    ones = jnp.zeros(dims)
-    ones = fill_diagonal(ones, 1)
-    noise = jax.random.normal(key, dims) * 1e-3
-    return ones + noise
-
-
 class BmDecompPeps(Bm):
     def __init__(self, d=None, n=16, seed=42, name=None,
                  d_x=4, d_y=4, r_x=3, r_y=3):
@@ -92,8 +80,7 @@ class BmDecompPeps(Bm):
     @property
     def ref(self):
         i = [11, 2, 5, 9, 5, 4, 7, 8, 2, 3, 11, 8, 13, 4, 15, 8]
-        return np.array(i, dtype=int), 4142783.25
-
+        return np.array(i, dtype=int), 19637.181640625
 
     def prep_bm(self):
         rng = jax.random.PRNGKey(self.seed)
@@ -102,7 +89,7 @@ class BmDecompPeps(Bm):
         for x in range(self.d_x):
             for y in range(self.d_y):
                 rng, key = jax.random.split(rng)
-                self._cores.append(prepare_array(key, (
+                self._cores.append(_rand(key, (
                     self.n0,
                     self.r_x if x > 0 else 1,
                     self.r_y if y > 0 else 1,
@@ -140,6 +127,12 @@ class BmDecompPeps(Bm):
         return float(jnp.einsum(*a, optimize=self._path[0]))
 
 
+def _fill_diagonal(a, val):
+    assert a.ndim >= 2
+    i, j = jnp.diag_indices(min(a.shape[-2:]))
+    return a.at[..., i, j].set(val)
+
+
 def _make_contract_idx(d_x, d_y, big_num_y=2000):
     # To each vertex belong upper edge and left edge
     # idx of vertex with coordinates x and y is (d_x * x + y)
@@ -156,11 +149,18 @@ def _make_contract_idx(d_x, d_y, big_num_y=2000):
     ]
 
 
+def _rand(key, dims):
+    ones = jnp.zeros(dims)
+    ones = _fill_diagonal(ones, 1)
+    noise = jax.random.normal(key, dims) * 1e-3
+    return ones + noise
+
+
 if __name__ == '__main__':
     # Service code just for test.
     np.random.seed(42)
 
-    bm = BmDecompPeps(n=10, d_x=2, d_y=3, r_x=4, r_y=5).prep()
+    bm = BmDecompPeps(n=10, d_x=8, d_y=9, r_x=4, r_y=5).prep()
     print(bm.info())
 
     I_trn, y_trn = bm.build_trn(1.E+2)
