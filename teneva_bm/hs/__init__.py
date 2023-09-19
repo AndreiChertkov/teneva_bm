@@ -128,8 +128,9 @@ from .bm_hs_func013 import BmHsFunc013
 # from .bm_hs_func128 import BmHsFunc128
 # from .bm_hs_func129 import BmHsFunc129
 
-# def teneva_bm_get_hs():
-#     Bms = []
-#     Bms.append(BmHsFunc001)
-#     Bms.append(BmHsFunc006)
-#     return Bms
+
+def teneva_bm_get_hs():
+    Bms = []
+    # Bms.append(BmHsFunc001)
+    # Bms.append(BmHsFunc006)
+    return Bms
