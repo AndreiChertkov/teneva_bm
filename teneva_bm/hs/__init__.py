@@ -11,10 +11,10 @@ from .bm_hs_func010 import BmHsFunc010
 from .bm_hs_func011 import BmHsFunc011
 from .bm_hs_func012 import BmHsFunc012
 from .bm_hs_func013 import BmHsFunc013
-# from .bm_hs_func014 import BmHsFunc014
-# from .bm_hs_func015 import BmHsFunc015
-# from .bm_hs_func016 import BmHsFunc016
-# from .bm_hs_func017 import BmHsFunc017
+from .bm_hs_func014 import BmHsFunc014
+from .bm_hs_func015 import BmHsFunc015
+from .bm_hs_func016 import BmHsFunc016
+from .bm_hs_func017 import BmHsFunc017
 # from .bm_hs_func018 import BmHsFunc018
 # from .bm_hs_func019 import BmHsFunc019
 # from .bm_hs_func020 import BmHsFunc020
@@ -128,9 +128,8 @@ from .bm_hs_func013 import BmHsFunc013
 # from .bm_hs_func128 import BmHsFunc128
 # from .bm_hs_func129 import BmHsFunc129
 
-
-def teneva_bm_get_hs():
-    Bms = []
-    # Bms.append(BmHsFunc001)
-    # Bms.append(BmHsFunc006)
-    return Bms
+# def teneva_bm_get_hs():
+#     Bms = []
+#     Bms.append(BmHsFunc001)
+#     Bms.append(BmHsFunc006)
+#     return Bms

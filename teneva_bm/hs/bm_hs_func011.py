@@ -18,7 +18,7 @@ class BmHsFunc011(Bm):
                 (x[0] - 5)^2 + x[1]^2 - 25
             C - equation function
                 -x[0]^2 + x[1] >= 0
-            The exact global minimum is known: x ~ [1.235, 1.525], y ~ -8.498.
+            The exact global minimum is apprx known: x ~ [1.235, 1.525], y ~ -8.498.
             Hyperparameters: 
             * The dimension d should be 
             * The mode size n may be any (default is 64)
@@ -26,8 +26,6 @@ class BmHsFunc011(Bm):
         """)
 
         self.set_grid(-10., +10.)
-        c = (1/6) * (270 + 6 * np.sqrt(2031)) ** (1/3) - (270 + 6 * np.sqrt(2031)) ** (-1/3)
-        self.set_min(x=[c, c**2], y=-8.498464223154677)
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 
     @property
@@ -41,11 +39,6 @@ class BmHsFunc011(Bm):
     @property
     def is_func(self):
         return True
-
-    @property
-    def ref(self):
-        i = [0] * self.d
-        return np.array(i, dtype=int), -1
 
     @property
     def with_constr(self):

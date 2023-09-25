@@ -49,11 +49,6 @@ class BmHsFunc008(Bm):
         return True
 
     @property
-    def ref(self):
-        i = [0] * self.d
-        return np.array(i, dtype=int), -1
-
-    @property
     def with_constr(self):
         return True
         

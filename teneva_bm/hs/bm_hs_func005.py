@@ -44,10 +44,5 @@ class BmHsFunc005(Bm):
     def is_func(self):
         return True
 
-    @property
-    def ref(self):
-        i = [0] * self.d
-        return np.array(i, dtype=int), -1
-
     def target_batch(self, X):
         return np.sin(X[:, 0] + X[:, 1]) + (X[:, 0] - X[:, 1]) ** 2 - 1.5 * X[:, 0] + 2.5 * X[:, 1] + 1

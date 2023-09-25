@@ -16,7 +16,7 @@ class BmHsFunc002(Bm):
                 x[1] | >= 3/2
             F - objective function
                 100 * (x[1] - x[0]^2)^2 + (1 - x[0])^2
-            The exact global minimum is known: x = [~1.224, 1.5], y ~ 0.05.
+            The exact global minimum is apprx known: x = [~1.224, 1.5], y ~ 0.05.
             Hyperparameters: 
             * The dimension d should be 2
             * The mode size n may be any (default is 64)
@@ -24,7 +24,6 @@ class BmHsFunc002(Bm):
         """)
 
         self.set_grid([-10., 3/2], +10.)
-        self.set_min(x=[1.224, 1.5], y=0.05042618789360708)
 
     @property
     def args_constr(self):
@@ -37,11 +36,6 @@ class BmHsFunc002(Bm):
     @property
     def is_func(self):
         return True
-
-    @property
-    def ref(self):
-        i = [0] * self.d
-        return np.array(i, dtype=int), -1
 
     def target_batch(self, X):
         return 100. * (X[:, 1] - X[:, 0] ** 2) ** 2 + (1. - X[:, 0]) ** 2
