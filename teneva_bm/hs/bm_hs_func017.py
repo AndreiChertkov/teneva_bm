@@ -26,8 +26,8 @@ class BmHsFunc017(Bm):
             * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid([-0.5, -10.], [0.5, 1.])
-        self.set_min(x=[0., 0.], y=1.)
+        self.set_grid([-0.5, -10], [0.5, 1])
+        self.set_min(x=[0, 0], y=1)
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 
     @property

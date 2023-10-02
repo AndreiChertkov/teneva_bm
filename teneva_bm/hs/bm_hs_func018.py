@@ -2,32 +2,35 @@ import numpy as np
 from teneva_bm import Bm
 
 
-class BmHsFunc016(Bm):
+class BmHsFunc018(Bm):
     def __init__(self, d=2, n=64, seed=42, name=None):
         super().__init__(d, n, seed, name)
         self.set_desc("""
-            The function 016 from the Hock & Schittkowski collection.
+            The function 018 from the Hock & Schittkowski collection.
             Continuous optimal control (OC) problem with constraints:
             .------------------------------.
             | F(x) -> min s.t. C(x) = True |
             .------------------------------.
             x - continuous control
-                x[0] | >= -0.5 | <= 0.5
-                x[1] | <= 1
+                x[0] | >= 2 | <= 50
+                x[1] | >= 0 | <= 50
             F - objective function
-                100 * (x[1] - x[0]^2)^2 + (1 - x[0])^2
-            C - equation function
-                x[0] + x[1]^2 >= 0
-                x[0]^2 + x[1] >= 0
-            The exact global minimum is known: x = [0.5, 0.25], y = 0.25.
+                (1 / 100) * x[0] ** 2 + x[1] ** 2
+            C - constraint function
+                x[0] * x[1] - 25 >= 0
+                x[0] ** 2 + x[1] ** 2 - 25 >= 0
+            The exact global minimum is known:
+                y = 5
+                x[0] = sqrt(250)
+                x[1] = sqrt(2.5)
             Hyperparameters: 
-            * The dimension d should be 
-            * The mode size n may be any (default is 64)
-            * The default limits for function inputs are [-10, 10].
+                * The dimension d should be 2
+                * The mode size n may be any (default is 64)
+                * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid([-0.5, -10], [0.5, 1])
-        self.set_min(x=[0.5, 0.25], y=0.25)
+        self.set_grid([2, 0], [50, 50])
+        self.set_min(x=[np.sqrt(250), np.sqrt(2.5)], y=5)
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 
     @property
@@ -47,8 +50,8 @@ class BmHsFunc016(Bm):
         return True
 
     def _constr_batch(self, X):
-        c_1 = -1 * (X[:, 0] + X[:, 1] ** 2)
-        c_2 = -1 * (X[:, 0] ** 2 + X[:, 1])
+        c_1 = -1 * (X[:, 0] * X[:, 1] - 25)
+        c_2 = -1 * (X[:, 0] ** 2 + X[:, 1] ** 2 - 25)
         return np.array([c_1, c_2])
 
     def constr_batch(self, X):
@@ -57,4 +60,4 @@ class BmHsFunc016(Bm):
         return c
 
     def target_batch(self, X):
-        return 100 * (X[:, 1] - X[:, 0] ** 2) ** 2 + (1 - X[:, 0]) ** 2
+        return (1 / 100) * X[:, 0] ** 2 + X[:, 1] ** 2

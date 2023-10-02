@@ -28,7 +28,7 @@ class BmHsFunc014(Bm):
             * The mode size n may be any (default is 64)
             * The default limits for function inputs are [-10, 10].
         """)
-        self.set_grid(-10., +10.)
+        self.set_grid([-10, -10], [+10, +10])
         self.set_min(
             x=[0.5 * (np.sqrt(7) - 1), 0.25 * (np.sqrt(7) + 1)], 
             y=(9 - 2.875 * np.sqrt(7))

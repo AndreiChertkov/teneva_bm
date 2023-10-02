@@ -15,17 +15,20 @@ class BmHsFunc012(Bm):
                 x[0]
                 x[1]
             F - objective function
-                0.5 * x[0]^2 + x[1]^2 - x[0] * x[1] - 7 * x[0] - 7 * x[1]
+                0.5 * x[0] ** 2 + x[1] ** 2 - x[0] * x[1] - 7 * x[0] - 7 * x[1]
             C - equation function
-                25 - 4 * x[0]^2 - x[1]^2 >= 0
-            The exact global minimum is known: x = [2, 3], y = -30.
+                25 - 4 * x[0] ** 2 - x[1] ** 2 >= 0
+            The exact global minimum is known: 
+                y = -30
+                x[0] = 2
+                x[1] = 3
             Hyperparameters: 
-            * The dimension d should be 
+            * The dimension d should be 2
             * The mode size n may be any (default is 64)
             * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid(-10., +10.)
+        self.set_grid([-10, -10], [+10, +10])
         self.set_min(x=[2, 3], y=-30)
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 

@@ -15,46 +15,48 @@ from .bm_hs_func014 import BmHsFunc014
 from .bm_hs_func015 import BmHsFunc015
 from .bm_hs_func016 import BmHsFunc016
 from .bm_hs_func017 import BmHsFunc017
-# from .bm_hs_func018 import BmHsFunc018
-# from .bm_hs_func019 import BmHsFunc019
-# from .bm_hs_func020 import BmHsFunc020
-# from .bm_hs_func021 import BmHsFunc021
-# from .bm_hs_func022 import BmHsFunc022
-# from .bm_hs_func023 import BmHsFunc023
-# from .bm_hs_func024 import BmHsFunc024
-# from .bm_hs_func025 import BmHsFunc025
-# from .bm_hs_func026 import BmHsFunc026
-# from .bm_hs_func027 import BmHsFunc027
-# from .bm_hs_func028 import BmHsFunc028
-# from .bm_hs_func029 import BmHsFunc029
-# from .bm_hs_func030 import BmHsFunc030
-# from .bm_hs_func031 import BmHsFunc031
-# from .bm_hs_func032 import BmHsFunc032
-# from .bm_hs_func033 import BmHsFunc033
-# from .bm_hs_func034 import BmHsFunc034
-# from .bm_hs_func035 import BmHsFunc035
-# from .bm_hs_func036 import BmHsFunc036
-# from .bm_hs_func037 import BmHsFunc037
-# from .bm_hs_func038 import BmHsFunc038
-# from .bm_hs_func039 import BmHsFunc039
-# from .bm_hs_func040 import BmHsFunc040
-# from .bm_hs_func041 import BmHsFunc041
-# from .bm_hs_func042 import BmHsFunc042
-# from .bm_hs_func043 import BmHsFunc043
-# from .bm_hs_func044 import BmHsFunc044
-# from .bm_hs_func045 import BmHsFunc045
-# from .bm_hs_func046 import BmHsFunc046
-# from .bm_hs_func047 import BmHsFunc047
-# from .bm_hs_func048 import BmHsFunc048
-# from .bm_hs_func049 import BmHsFunc049
-# from .bm_hs_func050 import BmHsFunc050
-# from .bm_hs_func051 import BmHsFunc051
-# from .bm_hs_func052 import BmHsFunc052
-# from .bm_hs_func053 import BmHsFunc053
-# from .bm_hs_func054 import BmHsFunc054
-# from .bm_hs_func055 import BmHsFunc055
-# from .bm_hs_func056 import BmHsFunc056
-# from .bm_hs_func057 import BmHsFunc057
+from .bm_hs_func018 import BmHsFunc018
+from .bm_hs_func019 import BmHsFunc019
+from .bm_hs_func020 import BmHsFunc020
+from .bm_hs_func021 import BmHsFunc021
+from .bm_hs_func022 import BmHsFunc022
+from .bm_hs_func023 import BmHsFunc023
+from .bm_hs_func024 import BmHsFunc024
+from .bm_hs_func025 import BmHsFunc025
+from .bm_hs_func026 import BmHsFunc026
+from .bm_hs_func027 import BmHsFunc027
+from .bm_hs_func028 import BmHsFunc028
+from .bm_hs_func029 import BmHsFunc029
+from .bm_hs_func030 import BmHsFunc030
+from .bm_hs_func031 import BmHsFunc031
+from .bm_hs_func032 import BmHsFunc032
+from .bm_hs_func033 import BmHsFunc033
+from .bm_hs_func034 import BmHsFunc034
+from .bm_hs_func035 import BmHsFunc035
+from .bm_hs_func036 import BmHsFunc036
+from .bm_hs_func037 import BmHsFunc037
+from .bm_hs_func038 import BmHsFunc038
+from .bm_hs_func039 import BmHsFunc039
+from .bm_hs_func040 import BmHsFunc040
+from .bm_hs_func041 import BmHsFunc041
+from .bm_hs_func042 import BmHsFunc042
+from .bm_hs_func043 import BmHsFunc043
+from .bm_hs_func044 import BmHsFunc044
+from .bm_hs_func045 import BmHsFunc045
+from .bm_hs_func046 import BmHsFunc046
+from .bm_hs_func047 import BmHsFunc047
+from .bm_hs_func048 import BmHsFunc048
+from .bm_hs_func049 import BmHsFunc049
+from .bm_hs_func050 import BmHsFunc050
+from .bm_hs_func051 import BmHsFunc051
+from .bm_hs_func052 import BmHsFunc052
+from .bm_hs_func053 import BmHsFunc053
+from .bm_hs_func054_1 import BmHsFunc054_1
+from .bm_hs_func054_2 import BmHsFunc054_2
+from .bm_hs_func054_3 import BmHsFunc054_3
+from .bm_hs_func055 import BmHsFunc055
+from .bm_hs_func056 import BmHsFunc056
+from .bm_hs_func057 import BmHsFunc057
 # from .bm_hs_func058 import BmHsFunc058
 # from .bm_hs_func059 import BmHsFunc059
 # from .bm_hs_func060 import BmHsFunc060

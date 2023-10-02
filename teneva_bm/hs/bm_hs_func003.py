@@ -15,16 +15,19 @@ class BmHsFunc003(Bm):
                 x[0]
                 x[1] | >= 0
             F - objective function
-                x[1] + 0.00001 * (x[1] - x[0])^2
-            The exact global minimum is known: x = [0, 0], y = 0.
+                x[1] + 0.00001 * (x[1] - x[0]) ** 2
+            The exact global minimum is known: 
+                y = 0
+                x[0] = 0
+                x[1] = 0
             Hyperparameters: 
             * The dimension d should be 2
             * The mode size n may be any (default is 64)
             * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid([-10., 0.], +10.)
-        self.set_min(x=0., y=0.)
+        self.set_grid([-10, 0], [+10, +10])
+        self.set_min(x=0, y=0)
 
     @property
     def args_constr(self):

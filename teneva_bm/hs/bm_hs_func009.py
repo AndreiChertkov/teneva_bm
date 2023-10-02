@@ -18,15 +18,18 @@ class BmHsFunc009(Bm):
                 sin(4 * atan(1) * x[0] / 12) * cos(4 * atan(1) * x[1] / 16)
             C - equation function
                 4 * x[0] - 3 * x[1] = 0
-            The exact global minimum is known: x = [-3, -4], y = -0.5.
+            The exact global minimum is known: 
+                y = -0.5
+                x[0] = -3
+                x[1] = -4
             Hyperparameters: 
             * The dimension d should be 2
             * The mode size n may be any (default is 64)
             * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid(-10., +10.)
-        self.set_min(x=[-3., -4.], y=-0.5)
+        self.set_grid([-10, -10], [+10, +10])
+        self.set_min(x=[-3, -4], y=-0.5)
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 
     @property

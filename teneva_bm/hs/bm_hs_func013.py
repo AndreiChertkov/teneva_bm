@@ -15,18 +15,21 @@ class BmHsFunc013(Bm):
                 x[0] | >= 0
                 x[1] | >= 0
             F - objective function
-                (x[0] - 2)^2 + x[1]^2
+                (x[0] - 2) ** 2 + x[1] ** 2
             C - equation function
-                (1 - x[0])^3 - x[1] >= 0
-            The exact global minimum is known: x = [1, 0], y = 1.
+                (1 - x[0]) ** 3 - x[1] >= 0
+            The exact global minimum is known: 
+                y = 1
+                x[0] = 1
+                x[1] = 0
             Hyperparameters: 
-            * The dimension d should be 
+            * The dimension d should be 2
             * The mode size n may be any (default is 64)
             * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid(0., +10.)
-        self.set_min(x=[1., 0.], y=1.)
+        self.set_grid([0, 0], [+10, +10])
+        self.set_min(x=[1, 0], y=1)
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
 
     @property

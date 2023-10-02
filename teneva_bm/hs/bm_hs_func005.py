@@ -15,18 +15,18 @@ class BmHsFunc005(Bm):
                 x[0] >= -1.5 | <= 4
                 x[1] >= -3   | <= 3
             F - objective function
-                sin(x[0] + x[1]) + (x[0] - x[1])^2 - 1.5*x[0] + 2.5*x[1] + 1
+                sin(x[0] + x[1]) + (x[0] - x[1]) ** 2 - 1.5 * x[0] + 2.5 * x[1] + 1
             The exact global minimum is known: 
-                x[0] = -pi/3 + 1/2 ~ -0.547
-                x[1] = -pi/3 - 1/2 ~ -1.547
-                y = -sqrt(3)/2 - pi/3 ~ -1.913.
+                y = -sqrt(3)/2 - pi/3
+                x[0] = -pi/3 + 1/2
+                x[1] = -pi/3 - 1/2
             Hyperparameters: 
             * The dimension d should be 2
             * The mode size n may be any (default is 64)
             * The default limits for function inputs are [-10, 10].
         """)
         
-        self.set_grid([-1.5, -3.], [+4., +3.])
+        self.set_grid([-1.5, -3], [+4, +3])
         self.set_min(
             x=[-np.pi/3 + 0.5, -np.pi/3 - 0.5], 
             y=(-np.sqrt(3)/2 - np.pi/3)
