@@ -2,7 +2,7 @@ import numpy as np
 from teneva_bm import Bm
 
 
-class BmHsFunc054_1(Bm):
+class BmHsFunc054(Bm):
     def __init__(self, d=6, n=64, seed=42, name=None):
         super().__init__(d, n, seed, name)
         self.set_desc("""
@@ -12,12 +12,12 @@ class BmHsFunc054_1(Bm):
             | F(x | t) -> min s.t. C(x) = True |
             .----------------------------------.
             x - continuous control
-                x[0] | >= 0 | <= 20000
+                x[0] | >= 0   | <= 20000
                 x[1] | >= -10 | <= 10
-                x[2] | >= 0 | <= 10000000
-                x[3] | >= 0 | <= 20
-                x[4] | >= -1 | <= 1
-                x[5] | >= 0 | <= 200000000
+                x[2] | >= 0   | <= 10000000
+                x[3] | >= 0   | <= 20
+                x[4] | >= -1  | <= 1
+                x[5] | >= 0   | <= 200000000
             t - intermediates
                 y[0] = (x[0] - 10000) / 8000
                 y[1] = (x[1] - 1) / 1
@@ -27,9 +27,8 @@ class BmHsFunc054_1(Bm):
                 y[5] = (x[5] - 100000000) / 500000000
                 h1 = (y[0] ** 2 + y[0] * y[1] * 2 / 5 + y[1] ** 2) * 25 / 24
                 h2 = y[2] ** 2 + y[3] ** 2 + y[4] ** 2 + y[5] ** 2
-                mf = -exp(-(h1 + h2) / 2)
             F - objective function
-                mf
+                -exp(-(h1 + h2) / 2)
             C - constraint function
                 x[0] + 4000 * x[1] - 17600 = 0
             The exact global minimum is known:
@@ -66,10 +65,7 @@ class BmHsFunc054_1(Bm):
     def with_constr(self):
         return True
 
-    def constr_batch(self, X):
-        return np.abs(X[:, 0] + 4000 * X[:, 1] - 17600)
-
-    def target_batch(self, X):
+    def intermediates(self, X):        
         y = np.zeros_like(X)
         y[:, 0] = (X[:, 0] - 10000) / 8000
         y[:, 1] = (X[:, 1] - 1) / 1
@@ -79,5 +75,11 @@ class BmHsFunc054_1(Bm):
         y[:, 5] = (X[:, 5] - 100000000) / 500000000
         h1 = (y[:, 0] ** 2 + y[:, 0] * y[:, 1] * 2 / 5 + y[:, 1] ** 2) * 25 / 24
         h2 = y[:, 2] ** 2 + y[:, 3] ** 2 + y[:, 4] ** 2 + y[:, 5] ** 2
-        obj = -np.exp(-(h1 + h2) / 2)
-        return obj
+        return h1, h2
+
+    def constr_batch(self, X):
+        return np.abs(X[:, 0] + 4000 * X[:, 1] - 17600)
+
+    def target_batch(self, X):
+        h1, h2 = self.intermediates(X)
+        return -np.exp(-(h1 + h2) / 2)

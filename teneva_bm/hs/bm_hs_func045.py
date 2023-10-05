@@ -12,11 +12,11 @@ class BmHsFunc045(Bm):
             | F(x) -> min |
             .-------------.
             x - continuous control
-                x[0] | <= 1
-                x[1] | <= 2
-                x[2] | <= 3
-                x[3] | <= 4
-                x[4] | <= 5
+                x[0] | >= 0 | <= 1
+                x[1] | >= 0 | <= 2
+                x[2] | >= 0 | <= 3
+                x[3] | >= 0 | <= 4
+                x[4] | >= 0 | <= 5
             F - objective function
                 2 - (1 / 120) * x[0] * x[1] * x[2] * x[3] * x[4]
             The exact global minimum is known:
@@ -32,7 +32,7 @@ class BmHsFunc045(Bm):
                 * The default limits for function inputs are [-10, 10].
         """)
 
-        self.set_grid([-10, -10, -10, -10, -10], [1, 2, 3, 4, 5])
+        self.set_grid([0, 0, 0, 0, 0], [1, 2, 3, 4, 5])
         self.set_min(x=[1, 2, 3, 4, 5], y=1)
 
     @property

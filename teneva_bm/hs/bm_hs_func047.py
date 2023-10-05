@@ -24,12 +24,12 @@ class BmHsFunc047(Bm):
                 x[1] - x[2] ** 2 + x[3] - 1 = 0
                 x[0] * x[4] - 1 = 0
             The exact global minimum is approx. known:
-                y ~ -0.027
-                x[0] ~ 0.677
-                x[1] ~ 0.726
-                x[2] ~ 1.215
-                x[3] ~ 1.751
-                x[4] ~ 1.477
+                y ~= -0.027
+                x[0] ~= 0.677
+                x[1] ~= 0.726
+                x[2] ~= 1.215
+                x[3] ~= 1.751
+                x[4] ~= 1.477
             Hyperparameters: 
                 * The dimension d should be 5
                 * The mode size n may be any (default is 64)

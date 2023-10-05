@@ -16,10 +16,10 @@ class BmHsFunc002(Bm):
                 x[1] | >= 3/2
             F - objective function
                 100 * (x[1] - x[0] ** 2) ** 2 + (1 - x[0]) ** 2
-            The exact global minimum is apprx known: 
-                y ~ 0.05
-                x[0] ~1.224
-                x[1] ~ 1.5]
+            The exact global minimum is approx. known: 
+                y ~= 0.05
+                x[0] ~= 1.224
+                x[1] ~= 1.5
             Hyperparameters: 
             * The dimension d should be 2
             * The mode size n may be any (default is 64)

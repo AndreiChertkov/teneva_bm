@@ -12,7 +12,11 @@ class BmHsFunc052(Bm):
             | F(x) -> min s.t. C(x) = True |
             .------------------------------.
             x - continuous control
-                x[0:4]
+                x[0]
+                x[1]
+                x[2]
+                x[3]
+                x[4]
             F - objective function
                 (4 * x[0] - x[1]) ** 2 + (x[1] + x[2] - 2) ** 2 + (x[3] - 1) ** 2 + (x[4] - 1) ** 2
             C - constraint function

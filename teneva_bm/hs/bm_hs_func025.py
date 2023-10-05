@@ -19,9 +19,9 @@ class BmHsFunc025(Bm):
                 x[1] | >= 0   | <= 25.6
                 x[2] | >= 0   | <= 5
             t - intermediates
-                f = (-1 / 100) * ai + np.exp(-1 / x[0]) * (u - x[1]) ** x[2]
+                t = (-1 / 100) * ai + np.exp(-1 / x[0]) * (u - x[1]) ** x[2]
             F - objective function
-                (f ** 2).sum()
+                (t ** 2).sum()
             The exact global minimum is known:
                 y = 0
                 x[0] = 50
@@ -35,7 +35,7 @@ class BmHsFunc025(Bm):
 
         self.set_grid([0.1, 0, 0], [100, 25.6, 5])
         self.set_min(x=[50, 25, 1.5], y=0)
-        self.parameters = self.set_parameters()
+        self.set_parameters()
 
     @property
     def args_constr(self):
@@ -49,15 +49,16 @@ class BmHsFunc025(Bm):
     def is_func(self):
         return True
 
-    def set_parameters(self):
+    def set_parameters(self): 
         ai = np.arange(1, 99)
         u = 25 + (-50 * np.log(ai / 100)) ** (2 / 3)
-        return {'ai': ai, 'u': u}
+        self.parameters = {'ai': ai, 'u': u}
     
+    def intermediates(self, X):        
+        t = (-1 / 100) * self.parameters['ai'] + np.exp(-1 / X[:, 0])[:, None] * \
+            (self.parameters['u'][None, :] - X[:, 1][:, None]) ** X[:, 2][:, None]    
+        return t
+
     def target_batch(self, X):
-        f_1 = (-1 / 100) * self.parameters['ai']
-        f_2 = np.exp(-1 / X[:, 0])
-        f_3 = (self.parameters['u'][None, :] - X[:, 1][:, None]) ** X[:, 2][:, None]    
-        f = f_1 + f_2[:, None] * f_3  
-        obj = (f ** 2).sum(-1)
-        return obj
+        t = self.intermediates(X)
+        return (t ** 2).sum(-1)

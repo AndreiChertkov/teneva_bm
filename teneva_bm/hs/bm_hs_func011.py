@@ -18,10 +18,10 @@ class BmHsFunc011(Bm):
                 (x[0] - 5) ** 2 + x[1] ** 2 - 25
             C - equation function
                 -x[0] ** 2 + x[1] >= 0
-            The exact global minimum is apprx known: 
-                y ~ -8.498
-                x[0] ~ 1.235
-                x[1] ~ 1.525
+            The exact global minimum is approx. known: 
+                y ~= -8.498
+                x[0] ~= 1.235
+                x[1] ~= 1.525
             Hyperparameters: 
             * The dimension d should be 2
             * The mode size n may be any (default is 64)
