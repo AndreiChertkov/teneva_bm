@@ -65,8 +65,8 @@ from .bm_hs_func064 import BmHsFunc064
 from .bm_hs_func065 import BmHsFunc065
 from .bm_hs_func066 import BmHsFunc066
 from .bm_hs_func067 import BmHsFunc067
-# from .bm_hs_func068 import BmHsFunc068
-# from .bm_hs_func069 import BmHsFunc069
+from .bm_hs_func068 import BmHsFunc068
+from .bm_hs_func069 import BmHsFunc069
 from .bm_hs_func070 import BmHsFunc070
 from .bm_hs_func071 import BmHsFunc071
 from .bm_hs_func072 import BmHsFunc072
@@ -79,32 +79,25 @@ from .bm_hs_func078 import BmHsFunc078
 from .bm_hs_func079 import BmHsFunc079
 from .bm_hs_func080 import BmHsFunc080
 from .bm_hs_func081 import BmHsFunc081
-# from .bm_hs_func082 import BmHsFunc082
+# from .bm_hs_func082 import BmHsFunc082 # doesn't exist
 from .bm_hs_func083 import BmHsFunc083
 from .bm_hs_func084 import BmHsFunc084
 from .bm_hs_func085 import BmHsFunc085
 from .bm_hs_func086 import BmHsFunc086
-# from .bm_hs_func087 import BmHsFunc087
-# from .bm_hs_func088 import BmHsFunc088
-# from .bm_hs_func089 import BmHsFunc089
-# from .bm_hs_func090 import BmHsFunc090
-# from .bm_hs_func091 import BmHsFunc091
-# from .bm_hs_func092 import BmHsFunc092
+from .bm_hs_func087 import BmHsFunc087
+from .bm_hs_func088 import BmHsFunc088
+from .bm_hs_func089 import BmHsFunc089
+from .bm_hs_func090 import BmHsFunc090
+from .bm_hs_func091 import BmHsFunc091
+from .bm_hs_func092 import BmHsFunc092
 from .bm_hs_func093 import BmHsFunc093
-# from .bm_hs_func094 import BmHsFunc094
+# from .bm_hs_func094 import BmHsFunc094 # doesn't exist
 from .bm_hs_func095 import BmHsFunc095
 from .bm_hs_func096 import BmHsFunc096
 from .bm_hs_func097 import BmHsFunc097
 from .bm_hs_func098 import BmHsFunc098
 from .bm_hs_func099 import BmHsFunc099
 from .bm_hs_func100 import BmHsFunc100
-
-
-
-
-
-
-
 # from .bm_hs_func101 import BmHsFunc101
 # from .bm_hs_func102 import BmHsFunc102
 # from .bm_hs_func103 import BmHsFunc103
