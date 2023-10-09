@@ -98,38 +98,32 @@ from .bm_hs_func097 import BmHsFunc097
 from .bm_hs_func098 import BmHsFunc098
 from .bm_hs_func099 import BmHsFunc099
 from .bm_hs_func100 import BmHsFunc100
-# from .bm_hs_func101 import BmHsFunc101
-# from .bm_hs_func102 import BmHsFunc102
-# from .bm_hs_func103 import BmHsFunc103
-# from .bm_hs_func104 import BmHsFunc104
-# from .bm_hs_func105 import BmHsFunc105
-# from .bm_hs_func106 import BmHsFunc106
-# from .bm_hs_func107 import BmHsFunc107
-# from .bm_hs_func108 import BmHsFunc108
-# from .bm_hs_func109 import BmHsFunc109
-# from .bm_hs_func110 import BmHsFunc110
-# from .bm_hs_func111 import BmHsFunc111
-# from .bm_hs_func112 import BmHsFunc112
-# from .bm_hs_func113 import BmHsFunc113
-# from .bm_hs_func114 import BmHsFunc114
+from .bm_hs_func101 import BmHsFunc101
+from .bm_hs_func102 import BmHsFunc102
+from .bm_hs_func103 import BmHsFunc103
+from .bm_hs_func104 import BmHsFunc104
+from .bm_hs_func105 import BmHsFunc105
+from .bm_hs_func106 import BmHsFunc106
+from .bm_hs_func107 import BmHsFunc107
+from .bm_hs_func108 import BmHsFunc108
+from .bm_hs_func109 import BmHsFunc109
+from .bm_hs_func110 import BmHsFunc110
+from .bm_hs_func111 import BmHsFunc111
+from .bm_hs_func112 import BmHsFunc112
+from .bm_hs_func113 import BmHsFunc113
+from .bm_hs_func114 import BmHsFunc114
 # from .bm_hs_func115 import BmHsFunc115
-# from .bm_hs_func116 import BmHsFunc116
-# from .bm_hs_func117 import BmHsFunc117
-# from .bm_hs_func118 import BmHsFunc118
-# from .bm_hs_func119 import BmHsFunc119
-# from .bm_hs_func120 import BmHsFunc120
-# from .bm_hs_func121 import BmHsFunc121
-# from .bm_hs_func122 import BmHsFunc122
-# from .bm_hs_func123 import BmHsFunc123
-# from .bm_hs_func124 import BmHsFunc124
-# from .bm_hs_func125 import BmHsFunc125
-# from .bm_hs_func126 import BmHsFunc126
-# from .bm_hs_func127 import BmHsFunc127
-# from .bm_hs_func128 import BmHsFunc128
-# from .bm_hs_func129 import BmHsFunc129
-
-# def teneva_bm_get_hs():
-#     Bms = []
-#     Bms.append(BmHsFunc001)
-#     Bms.append(BmHsFunc006)
-#     return Bms
+from .bm_hs_func116 import BmHsFunc116
+from .bm_hs_func117 import BmHsFunc117
+from .bm_hs_func118 import BmHsFunc118
+from .bm_hs_func119 import BmHsFunc119
+from .bm_hs_func120 import BmHsFunc120
+# from .bm_hs_func121 import BmHsFunc121 # the same as 120
+from .bm_hs_func122 import BmHsFunc122
+# from .bm_hs_func123 import BmHsFunc123 # the same as 122
+from .bm_hs_func124 import BmHsFunc124
+# from .bm_hs_func125 import BmHsFunc125 # the same as 124
+from .bm_hs_func126 import BmHsFunc126
+from .bm_hs_func127 import BmHsFunc127
+from .bm_hs_func128 import BmHsFunc128
+# from .bm_hs_func129 import BmHsFunc129 # the same as 120
