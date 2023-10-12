@@ -20,7 +20,7 @@ Benchmarks library, based on the software product [teneva](https://github.com/An
     wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_all.py
     python install_all.py --env ENV_NAME --silent
     ```
-    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_all.py` is rather complicated. You can find mode details for using this script in the header of the file.
+    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_all.py` is rather complicated. You can find mode details for using this script in the header of the file. If you have problems downloading the script via vget, you can download it manually from the root folder of the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm).
 
 3. To run benchmark optimization examples (see `demo/opti_*.py` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer:
     ```bash
@@ -92,6 +92,8 @@ The class constructor of all benchmarks has the following optional arguments:
 
 - `seed`- the random seed (default is `42`). Note that we use `Random Generator` from numpy (i.e., `numpy.random.default_rng(seed)`) and for a fixed value of the seed, the behavior of the benchmark will always be the same, however, not all benchmarks depend on a seed.
 
+- `name`- the display name for benchmark. By default, the class name without `Bm` prefix is used.
+
 - `...other arguments...` - some benchmarks have additional optional arguments, which are described in the corresponding python files (and in the info text).
 
 ##### Setting advanced options
@@ -108,7 +110,7 @@ Before calling the `bm.prep()` method, you can optionally set a number of additi
 
 - `bm.set_min(i=None, x=None, y=None)` - the same as in the previous point, but for the global minimum.
 
-- `bm.set_log(log=False, cond='min-max', step=1000, prefix='bm', with_min=True, with_max=True)` - when calling this function with the `True` argument `log`, the log will be printed while requests to benchmark. You may set the log codition `cond` (`min`, `max`, `max-min` or `step`; e.g., in the case `min` the log will be presented each time the `min` value is updated), the log step (for condition `step`) and a string `prefix` for the log. You can also disable the display of current minimum values (`with_min`) or maximum values (`with_max`) in the log string. Note that you can provide as `log` argument some print-like function, e.g., `log=print`, in this case, printing will occur not to the console, but to the corresponding function.
+- `bm.set_log(log=False, cond=None, step=1000, prefix='bm', with_min=None, with_max=None)` - when calling this function with the `True` argument `log`, the log will be printed while requests to benchmark. You may set the log codition `cond` (`min`, `max`, `max-min` or `step`; e.g., in the case `min` the log will be presented each time the `min` value is updated), the log step (for condition `step`) and a string `prefix` for the log. You can also disable the display of current minimum values (`with_min`) or maximum values (`with_max`) in the log string. Note that you can provide as `log` argument some print-like function, e.g., `log=print`, in this case, printing will occur not to the console, but to the corresponding function. If `cond`, `with_min` and `with_max` are not set, then the logs will correspond to an improvement in the optimization result, taking into account the type of benchmark (max/min).
 
 - `bm.set_cache(with_cache=False, cache=None, m_max=1.E+8)` - when calling this function with the `True` argument `with_cache`, the cache will be used, that is, all the values requested from the benchmark will be saved and when the same multi-indices are accessed again, the values will be retrieved from the cache instead of explicitly calculating the objective function. Additionally, you can optionally pass as an argument `cache` an already existing cache in the form of a dictionary (the keys are multi-indices in the form of tuples, and the values are the corresponding values of the objective function). We especially note that the cache is only used when querying benchmark values in discrete multi-indices; for requested continuous points, no cache will be used. It is also important to note that no cache will be used for matching multi-indices in the same requested batch of values. Optionally, you can set `m_max` argument that specifies the maximum cache size. If the size is exceeded, the cache will be cleared and a corresponding warning will be displayed in the log. Note that when the `bm.init` method is called, the cache is always reset to zero.
 
@@ -128,7 +130,7 @@ print(bm[I]) # you can use the alias "bm.get(I)"
 ```
 Note that the `get` method can be used instead of `[ ]` notation, for example, if it is necessary to pass somewhere a function that calculates benchmark values.
 
-Since the considered benchmark (`BmFuncAckley`) corresponds to a function of a continuous argument, above we calculated the values for the discretization of the function on an automatically selected grid. Additionally, we can calculate values at continuous points by analogy:
+Since the considered benchmark (`BmFuncAckley`) corresponds to a function of a continuous argument, above we calculated the values for the discretization of the function on an automatically selected grid (see `bm.set_grid` method). Additionally, we can calculate values at continuous points by analogy:
 ```python
 # Get value at point x:
 x = np.ones(bm.d) * 0.42
@@ -164,13 +166,13 @@ During requests to the benchmark, that is, when calling functions `bm[]` (or `bm
 
 - `bm.time_calc` - total time in seconds spent on calculating the benchmark values (the time spent on cache accesses is also taken into account).
 
-- `bm.time_full` - benchmark lifetime in seconds from the moment of initialization (i.e., the call to `bm.init` method).
+- `bm.time_full` - benchmark lifetime in seconds from the moment of initialization (i.e., the call to `bm.init` method, which is called automatically when creating a benchmark or can then be called manually to reset the query history).
 
 - `bm.y_list` - a list of all sequentially calculated benchmark values (results of cache accesses are not added to the list).
 
 - `bm.y_list_full` - a list of all sequentially calculated benchmark values including the cache requests.
 
-- `bm.i_max`, `bm.x_max`, `bm.y_max` - a discrete multi-index, a continuous multi-dimensional point, and benchmark values corresponding to the maximum of all requested values. Note that for the case of a discrete function, the value of `x_max` will be `None`, and for the case of a continuous function, the values of `i_max` and `x_max` will correlate, while if requests were made for continuous points, then `x_max` will correspond to the exact position of the point, and `i_max` will be the nearest multi-index of the used discrete grid.
+- `bm.i_max`, `bm.x_max`, `bm.y_max` - a discrete multi-index, a continuous multi-dimensional point, and benchmark's value corresponding to the maximum of all requested values. Note that for the case of a discrete function, the value of `x_max` will be `None`, and for the case of a continuous function, the values of `i_max` and `x_max` will correlate, while if requests were made for continuous points, then `x_max` will correspond to the exact position of the point, and `i_max` will be the nearest multi-index of the used discrete grid.
 
 - `bm.i_min`, `bm.x_min`, `bm.y_min` - same as in the previous point, but for the minimum value.
 
