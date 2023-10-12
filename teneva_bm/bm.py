@@ -42,13 +42,13 @@ class Bm:
 
     @property
     def args(self):
-        """Dict with values of benchmark's arguments (i.e., main parameters)."""
+        """Dict with values of benchmark's arguments (i.e., main params)."""
         return self.build_dict(self.args_info)
 
     @property
     def args_constr(self):
         """Dict with constraints on the benchmark's arguments."""
-        # Note that constraints should be number, list (enum)  or "equal".
+        # Note that constraints should be number, list (enum) or "equal".
         return {}
 
     @property
@@ -1372,9 +1372,9 @@ class BmBudgetOverException(Exception):
         self.m = m
         self.is_cache = is_cache
 
+        self.message = 'Computation budget '
         if self.is_cache:
-            self.message = f'Computation budget for cache (m={self.m}) exceeded'
-        else:
-            self.message = f'Computation budget (m={self.m}) exceeded'
+            self.message += 'for cache '
+        self.message += f'(m={self.m}) exceeded'
 
         super().__init__(self.message)
