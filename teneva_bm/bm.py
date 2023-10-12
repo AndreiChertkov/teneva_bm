@@ -1210,8 +1210,8 @@ class Bm:
 
         self.grid_kind = kind
 
-    def set_log(self, log=False, cond='max-min', step=1000, prec=3, prefix='bm',
-                with_max=True, with_min=True, log_wrn=None):
+    def set_log(self, log=False, cond=None, step=1000, prec=3, prefix='bm',
+                with_max=None, with_min=None, log_wrn=None):
         """Set the log options. The "log" may be bool or print-like function."""
         if log:
             self.with_log = True
@@ -1225,6 +1225,8 @@ class Bm:
         else:
             self.log_wrn = print
 
+        if cond is None:
+            cond = 'max' if self.is_opti_max else 'min'
         if not cond in ['min', 'max', 'min-max', 'max-min', 'step']:
             raise ValueError(f'Invalid "cond" argument "{cond}"')
 
@@ -1232,8 +1234,16 @@ class Bm:
         self.log_step = int(step) if step else None
         self.log_prec = int(prec)
         self.log_prefix = prefix
-        self.log_with_max = with_max
-        self.log_with_min = with_min
+
+        if with_max is None:
+            self.log_with_max = self.is_opti_max
+        else:
+            self.log_with_max = with_max
+
+        if with_min is None:
+            self.log_with_min = self.is_opti_min
+        else:
+            self.log_with_min = with_min
 
     def set_max(self, i=None, x=None, y=None):
         """Set exact (real) global maximum (index, point and related value)."""
