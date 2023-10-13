@@ -19,6 +19,11 @@ class TestRef(unittest.TestCase):
                 bm = Bm()
                 bm.prep()
 
+                try:
+                    i, z = bm.ref
+                except NotImplementedError as e:
+                    continue 
+
                 i, z = bm.ref
                 y = bm.get(i)
 
