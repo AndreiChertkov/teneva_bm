@@ -27,14 +27,14 @@ class BmHsFunc025(Bm):
                 x[0] = 50
                 x[1] = 25
                 x[2] = 1.5
-            Hyperparameters: 
+            Hyperparameters:
                 * The dimension d should be 3
                 * The mode size n may be any (default is 64)
                 * The default limits for function inputs are [-10, 10].
         """)
 
         self.set_grid([0.1, 0, 0], [100, 25.6, 5])
-        self.set_min(x=[50, 25, 1.5], y=0)
+        # self.set_min(x=[50, 25, 1.5], y=0)
         self.set_parameters()
 
     @property
@@ -49,16 +49,23 @@ class BmHsFunc025(Bm):
     def is_func(self):
         return True
 
-    def set_parameters(self): 
+    def set_parameters(self):
         ai = np.arange(1, 99)
         u = 25 + (-50 * np.log(ai / 100)) ** (2 / 3)
         self.parameters = {'ai': ai, 'u': u}
-    
-    def intermediates(self, X):        
+
+    def intermediates(self, X):
         t = (-1 / 100) * self.parameters['ai'] + np.exp(-1 / X[:, 0])[:, None] * \
-            (self.parameters['u'][None, :] - X[:, 1][:, None]) ** X[:, 2][:, None]    
+            (self.parameters['u'][None, :] - X[:, 1][:, None]) ** X[:, 2][:, None]
         return t
 
     def target_batch(self, X):
         t = self.intermediates(X)
         return (t ** 2).sum(-1)
+
+
+if __name__ == '__main__':
+    bm = BmHsFunc025()
+    bm.prep()
+    y = bm(bm.x_min_real)
+    print(y, bm.y_min_real)
