@@ -53,7 +53,7 @@ We prepare some demo scripts with benchmark usage and optimization examples in t
 
 - `func_fix` - a collection of analytic functions of a real multidimensional argument having the fixed dimension. The collection includes the following benchmarks: `BmFuncFixBiggs` (`d = 5`), `BmFuncFixCantrell` (`d = 4`), `BmFuncFixColville` (`d = 4`), `BmFuncFixDolan` (`d = 5`), `BmFuncFixPiston` (`d=7`).
 
-- `hs` (draft!) - the [Hock & Schittkowski](http://apmonitor.com/wiki/index.php/Apps/HockSchittkowski) collection of benchmark functions, containing continuous analytic functions of small dimensions (`2-5`), some of which have given constraints. The collection includes the following benchmarks: `empty now`.
+- `hs` - the [Hock & Schittkowski](http://apmonitor.com/wiki/index.php/Apps/HockSchittkowski) collection of benchmark functions, containing continuous analytic functions of small dimensions (`2-5` for almost all problems), some of which have given constraints (`= 0` and/or `> 0`). The collection includes the following benchmarks: `BmHsFunc001`, `BmHsFunc002`, ..., `BmHsFunc128` (except `BmHsFunc082`, `BmHsFunc094`, `BmHsFunc115`, `BmHsFunc121`, `BmHsFunc123`, `BmHsFunc125` which do not exist).
 
 - `odeoc` - a collection of optimal control problems described by ordinary differential equations (ODEs), some of the problems have explicit restrictions on the elements of the control vector. The collection includes the following benchmarks: `BmOdeocSimple`, `BmOdeocSimpleConstr`.
 
