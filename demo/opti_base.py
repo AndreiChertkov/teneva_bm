@@ -1,6 +1,6 @@
 """Basic benchmark optimization example.
 
-We are looking for a global minimum for benchmark "BmQuboFixKnapDet" using a
+We are looking for a global minimum for benchmark "BmQuboFixKnap100" using a
 gradient-free PROTES optimizer. The benchmark dimension ("d"; note that it may
 be 10, 20, 50, 80 and 100 for the selected benchark) and budget ("m") are given
 as function "demo" arguments. To run the code use the following command:
