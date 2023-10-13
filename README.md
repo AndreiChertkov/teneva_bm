@@ -20,7 +20,7 @@ Benchmarks library, based on the software product [teneva](https://github.com/An
     wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_all.py
     python install_all.py --env ENV_NAME --silent
     ```
-    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_all.py` is rather complicated. You can find mode details for using this script in the header of the file. If you have problems downloading the script via vget, you can download it manually from the root folder of the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm).
+    > Please note that the collection `agent` requires a rather complicated installation process of the `gym` and `mujoco` frameworks and related packages, so the script `install_all.py` is rather complicated. You can find mode details for using this script in the header of the file. If you have problems downloading the script via wget, you can download it manually from the root folder of the repository [teneva_bm](https://github.com/AndreiChertkov/teneva_bm).
 
 3. To run benchmark optimization examples (see `demo/opti_*.py` folder), you should also install the [PROTES](https://github.com/anabatsh/PROTES) optimizer:
     ```bash
