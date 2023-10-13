@@ -16,9 +16,9 @@ from .qubo_fix import *
 from .various import *
 
 
-def teneva_bm_get(d=None, is_func=None, is_opti_max=None, with_constr=None,
-                  with_cores=None, with_show=None, with_render=None,
-                  with_max=None, with_min=None):
+def teneva_bm_get(name=None, d=None, is_func=None, is_opti_max=None,
+                  with_constr=None, with_cores=None, with_show=None,
+                  with_render=None, with_max=None, with_min=None):
     Bms = []
     Bms += teneva_bm_get_agent()
     Bms += teneva_bm_get_decomp()
@@ -32,6 +32,11 @@ def teneva_bm_get(d=None, is_func=None, is_opti_max=None, with_constr=None,
 
     Bms_out = []
     for Bm in Bms:
+        if name is not None:
+            if name.lower() in Bm.__name__.lower():
+                return Bm
+            continue
+
         bm = Bm()
 
         if d is not None and not bm.check_args(d=d):
