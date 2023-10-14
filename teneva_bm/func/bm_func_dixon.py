@@ -54,3 +54,44 @@ class BmFuncDixon(Func):
         y2 = torch.sum(y2)
 
         return y1 + y2
+
+    @property
+    def with_cores(self):
+        return True
+
+    def cores(self, X):
+        d = X.shape[1]
+        Y = [_Dixon_core(Xi, i, pos='m' if i < d-1 else 'l') for i, Xi in enumerate(X.T)]
+        return Y
+
+def _Dixon_core(x, i, pos='m'):
+    # x = np.asarray(x)
+    n = len(x)
+    if i == 0:
+        pos = 'f'
+
+    x2 = x*x
+    x4 = x2*x2
+
+    if pos[0] != 'f':
+        c = np.zeros([4, n, 4])
+        c[0, :, 0] = 1
+        c[-1, :, -1] = 1
+        c[0, :, 1]  = x
+        c[0, :, 2]  = x2
+        c[1, :, -1]  = i*4*x4
+        c[2, :, -1]  = -2*i*x2
+        c[3, :, -1]  = i
+
+    else: # first core
+        c = np.zeros([1, n, 4])
+        c[0, :, 0] = 1
+        c[-1, :, -1] = 1
+        c[0, :, 1]  = x
+        c[0, :, 2]  = x2
+        c[0, :, -1]  = (x - 1)**2
+
+    if pos[0] == 'l':
+        c = np.copy(c[..., -1:])
+
+    return c

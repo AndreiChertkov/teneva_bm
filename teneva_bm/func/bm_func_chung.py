@@ -33,7 +33,6 @@ class BmFuncChung(Func):
         return True
 
     def cores(self, X):
-        # return self.cores_add([np.abs(x * (np.sin(x) + 0.1)) for x in X.T])
         Y = [_Chung_core(X.T[0], pos='f')]
         Y.extend([_Chung_core(Xi) for Xi in X.T[1:-1]])
         Y.append(_Chung_core(X.T[0], pos='l'))
