@@ -69,7 +69,7 @@ def _Dixon_core(x, i, pos='m'):
     n = len(x)
     if i == 1:
         pos = 'f'
-        
+
     x2 = x*x
     x4 = x2*x2
 
@@ -86,9 +86,9 @@ def _Dixon_core(x, i, pos='m'):
         c[0, :, 0] = 1
         c[0, :, 1]  = x
         c[0, :, -1]  = (x-1)**2 + (i+1)*x2
-        
+
     if pos[0] == 'l':
         c = np.copy(c[..., -1:])
-        
+
     return c
 

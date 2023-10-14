@@ -30,6 +30,13 @@ class BmFuncPowell(Func):
     def ref(self):
         return self.ref_i, 1.979712122400335
 
+    @property
+    def with_cores(self):
+        return True
+
+    def cores(self, X):
+        return self.cores_add([np.abs(x)**(i+2) for i, x in enumerate(X.T)])
+
     def target_batch(self, X):
         i = np.arange(1, self.d+1)
         return np.sum(np.abs(X)**(i+1), axis=1)
