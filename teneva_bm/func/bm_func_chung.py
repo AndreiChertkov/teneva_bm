@@ -57,7 +57,7 @@ def _Chung_core(x, pos='m'):
     x2 = c[0, :, 1] = c[1, :, -1] = x*x
     c[1, :, -1] *= 2
     c[0, :, 2] = x2*x2
-    
+
     if pos[0] == 'f': # first core
         c = np.copy(c[0:1, ...])
     elif pos[0] == 'l': # last core
