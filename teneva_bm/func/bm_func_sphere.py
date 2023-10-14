@@ -29,6 +29,13 @@ class BmFuncSphere(Func):
         return {'dy_min': 100., 'dy_max': 0.}
 
     @property
+    def with_cores(self):
+        return True
+
+    def cores(self, X):
+        return self.cores_add([x**2 for  x in X.T])
+
+    @property
     def ref(self):
         return self.ref_i, 85.29515570637663
 
