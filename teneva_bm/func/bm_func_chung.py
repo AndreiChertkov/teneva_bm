@@ -33,9 +33,9 @@ class BmFuncChung(Func):
         return True
 
     def cores(self, X):
-        Y = [_Chung_core(X.T[0], pos='f')]
+        Y = [_Chung_core(X[:, 0], pos='f')]
         Y.extend([_Chung_core(Xi) for Xi in X.T[1:-1]])
-        Y.append(_Chung_core(X.T[0], pos='l'))
+        Y.append(_Chung_core(X[:, -1], pos='l'))
         return Y
 
 
@@ -57,9 +57,10 @@ def _Chung_core(x, pos='m'):
     x2 = c[0, :, 1] = c[1, :, -1] = x*x
     c[1, :, -1] *= 2
     c[0, :, 2] = x2*x2
-
+    
     if pos[0] == 'f': # first core
         c = np.copy(c[0:1, ...])
     elif pos[0] == 'l': # last core
         c = np.copy(c[..., -1:])
     return c
+
