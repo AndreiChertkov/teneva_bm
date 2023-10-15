@@ -38,6 +38,15 @@ class BmFuncWavy(Func):
         return {'dy_min': 2., 'dy_max': 1.}
 
     @property
+    def with_cores(self):
+        return True
+
+    def cores(self, X):
+        Y = self.cores_add([-np.cos(self.opt_k * x) * np.exp(-x**2 / 2)/self.d for  i, x in enumerate(X.T)])
+        Y[-1][0, :, -1] += 1
+        return Y
+
+    @property
     def ref(self):
         return self.ref_i, 1.1671695279181264
 
