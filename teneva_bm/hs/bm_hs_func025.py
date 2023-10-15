@@ -12,7 +12,7 @@ class BmHsFunc025(Bm):
             | F(x | p, t) -> min |
             .--------------------.
             p - parameters
-                ai = range(1, 99)
+                ai = range(1, 100)
                 u = 25 + (-50 * log(ai / 100)) ** (2 / 3)
             x - continuous control
                 x[0] | >= 0.1 | <= 100
@@ -34,7 +34,7 @@ class BmHsFunc025(Bm):
         """)
 
         self.set_grid([0.1, 0, 0], [100, 25.6, 5])
-        # self.set_min(x=[50, 25, 1.5], y=0)
+        self.set_min(x=[50, 25, 1.5], y=0)
         self.set_parameters()
 
     @property
@@ -50,13 +50,13 @@ class BmHsFunc025(Bm):
         return True
 
     def set_parameters(self):
-        ai = np.arange(1, 99)
+        ai = np.arange(1, 100)
         u = 25 + (-50 * np.log(ai / 100)) ** (2 / 3)
         self.parameters = {'ai': ai, 'u': u}
 
     def intermediates(self, X):
-        t = (-1 / 100) * self.parameters['ai'] + np.exp(-1 / X[:, 0])[:, None] * \
-            (self.parameters['u'][None, :] - X[:, 1][:, None]) ** X[:, 2][:, None]
+        t = (-1 / 100) * self.parameters['ai'] + np.exp((-1 / X[:, 0])[:, None] * \
+            (self.parameters['u'][None, :] - X[:, 1][:, None]) ** X[:, 2][:, None])
         return t
 
     def target_batch(self, X):
