@@ -1,5 +1,6 @@
 import numpy as np
 from teneva_bm.func.func import Func
+import teneva
 
 
 class BmFuncTrigonometric(Func):
@@ -29,6 +30,27 @@ class BmFuncTrigonometric(Func):
     @property
     def ref(self):
         return self.ref_i, 543.0253567898842
+
+    @property
+    def with_cores(self):
+        return True
+
+    def cores(self, X):
+        Yj = self.cores_add([-np.cos(x) for  x in X.T])
+        Yj[-1][0, :, -1] += self.d
+
+        Yj2 = teneva.mul(Yj, Yj)
+
+        Ya = self.cores_add([2*(i+1) * (1. - np.cos(x) - np.sin(x)) for i, x in enumerate(X.T)])
+        Yb = self.cores_add([ (  (i+1) * (1. - np.cos(x) - np.sin(x)) )**2 for i, x in enumerate(X.T)])
+
+        Yj2[-1] *= self.d
+
+        return teneva.add(Yj2,
+                teneva.add(Yb,
+                    teneva.mul(Ya, Yj)
+                 )
+                )
 
     def target_batch(self, X):
         i = np.arange(1, self.d+1)
