@@ -41,37 +41,35 @@ class BmFuncTrid(Func):
         return True
 
     def cores(self, X):
-        d = X.shape[1]
-        Y = [_trid_core(Xi, i, pos='l' if i == d-1 else 'm') for i, Xi in enumerate(X.T)]
-        return Y
+        def _core(x, i, pos='m'):
+            x = np.asarray(x)
+            n = len(x)
+            if i == 0:
+                pos = 'f'
+
+            if pos[0] != 'f':
+                c = np.zeros([3, n, 3])
+                c[0, :, 0] = 1
+                c[-1, :, -1] = 1
+                c[0, :, 1]  = x
+                c[0, :, -1]  = (x-1)**2
+                c[1, :, -1]  = -x
+
+            else: # First core
+                c = np.zeros([1, n, 3])
+                c[0, :, 0] = 1
+                c[0, :, 1]  = x
+                c[0, :, -1]  = (x-1)**2
+
+            if pos[0] == 'l':
+                c = np.copy(c[..., -1:])
+
+            return c
+
+        return [_core(x, i, 'l' if i == self.d-1 else 'm')
+            for i, x in enumerate(X.T)]
 
     def target_batch(self, X):
         y1 = np.sum((X-1)**2, axis=1)
         y2 = np.sum(X[:, 1:] * X[:, :-1], axis=1)
         return y1 - y2
-
-def _trid_core(x, i, pos='m'):
-    x = np.asarray(x)
-    n = len(x)
-    if i == 0:
-        pos = 'f'
-
-    if pos[0] != 'f':
-        c = np.zeros([3, n, 3])
-        c[0, :, 0] = 1
-        c[-1, :, -1] = 1
-        c[0, :, 1]  = x
-        c[0, :, -1]  = (x-1)**2
-        c[1, :, -1]  = -x
-
-    else: # first core
-        c = np.zeros([1, n, 3])
-        c[0, :, 0] = 1
-        c[0, :, 1]  = x
-        c[0, :, -1]  = (x-1)**2
-
-    if pos[0] == 'l':
-        c = np.copy(c[..., -1:])
-
-    return c
-

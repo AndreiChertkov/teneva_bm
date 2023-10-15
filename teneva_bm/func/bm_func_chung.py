@@ -33,9 +33,27 @@ class BmFuncChung(Func):
         return True
 
     def cores(self, X):
-        Y = [_Chung_core(X[:, 0], pos='f')]
-        Y.extend([_Chung_core(Xi) for Xi in X.T[1:-1]])
-        Y.append(_Chung_core(X[:, -1], pos='l'))
+        def _core(x, pos='m'):
+            x = np.asarray(x)
+            n = len(x)
+            c = np.zeros([3, n, 3])
+            c[0, :, 0] = 1
+            c[1, :, 1] = 1
+            c[2, :, 2] = 1
+            x2 = c[0, :, 1] = c[1, :, -1] = x*x
+            c[1, :, -1] *= 2
+            c[0, :, 2] = x2*x2
+
+            if pos[0] == 'f':   # First core
+                c = np.copy(c[0:1, ...])
+            elif pos[0] == 'l': # Last core
+                c = np.copy(c[..., -1:])
+
+            return c
+
+        Y = [_core(X[:, 0], 'f')]
+        Y.extend([_core(x) for x in X.T[1:-1]])
+        Y.append(_core(X[:, -1], 'l'))
         return Y
 
 
@@ -45,22 +63,3 @@ class BmFuncChung(Func):
 
     def target_batch(self, X):
         return np.sum(X**2, axis=1)**2
-
-
-def _Chung_core(x, pos='m'):
-    x = np.asarray(x)
-    n = len(x)
-    c = np.zeros([3, n, 3])
-    c[0, :, 0] = 1
-    c[1, :, 1] = 1
-    c[2, :, 2] = 1
-    x2 = c[0, :, 1] = c[1, :, -1] = x*x
-    c[1, :, -1] *= 2
-    c[0, :, 2] = x2*x2
-
-    if pos[0] == 'f': # first core
-        c = np.copy(c[0:1, ...])
-    elif pos[0] == 'l': # last core
-        c = np.copy(c[..., -1:])
-    return c
-

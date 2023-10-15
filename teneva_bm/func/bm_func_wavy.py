@@ -42,7 +42,9 @@ class BmFuncWavy(Func):
         return True
 
     def cores(self, X):
-        Y = self.cores_add([-np.cos(self.opt_k * x) * np.exp(-x**2 / 2)/self.d for  i, x in enumerate(X.T)])
+        Y = self.cores_add(
+            [-np.cos(self.opt_k * x) * np.exp(-x**2 / 2)/self.d
+                for i, x in enumerate(X.T)])
         Y[-1][0, :, -1] += 1
         return Y
 

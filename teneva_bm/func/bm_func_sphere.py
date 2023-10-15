@@ -33,7 +33,7 @@ class BmFuncSphere(Func):
         return True
 
     def cores(self, X):
-        return self.cores_add([x**2 for  x in X.T])
+        return self.cores_add([x**2 for x in X.T])
 
     @property
     def ref(self):

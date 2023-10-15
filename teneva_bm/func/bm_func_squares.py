@@ -32,7 +32,7 @@ class BmFuncSquares(Func):
         return True
 
     def cores(self, X):
-        return self.cores_add([(i+1)*x**2 for  i, x in enumerate(X.T)])
+        return self.cores_add([(i+1)*x**2 for i, x in enumerate(X.T)])
 
     @property
     def ref(self):

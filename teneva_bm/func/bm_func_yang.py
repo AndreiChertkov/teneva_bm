@@ -32,8 +32,8 @@ class BmFuncYang(Func):
 
     def cores(self, X):
         Y = self.cores_add([np.abs(x) for x in X.T])
-        for G, xi in zip(Y, X.T):
-            for i, x_cur in enumerate(xi):
+        for G, x in zip(Y, X.T):
+            for i, x_cur in enumerate(x):
                 G[:, i, :] *= np.exp(-np.sin(x_cur**2))
         return Y
 
