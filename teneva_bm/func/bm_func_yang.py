@@ -27,6 +27,18 @@ class BmFuncYang(Func):
         return {'dy_min': 125., 'dy_max': 0.}
 
     @property
+    def with_cores(self):
+        return True
+
+    def cores(self, X):
+        Y = self.cores_add([np.abs(x) for x in X.T])
+        for G, xi in zip(Y, X.T):
+            for i, x_cur in enumerate(xi):
+                G[:, i, :] *= np.exp(-np.sin(x_cur**2))
+        return Y
+
+
+    @property
     def ref(self):
         return self.ref_i, 85.15511376128357
 
