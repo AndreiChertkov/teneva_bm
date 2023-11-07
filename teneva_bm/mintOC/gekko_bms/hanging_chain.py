@@ -1,5 +1,5 @@
 import numpy as np
-from GEKKO.gekko import GEKKO
+from gekko import GEKKO
 
 
 def hanging_chain(d, m): 

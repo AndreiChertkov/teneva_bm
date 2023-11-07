@@ -1,5 +1,5 @@
 import numpy as np
-from GEKKO.gekko import GEKKO
+from gekko import GEKKO
 
 
 def batch_reactor(d, m):
