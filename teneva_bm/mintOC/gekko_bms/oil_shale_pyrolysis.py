@@ -1,12 +1,11 @@
 import numpy as np
 from gekko import GEKKO
 
-def oil_shale_pyrolysis(d, m):
+def oil_shale_pyrolysis(bm, m):
     m = GEKKO() # remote=False
     m.options.IMODE = 6
-    m.options.SOLVER = 3
-    m.options.MAX_ITER = m
-    m.time = np.linspace(0, 1, d)
+    # m.options.MAX_ITER = m
+    m.time = np.linspace(0, 1, bm.d)
     
     # parameters
     # frequency factors
@@ -50,7 +49,7 @@ def oil_shale_pyrolysis(d, m):
     m.Equation(x3.dt()/tf == k2 * x2 + k4 * x1 * x2)
     m.Equation(x4.dt()/tf == k5 * x1 * x2)
     
-    final = m.Param(np.zeros(d))
+    final = m.Param(np.zeros(bm.d))
     final.value[-1] = 1
     m.Obj(-x2 * final)
     m.solve(disp=False)

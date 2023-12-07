@@ -2,22 +2,14 @@ import numpy as np
 from gekko import GEKKO
 
 
-def hanging_chain(d, m): 
+def hanging_chain(bm, m): 
     m = GEKKO() # remote=False
     m.options.IMODE = 6
-    m.options.NODES = 3
-    m.options.SOLVER = 3
-    m.options.TIME_SHIFT = 0
-    m.options.MAX_ITER = m
-    m.time = np.linspace(0, 1, d)
-    
-    # parameters
-    a = 1
-    b = 3
-    Lp = 4
+    # m.options.MAX_ITER = m
+    m.time = np.linspace(0, 1, bm.d)
 
     # state variables
-    x1 = m.Var(value=a, lb=0, ub=10)
+    x1 = m.Var(value=1, lb=0, ub=10)
     x2 = m.Var(value=0, lb=0, ub=10)
     x3 = m.Var(value=0, lb=0, ub=10)
 
@@ -28,11 +20,19 @@ def hanging_chain(d, m):
     m.Equation(x2.dt() == x1 * (1 + u ** 2) ** 0.5)
     m.Equation(x3.dt() == (1 + u ** 2) ** 0.5)
     
-    final = m.Param(np.zeros(d))
+    final = m.Param(np.zeros(bm.d))
     final.value[-1] = 1
-    m.Obj(1000 * (x1 - b) ** 2 * final)
-    m.Obj(1000 * (x3 - Lp) ** 2 * final)
     m.Obj(x2 * final)
+
+    # constraints
+    m.Equation(m.abs(x1 - 3) * final < bm.constr_eps)
+    m.Equation(m.abs(x3 - 4) * final < bm.constr_eps)
+    m.Equation(-1 * x1 < bm.constr_eps)
+    m.Equation(-1 * x2 < bm.constr_eps)
+    m.Equation(-1 * x3 < bm.constr_eps)
+    m.Equation(-1 * (10 - x1) < bm.constr_eps)
+    m.Equation(-1 * (10 - x2) < bm.constr_eps)
+    m.Equation(-1 * (10 - x3) < bm.constr_eps)
     
     u.STATUS = 0
     m.solve(disp=False)

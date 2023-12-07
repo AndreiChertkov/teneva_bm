@@ -8,8 +8,9 @@ class BmHangingChain(Bm):
     def __init__(self, d=100, n=31, seed=42, name=None):
         super().__init__(d, n, seed, name)
         self.set_desc("""
-            The Hanging Chain from the mintOC collection is concerned with finding a chain (of uniform 
-            density) of length L suspendend between two points a, b with minimal potential energy. 
+            The Hanging Chain from the mintOC collection is concerned 
+            with finding a chain (of uniform density) of length L 
+            suspendend between two points a, b with minimal potential energy. 
             Details: https://mintoc.de/index.php/Hanging_chain_problem
         """)
         
@@ -17,57 +18,50 @@ class BmHangingChain(Bm):
         self.set_grid_kind('uni')
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
         self.set_parameters()
-        self.set_time()
-    
-    @property
-    def identity(self):
-        return ['d']
     
     @property
     def is_func(self):
         return True
     
     def set_parameters(self):
-        self.parameters = {'a': 1, 'b': 3, 'Lp': 4}
-
-    def set_time(self):
-        self.t = np.linspace(0, 1, self.d)
+        self.time = np.linspace(0, 1, self.d)
+        self.state_initial = [1, 0, 0]
     
-    def _ode(self, u):
-        u_interpolate = interp1d(self.t, u, kind='nearest', fill_value='extrapolate')
+    def _ode(self, control):
+        control_interpolate = interp1d(self.time, control, kind='nearest', fill_value='extrapolate')
 
-        def f(t, x):
-            x1, x2, x3 = x
-            u = u_interpolate(t)
+        def f(t, state):
+            x1, x2, x3 = state
+            u = control_interpolate(t)
             k = np.sqrt(1 + u ** 2)
             dx1 = u
             dx2 = x1 * k
             dx3 = k
             return [dx1, dx2, dx3]
 
-        sol = solve_ivp(f, [self.t[0], self.t[-1]], [self.parameters['a'], 0, 0], t_eval=self.t)
-        return {'x': sol.y, 'success': sol.success}
+        sol = solve_ivp(f, [self.time[0], self.time[-1]], y0=self.state_initial, t_eval=self.time)
+        return {'state': sol.y, 'success': sol.success}
 
-    def _obj(self, x):
-        x1, x2, x3 = x
+    def _obj(self, state):
+        x1, x2, x3 = state
         return x2[-1]
 
-    def target(self, u):
-        x = self._ode(u)['x']
-        y = self._obj(x)
-        return y
+    def target(self, control):
+        state = self._ode(control)['state']
+        obj = self._obj(state)
+        return obj
     
     # ---------------- constraints ----------------
     @property
     def with_constr(self):
         return True
     
-    def _constr(self, u):
-        sol = self._ode(u)
+    def _constr(self, control):
+        sol = self._ode(control)
         if sol['success']:
-            x1, x2, x3 = sol['x']
-            c1 = np.abs(x1[-1] - self.parameters['b'])
-            c2 = np.abs(x3[-1] - self.parameters['Lp'])
+            x1, x2, x3 = sol['state']
+            c1 = np.abs(x1[-1] - 3)
+            c2 = np.abs(x3[-1] - 4)
             c3 = -1 * x1
             c4 = -1 * x2
             c5 = -1 * x3

@@ -18,57 +18,52 @@ class BmOilShalePyrolysis(Bm):
         self.set_grid_kind('uni')
         self.set_constr(penalty=1.E+3, eps=1.E-2, with_amplitude=True)
         self.set_parameters()
-        self.set_time()
-    
-    @property
-    def identity(self):
-        return ['d']
     
     @property
     def is_func(self):
         return True
     
     def set_parameters(self):
+        self.time = np.linspace(0, 1, self.d)
+        self.state_initial = [1, 0, 0, 0]
         self.parameters = {
             'a': np.exp([8.86, 24.25, 23.67, 18.75, 20.7]), # frequency factors
             'b': np.array([20.3, 37.4, 33.8, 28.2, 31.0]),  # activation energies
-            'R': 1.9858775e-3 # universal gas constant
+            'R': 1.9858775e-3                               # universal gas constant
         }
 
-    def set_time(self):
-        self.t = np.linspace(0, 1, self.d)
-    
-    def _ode(self, T):
-        T_interpolate = interp1d(self.t, T, kind='nearest', fill_value='extrapolate')
+    def _ode(self, control):
+        control_interpolate = interp1d(self.time, control, kind='nearest', fill_value='extrapolate')
 
-        def f(t, x):
-            x1, x2, x3, x4 = x
-            T = T_interpolate(t)
-            k = self.parameters['a'] * np.exp(-self.parameters['b'] / (self.parameters['R'] * T))
-            dx1 = - k[0] * x1 - (k[2] + k[3] + k[4]) * x1 * x2
+        def f(t, state):
+            x1, x2, x3, x4 = state
+            T = control_interpolate(t)
+            a, b, R = self.parameters.values()
+            k = a * np.exp(-b / (R * T))
+            dx1 = -k[0] * x1 - (k[2] + k[3] + k[4]) * x1 * x2
             dx2 = k[0] * x1 - k[1] * x2 + k[2] * x1 * x2
             dx3 = k[1] * x2 + k[3] * x1 * x2
             dx4 = k[4] * x1 * x2
             return [dx1, dx2, dx3, dx4]
 
-        sol = solve_ivp(f, [self.t[0], self.t[-1]], [1, 0, 0, 0], t_eval=self.t)
-        return {'x': sol.y, 'success': sol.success}
+        sol = solve_ivp(f, [self.time[0], self.time[-1]], y0=self.state_initial, t_eval=self.time)
+        return {'state': sol.y, 'success': sol.success}
 
-    def _obj(self, x):
-        x1, x2, x3, x4 = x
+    def _obj(self, state):
+        x1, x2, x3, x4 = state
         return x2[-1]
 
-    def target(self, T):
-        x = self._ode(T)['x']
-        y = self._obj(x)
-        return y
+    def target(self, control):
+        state = self._ode(control)['state']
+        obj = self._obj(state)
+        return obj
     
     # ---------------- constraints ----------------
     @property
     def with_constr(self):
         return True
 
-    def constr(self, T):
-        sol = self._ode(T)
+    def constr(self, control):
+        sol = self._ode(control)
         c = self.constr_penalty * ~sol['success']
         return c

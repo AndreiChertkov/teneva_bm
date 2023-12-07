@@ -2,21 +2,12 @@ import numpy as np
 from gekko import GEKKO
 
 
-def double_tank(d, m):
+def double_tank(bm, m):
     m = GEKKO(remote=False)
     m.options.IMODE = 6
-    m.options.NODES = 3
     m.options.SOLVER = 1
-    m.options.MV_TYPE = 0
-    m.options.MAX_ITER = m
-    # m.solver_options = ['minlp_gap_tol 0.001',
-    #                     'minlp_maximum_iterations 10000',
-    #                     'minlp_max_iter_with_int_sol 100',
-    #                     'minlp_branch_method 1',
-    #                     'minlp_integer_tol 0.001',
-    #                     'minlp_integer_leaves 0',
-    #                     'minlp_maximum_iterations 200']
-    m.time = np.linspace(0, 10, d)
+    # m.options.MAX_ITER = m
+    m.time = np.linspace(0, 10, bm.d)
 
     # parameters
     k1 = 2
@@ -35,7 +26,7 @@ def double_tank(d, m):
     m.Equation(x2.dt() == m.sqrt(x1) - m.sqrt(x2))
     m.Equation(x3.dt() == k1 * (x2 - k2) ** 2)
     
-    final = m.Param(np.zeros(d))
+    final = m.Param(np.zeros(bm.d))
     final.value[-1] = 1
     m.Obj(x3 * final)
 

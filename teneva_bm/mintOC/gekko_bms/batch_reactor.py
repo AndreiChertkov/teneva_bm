@@ -2,12 +2,11 @@ import numpy as np
 from gekko import GEKKO
 
 
-def batch_reactor(d, m):
+def batch_reactor(bm, m):
     m = GEKKO(remote=False)
     m.options.IMODE = 6
-    m.options.NODES = 3
-    m.options.MAX_ITER = m
-    m.time = np.linspace(0, 1, d)
+    # m.options.MAX_ITER = m
+    m.time = np.linspace(0, 1, bm.d)
 
     # state variables
     x1 = m.Var(value=1)
@@ -23,11 +22,11 @@ def batch_reactor(d, m):
     m.Equation(x1.dt() == -k1 * x1 ** 2)
     m.Equation(x2.dt() == k1 * x1 ** 2 - k2 * x2)
 
-    final = m.Param(np.zeros(d))
+    final = m.Param(np.zeros(bm.d))
     final.value[-1] = 1
     m.Obj(-x2 * final)
 
     m.solve(disp=False)
-    control_var = T.VALUE
+    control = T.VALUE
     obj = m.options.OBJFCNVAL
-    return control_var, obj
+    return control, obj
