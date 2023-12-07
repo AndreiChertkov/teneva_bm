@@ -7,4 +7,4 @@ from .fuller import fuller
 from .hanging_chain import hanging_chain
 from .lotka_volterra import lotka_volterra
 from .oil_shale_pyrolysis import oil_shale_pyrolysis
-# from .vanderpol_oscillator import vanderpol_oscillator
+from .vanderpol_oscillator import vanderpol_oscillator
