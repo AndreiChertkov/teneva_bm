@@ -1,5 +1,7 @@
 # teneva_bm
 
+> **Archived** The code from this repository has been moved to https://github.com/AIRI-Institute/teneva_bm. Work on this repository has been stopped, the code will not be updated. When installing via pip, the version of the code from the new repository will be used. **Please do not use this repository.**
+
 
 ## Description
 
